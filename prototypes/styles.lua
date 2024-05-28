@@ -6,6 +6,19 @@ styles["tp_character_frame"] = {
     horizontally_stretchable = "on",
 }
 
+styles["tp_config_flow"] = {
+    type = "vertical_flow_style",
+    parent = "vertical_flow",
+    horizontally_stretchable = "on",
+}
+
+styles["tp_config_table"] = {
+    type = "table_style",
+    parent = "slot_table",
+    horizontally_stretchable = "on",
+    right_cell_padding = 1,
+}
+
 styles["tp_character_inventory_scroll_pane"] = {
     type = "scroll_pane_style",
     parent = "inventory_scroll_pane",
