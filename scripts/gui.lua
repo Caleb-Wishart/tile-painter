@@ -44,8 +44,6 @@ end
 function tile_painter_gui.build_character_inventory(player, player_data)
     local character_inventory_table = player_data.elements.character_inventory_table
     character_inventory_table.clear()
-    -- TODO: remove debug
-    util.print("building character inventory", nil)
 
     -- copy the table so we can correctly place the hand icone
     local inventory = player.get_main_inventory()
@@ -53,7 +51,6 @@ function tile_painter_gui.build_character_inventory(player, player_data)
     inventory.insert(player.cursor_stack)
     local contents = inventory.get_contents()
     inventory.remove(player.cursor_stack)
-    -- TODO: Filter based on buildable items
     for item, count in pairs(contents) do
         local sprite = nil
         if player_data.inventory_selected == item then
@@ -153,7 +150,6 @@ local function build_config_row(parent, row, col, player_global)
         style = "slot_button",
         tile = config.tile_0,
         elem_filters = filter,
-        -- TODO
         tags = { action = "tp_config_select", type = "tile_0", index = index },
     }
     parent.add {

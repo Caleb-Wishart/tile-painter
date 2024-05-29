@@ -16,47 +16,40 @@ end)
 
 script.on_event(defines.events.on_player_selected_area, function(event)
   if event.item ~= item_name then return end
-  local p = game.get_player(event.player_index)
+  local p = game.get_player(event.player_index) ---@cast p -nil
   local player_global = global.players[p.index]
   if player_global == nil then return end
 
-  local force = p.force
+  local force = p.force ---@cast force LuaForce
 
   local config = player_global.config
   if config == nil then return end
 
   -- Iterate last to first
   -- The first settings will have highest priority with tiles
-  for i = #config, 1, -1 do
-    local setting = config[i]
+  local tiles = { "tile_0", "tile_1", "tile_2" }
+  for i = 0, 2 do -- 0, 1, 2
+    local tile = tiles[i + 1]
+    for j = #config, 1, -1 do
+      local setting = config[j]
 
-    local entity = nil
-    if setting.entity == nil then
-      entity = event.entities
-    else -- if entity is set, get all entities of that type in the area
-      entity = {}
-      local count = 1
-      for _, e in pairs(event.entities) do
-        if e.name == setting.entity then
-          entity[count] = e
-          count = count + 1
+      local entity = nil
+      if setting.entity == nil then
+        entity = event.entities
+      else -- if entity is set, get all entities of that type in the area
+        entity = {}
+        local count = 1
+        for _, e in pairs(event.entities) do
+          if e.name == setting.entity then
+            entity[count] = e
+            count = count + 1
+          end
         end
       end
-    end
-    -- TODO: reorder to apply tile 0 to all entities first?
-    if setting.tile_0 then
-      for _, e in pairs(entity) do
-        painter.paint_tiles_under_entity(force, e, setting.tile_0, 0)
-      end
-    end
-    if setting.tile_1 then
-      for _, e in pairs(entity) do
-        painter.paint_tiles_under_entity(force, e, setting.tile_1, 1)
-      end
-    end
-    if setting.tile_2 then
-      for _, e in pairs(entity) do
-        painter.paint_tiles_under_entity(force, e, setting.tile_2, 2)
+      if setting[tile] then
+        for _, e in pairs(entity) do
+          painter.paint_tiles_entity(force, e, setting[tile], i)
+        end
       end
     end
   end
@@ -122,20 +115,28 @@ script.on_event(defines.events.on_player_cursor_stack_changed, function(event)
   end
 end)
 
-local function handle_event(event)
+
+local gui_identifier_map = {
+  [defines.events.on_gui_click] = "on_gui_click",
+  [defines.events.on_gui_elem_changed] = "on_gui_elem_changed",
+}
+
+-- @param event EventData
+local function handle_gui_event(event)
   if event.element.tags == nil then return end
   if event.element.tags.action == nil then return end
-  local method = gui_handlers[event.element.tags.action]
+  local event_listeners = gui_handlers[gui_identifier_map[event.name]]
+
+  if event_listeners == nil then return end
+
+  local method = event_listeners[event.element.tags.action]
   if method == nil then return end
 
   method(event)
 end
 
--- TODO: look at listerners
--- https://github.com/ClaudeMetz/FactoryPlanner/blob/d9c6a0e347acef1892844da25d1e0ab8fd290a08/modfiles/ui/dialogs/factory_dialog.lua#L101
-
-script.on_event(defines.events.on_gui_click, handle_event)
-script.on_event(defines.events.on_gui_elem_changed, handle_event)
+script.on_event(defines.events.on_gui_click, handle_gui_event)
+script.on_event(defines.events.on_gui_elem_changed, handle_gui_event)
 
 script.on_event(defines.events.on_gui_closed, function(event)
   if event.element and event.element.name == (mod_prefix .. "_main_frame") then

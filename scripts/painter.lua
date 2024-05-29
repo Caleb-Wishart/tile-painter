@@ -1,28 +1,49 @@
 local bounding_box = require("__tile-painter__/scripts/bounding-box")
 local surfacelib = require("__tile-painter__/scripts/surface")
+local tilelib = require("__tile-painter__/scripts/tile")
 
-local util = require("__tile-painter__/util")
+local orientation = require("__flib__/orientation")
 
 --- @class tile_painter_painter
 local tile_painter_painter = {}
 
---- TODO
 ---@param force LuaForce the force to ghost the tiles for
 ---@param entity LuaEntity reference entity
--- TODO convert to object param
-function tile_painter_painter.paint_tiles_under_entity(force, entity, tile_type, delta)
+---@param tile_type string the tile to ghost
+---@param delta number the delta to grow the bounding box(es) by
+function tile_painter_painter.paint_tiles_entity(force, entity, tile_type, delta)
     local surface = entity.surface
-    local box = entity.bounding_box
+    local box = bounding_box.ensure_explicit(entity.bounding_box)
     local search_boxes = { box }
     if entity.secondary_bounding_box ~= nil then
-        table.insert(search_boxes, entity.secondary_bounding_box)
+        table.insert(search_boxes, bounding_box.ensure_explicit(entity.secondary_bounding_box))
     end
     for i = 1, #search_boxes do
-        local area = bounding_box.resize(search_boxes[i], delta)
-        local search_param = { has_hidden_tile = false, area = area }
-        local available_tiles = surfacelib.find_tiles_filtered(surface, search_param)
-        for j = #available_tiles, 1, -1 do
-            surfacelib.create_tile_ghost(surface, tile_type, available_tiles[j].position, force)
+        local sbox = search_boxes[i]
+        local tiles = nil
+        if sbox.orientation ~= orientation.north
+            and sbox.orientation ~= orientation.east
+            and sbox.orientation ~= orientation.south
+            and sbox.orientation ~= orientation.west then
+            -- If the bounding box has an orientation and isn't a simple rectangle,
+            -- we can't safely resize it and have to get adjacent tiles
+            local area = sbox
+            local search_param = { has_hidden_tile = false, area = area }
+            tiles = surfacelib.find_tiles_filtered(surface, search_param)
+            for _ = 1, delta do
+                local adj_tiles = tilelib.get_adjacent_tiles(tiles)
+                for j = 1, #adj_tiles do
+                    tiles[#tiles + 1] = adj_tiles[j]
+                end
+            end
+        else
+            -- It is more efficient to resize the bounding box and get all tiles in the area
+            local area = bounding_box.resize(sbox, delta)
+            local search_param = { has_hidden_tile = false, area = area }
+            tiles = surfacelib.find_tiles_filtered(surface, search_param)
+        end
+        for j = #tiles, 1, -1 do
+            surfacelib.create_tile_ghost(surface, tile_type, tiles[j].position, force)
         end
     end
 end
