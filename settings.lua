@@ -1,19 +1,19 @@
 local util = require("__tile-painter__/util")
-local mod_prefix = util.defines.mod_prefix
+local mod_name = util.defines.mod_name
 
 data:extend({
     {
         type = "bool-setting",
-        name = mod_prefix .. "-debug-mode",
+        name = mod_name .. "-debug-mode",
         setting_type = "runtime-global",
-        default_value = true, -- TODO Change to false on release
+        default_value = false,
         order = "aa"
     },
     {
         type = "bool-setting",
-        name = mod_prefix .. "-include-second-layer",
+        name = mod_name .. "-smooth-curved-rail",
         setting_type = "runtime-per-user",
-        default_value = false,
+        default_value = true,
         order = "ab"
     }
 })

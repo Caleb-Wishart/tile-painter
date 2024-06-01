@@ -41,26 +41,4 @@ function tile_painter_tile.get_adjacent_tiles(tiles)
     return adjacent
 end
 
----@param entity LuaEntity reference entity
----@param delta number the delta to grow the bounding box(es) by
-function tile_painter_tile.get_tiles_under_entity(entity, delta)
-    local surface = entity.surface
-    local box = entity.bounding_box
-    local search_boxes = { box }
-    if entity.secondary_bounding_box ~= nil then
-        table.insert(search_boxes, entity.secondary_bounding_box)
-    end
-    local tiles = {}
-    for i = 1, #search_boxes do
-        local area = bounding_box.resize(search_boxes[i], delta)
-        local search_param = { has_hidden_tile = false, area = area }
-        local available_tiles = surfacelib.find_tiles_filtered(surface, search_param)
-
-        for j = #available_tiles, 1, -1 do
-            tiles[#tiles + 1] = available_tiles[j]
-        end
-    end
-    return tiles
-end
-
 return tile_painter_tile

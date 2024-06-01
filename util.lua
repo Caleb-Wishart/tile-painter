@@ -12,7 +12,7 @@ tile_painter_util.defines = {
 --- @param obj table
 --- @noreturn
 function tile_painter_util.print(msg, obj)
-    if settings.global[tile_painter_util.defines.mod_prefix .. "-debug-mode"].value == false then
+    if settings.global[tile_painter_util.defines.mod_name .. "-debug-mode"].value == false then
         return
     end
     if obj == nil then

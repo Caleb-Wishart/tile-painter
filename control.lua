@@ -20,8 +20,6 @@ script.on_event(defines.events.on_player_selected_area, function(event)
   local player_global = global.players[p.index]
   if player_global == nil then return end
 
-  local force = p.force ---@cast force LuaForce
-
   local config = player_global.config
   if config == nil then return end
 
@@ -48,14 +46,11 @@ script.on_event(defines.events.on_player_selected_area, function(event)
       end
       if setting[tile] then
         for _, e in pairs(entity) do
-          painter.paint_tiles_entity(force, e, setting[tile], i)
+          painter.paint_tiles_entity(p, e, setting[tile], i)
         end
       end
     end
   end
-
-  -- if settings.get_player_settings(event.player_index)[mod_name .. "-include-second-layer"].value then
-  -- end
 end)
 
 
