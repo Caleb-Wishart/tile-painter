@@ -1,0 +1,9 @@
+---------------------------------------------------------------------------------------------------
+Version: 0.1.0
+Date: 2024.06.02
+  Info:
+    - Initial Beta Release.
+  Features:
+    - Shortcut to create "Tile Painter" tool.
+    - GUI to configure tiles to be painted for specific entities.
+    - Compatibility with oriented bounding boxes (i.e. Rails).
