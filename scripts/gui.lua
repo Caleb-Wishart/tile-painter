@@ -6,8 +6,6 @@ local MAX_CONFIG_ROWS = 6
 local CONFIG_ATTRS = 4
 
 
--- GUI OOP Functions
-
 local function initialize_player(player)
     local function init_attr(tbl, attr_name, default)
         if tbl[attr_name] == nil then
@@ -17,7 +15,7 @@ local function initialize_player(player)
     if global.players[player.index] == nil then
         global.players[player.index] = {}
     end
-    player_data = global.players[player.index]
+    local player_data = global.players[player.index]
     init_attr(player_data, "inventory_selected", nil)
     init_attr(player_data, "elements", {})
     init_attr(player_data, "config", {})
@@ -46,7 +44,90 @@ function gui.on_init()
     end
 end
 
--- GUI Build / Destroy
+--- @param e EventData.on_gui_click
+local function on_pin_button_click(e)
+    local self = global.gui[e.player_index]
+    if not self then
+        return
+    end
+    local pinned = not self.pinned
+    e.element.sprite = pinned and "flib_pin_black" or "flib_pin_white"
+    e.element.style = pinned and "flib_selected_frame_action_button" or "frame_action_button"
+    self.pinned = pinned
+    if pinned then
+        self.player.opened = nil
+        self.elems.close_button.tooltip = { "gui.close" }
+    else
+        self.player.opened = self.elems.tp_window
+        self.elems.close_button.tooltip = { "gui.close-instruction" }
+    end
+end
+
+--- @param e EventData.on_gui_click
+local function on_close_button_click(e)
+    local self = global.gui[e.player_index]
+    if not self then
+        return
+    end
+    gui.hide(self)
+    if self.player.opened == self.elems.tp_window then
+        self.player.opened = nil
+    end
+end
+
+--- @param name string
+--- @param sprite string
+--- @param tooltip LocalisedString
+--- @param handler function
+local function frame_action_button(name, sprite, tooltip, handler)
+    return {
+        type = "sprite-button",
+        name = name,
+        style = "frame_action_button",
+        sprite = sprite .. "_white",
+        hovered_sprite = sprite .. "_black",
+        clicked_sprite = sprite .. "_black",
+        tooltip = tooltip,
+        handler = handler,
+    }
+end
+
+--- @param caption LocalisedString
+---@param target string
+---@param close boolean
+local function titlebar(caption, target, close)
+    local elems = {
+        type = "flow",
+        style = "flib_titlebar_flow",
+        drag_target = target,
+        {
+            type = "label",
+            style = "frame_title",
+            caption = caption,
+            ignored_by_interaction = true,
+        },
+        { type = "empty-widget", style = "flib_titlebar_drag_handle", ignored_by_interaction = true },
+    }
+
+    if close then
+        table.insert(elems,
+            frame_action_button("pin_button", "flib_pin", { 'gui.flib-keep-open' }, on_pin_button_click))
+        table.insert(elems,
+            frame_action_button("close_button", "utility/close", { "gui.close-instruction" },
+                on_close_button_click))
+    end
+
+    return elems
+end
+
+--- @param e EventData.on_gui_closed
+local function on_window_closed(e)
+    local self = global.gui[e.player_index]
+    if not self or self.pinned then
+        return
+    end
+    gui.hide(self)
+end
 
 --- @param player LuaPlayer
 function gui.destroy_gui(player)
@@ -75,7 +156,7 @@ function gui.build_gui(player)
         style = "invisible_frame",
         --- @diagnostic disable-next-line: missing-fields
         elem_mods = { auto_center = true },
-        handler = { [defines.events.on_gui_closed] = gui.on_window_closed },
+        handler = { [defines.events.on_gui_closed] = on_window_closed },
         -- Children
         -- Configuration Frame
         {
@@ -84,7 +165,7 @@ function gui.build_gui(player)
             name = "tp_config_window",
             style = "inner_frame_in_outer_frame",
             {
-                gui.titlebar({ "tile_painter_gui.tile_painter_title" }, "tp_window", true),
+                titlebar({ "tile_painter_gui.tile_painter_title" }, "tp_window", true),
                 {
                     type = "frame",
                     style = "inside_shallow_frame",
@@ -113,7 +194,7 @@ function gui.build_gui(player)
             name = "to_inventory_window",
             style = "tp_inventory_frame",
             {
-                gui.titlebar({ "tile_painter_gui.inventory_title" }, "tp_window", false),
+                titlebar({ "tile_painter_gui.inventory_title" }, "tp_window", false),
                 {
                     type = "frame",
                     style = "inventory_frame",
@@ -145,102 +226,13 @@ end
 
 -- GUI Build Utilities
 
---- @param name string
---- @param sprite string
---- @param tooltip LocalisedString
---- @param handler function
-function gui.frame_action_button(name, sprite, tooltip, handler)
-    return {
-        type = "sprite-button",
-        name = name,
-        style = "frame_action_button",
-        sprite = sprite .. "_white",
-        hovered_sprite = sprite .. "_black",
-        clicked_sprite = sprite .. "_black",
-        tooltip = tooltip,
-        handler = handler,
-    }
-end
-
---- @param caption LocalisedString
----@param target string
----@param close boolean
-function gui.titlebar(caption, target, close)
-    local elems = {
-        type = "flow",
-        style = "flib_titlebar_flow",
-        drag_target = target,
-        {
-            type = "label",
-            style = "frame_title",
-            caption = caption,
-            ignored_by_interaction = true,
-        },
-        { type = "empty-widget", style = "flib_titlebar_drag_handle", ignored_by_interaction = true },
-    }
-
-    if close then
-        table.insert(elems,
-            gui.frame_action_button("pin_button", "flib_pin", { 'gui.flib-keep-open' }, gui.on_pin_button_click))
-        table.insert(elems,
-            gui.frame_action_button("close_button", "utility/close", { "gui.close-instruction" },
-                gui.on_close_button_click))
-    end
-
-    return elems
-end
-
--- GUI Utilities
-
 --- @param self Gui
 function gui.hide(self)
     self.elems.tp_window.visible = false
 end
 
--- GUI Event Handlers
-
 --- @param e EventData.on_gui_click
-function gui.on_pin_button_click(e)
-    local self = global.gui[e.player_index]
-    if not self then
-        return
-    end
-    local pinned = not self.pinned
-    e.element.sprite = pinned and "flib_pin_black" or "flib_pin_white"
-    e.element.style = pinned and "flib_selected_frame_action_button" or "frame_action_button"
-    self.pinned = pinned
-    if pinned then
-        self.player.opened = nil
-        self.elems.close_button.tooltip = { "gui.close" }
-    else
-        self.player.opened = self.elems.tp_window
-        self.elems.close_button.tooltip = { "gui.close-instruction" }
-    end
-end
-
---- @param e EventData.on_gui_click
-function gui.on_close_button_click(e)
-    local self = global.gui[e.player_index]
-    if not self then
-        return
-    end
-    gui.hide(self)
-    if self.player.opened == self.elems.tp_window then
-        self.player.opened = nil
-    end
-end
-
---- @param e EventData.on_gui_closed
-function gui.on_window_closed(e)
-    local self = global.gui[e.player_index]
-    if not self or self.pinned then
-        return
-    end
-    gui.hide(self)
-end
-
---- @param e EventData.on_gui_click
-function gui.on_inventory_selection(e)
+local function on_inventory_selection(e)
     local player = game.get_player(e.player_index)
     if player == nil then return end
 
@@ -258,7 +250,7 @@ function gui.on_inventory_selection(e)
 end
 
 --- @param e EventData.on_gui_elem_changed
-function gui.on_config_select(e)
+local function on_config_select(e)
     local player = game.get_player(e.player_index)
     if player == nil then return end
 
@@ -337,8 +329,8 @@ function gui.populate_config_table(self, player)
             },
             -- elem_filters = { { filter = "hidden", invert = true, mode = "and" } }
             -- TODO fun hidden setting to enable placing on enemy spawners
-            tags = { action = "tp_config_select", type = "entity", index = index },
-            handler = { [defines.events.on_gui_elem_changed] = gui.on_config_select }
+            tags = { type = "entity", index = index },
+            handler = { [defines.events.on_gui_elem_changed] = on_config_select }
         })
         flib_gui.add(tbl, {
             type = "empty-widget",
@@ -357,8 +349,8 @@ function gui.populate_config_table(self, player)
                 elem_type = "tile",
                 tile = config[tiles[i]],
                 elem_filters = filter,
-                tags = { action = "tp_config_select", type = tiles[i], index = index },
-                handler = { [defines.events.on_gui_elem_changed] = gui.on_config_select }
+                tags = { type = tiles[i], index = index },
+                handler = { [defines.events.on_gui_elem_changed] = on_config_select }
             })
         end
     end
@@ -447,12 +439,13 @@ local function on_player_cursor_stack_changed(e)
     end
 end
 
-flib_gui.add_handlers(gui, function(e, handler)
-    local self = global.guis[e.player_index]
-    if self then
-        handler(self, e)
-    end
-end)
+flib_gui.add_handlers({
+    on_pin_button_click = on_pin_button_click,
+    on_close_button_click = on_close_button_click,
+    on_window_closed = on_window_closed,
+    on_inventory_selection = on_inventory_selection,
+    on_config_select = on_config_select,
+})
 
 gui.events = {
     [defines.events.on_mod_item_opened] = on_mod_item_opened,
@@ -460,5 +453,7 @@ gui.events = {
     [defines.events.on_player_removed] = on_player_removed,
     [defines.events.on_player_cursor_stack_changed] = on_player_cursor_stack_changed,
 }
+
+
 
 return gui
