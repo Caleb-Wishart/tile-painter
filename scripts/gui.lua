@@ -292,7 +292,7 @@ function gui.populate_config_table(self, player)
     local function build_row(tbl, row, player_data)
         if row > MAX_CONFIG_ROWS then return end
         if player_data.config == nil then player_data.config = {} end
-        local col = (CONFIG_ATTRS // 2) + 1
+        local col = math.floor(CONFIG_ATTRS / 2) + 1
         local index = (col - 1) * MAX_CONFIG_ROWS + (row % CONFIG_ATTRS)
         if player_data.config[index] == nil then
             player_data.config[index] = {
