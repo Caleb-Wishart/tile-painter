@@ -1,16 +1,22 @@
-local bounding_box = require("__tile-painter__/scripts/bounding-box")
-local surfacelib = require("__tile-painter__/scripts/surface")
-local flib_position = require("__flib__/position")
+local flib_position = require("__flib__.position")
 
---- @class tile_painter_painter
-local tile_painter_tile = {}
+--- @class tp_tile
+local tp_tile = {}
 
 ---@param tiles LuaTile[] tiles to get adjacent tiles for
-function tile_painter_tile.get_adjacent_tiles(tiles)
+function tp_tile.get_adjacent_tiles(tiles)
     local function hash(position)
-        local a = position.x
-        local b = position.y
-        return 0.5 * (a + b) * (a + b + 1) + b
+        -- https://forums.factorio.com/viewtopic.php?t=41879
+        -- cantor pairing function v7
+        local function NtoZ(x, y)
+            return (x >= 0 and x or (-0.5 - x)), (y >= 0 and y or (-0.5 - y))
+        end
+        local x = position.x
+        local y = position.y
+        x, y = NtoZ(x, y)
+        local s = x + y
+        local h = s * (s + 0.5) + x
+        return h + h
     end
     local surface = nil
     local positions = {}
@@ -41,4 +47,4 @@ function tile_painter_tile.get_adjacent_tiles(tiles)
     return adjacent
 end
 
-return tile_painter_tile
+return tp_tile

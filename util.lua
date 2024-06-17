@@ -1,7 +1,7 @@
 --- @class tile_painter_util
-local tile_painter_util = {}
+local tp_util = {}
 
-tile_painter_util.defines = {
+tp_util.defines = {
     mod_name = "tile-painter",
     mod_prefix = "tile_painter",
     item_name = "tile-painter"
@@ -11,8 +11,8 @@ tile_painter_util.defines = {
 --- @param msg string
 --- @param obj table
 --- @noreturn
-function tile_painter_util.print(msg, obj)
-    if settings.global[tile_painter_util.defines.mod_name .. "-debug-mode"].value == false then
+function tp_util.print(msg, obj)
+    if settings.global[tp_util.defines.mod_name .. "-debug-mode"].value == false then
         return
     end
     if obj == nil then
@@ -22,4 +22,8 @@ function tile_painter_util.print(msg, obj)
     end
 end
 
-return tile_painter_util
+function tp_util.get_player_settings(player_index, setting)
+    return settings.get_player_settings(player_index)[tp_util.defines.mod_name .. "-" .. setting].value
+end
+
+return tp_util

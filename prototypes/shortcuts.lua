@@ -1,4 +1,4 @@
-local util = require("__tile-painter__/util")
+local util = require("util")
 local item_name = util.defines.item_name
 
 local shortcut = {

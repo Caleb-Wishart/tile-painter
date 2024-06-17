@@ -1,6 +1,6 @@
 local styles = data.raw["gui-style"].default
 
-styles["tp_character_frame"] = {
+styles["tp_inventory_frame"] = {
     type = "frame_style",
     parent = "inset_frame_container_frame",
     horizontally_stretchable = "on",
@@ -19,7 +19,7 @@ styles["tp_config_table"] = {
     right_cell_padding = 1,
 }
 
-styles["tp_character_inventory_scroll_pane"] = {
+styles["tp_inventory_scroll_pane"] = {
     type = "scroll_pane_style",
     parent = "inventory_scroll_pane",
     horizontally_squashable = "auto",

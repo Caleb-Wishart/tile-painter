@@ -1,6 +1,6 @@
-local position = require("__flib__/position")
+local position = require("__flib__.position")
 -- note that these functions will destroy any Orientation data passed in
-local flib_boundingBox = require("__flib__/bounding-box")
+local flib_boundingBox = require("__flib__.bounding-box")
 
 ---Four positions, specifying the top-left, top-right, bottom-left bottom-right corner of the box respectively.
 ---It is used as the result of applying the Orientation of a BoundingBox to the corners of the box.
@@ -36,15 +36,15 @@ end
 
 
 
---- @class tile_painter_bounding_box
-local tile_painter_bounding_box = {}
+--- @class tp_bounding_box
+local tp_bounding_box = {}
 
 
 --- Multiply by orientation to covert to radians.
 --- ```lua
---- local angle = area.orientation * tile_painter_bounding_box.orientation_to_rad
+--- local angle = area.orientation * orientation_to_rad
 --- ```
-tile_painter_bounding_box.orientation_to_rad = 2 * math.pi --- @type number
+local orientation_to_rad = 2 * math.pi --- @type number
 
 
 --- Return the box in explicit form.
@@ -52,7 +52,7 @@ tile_painter_bounding_box.orientation_to_rad = 2 * math.pi --- @type number
 --- that is preserves orientation.
 --- @param box BoundingBox
 --- @return BoundingBox
-function tile_painter_bounding_box.ensure_explicit(box)
+function tp_bounding_box.ensure_explicit(box)
     return {
         left_top = position.ensure_explicit(box.left_top or box[1]),
         right_bottom = position.ensure_explicit(box.right_bottom or box[2]),
@@ -63,7 +63,7 @@ end
 --- Return the box with additional properties left_bottom, right_top.
 --- @param box BoundingBox
 --- @return BoundingBox4
-function tile_painter_bounding_box.convert_to_BB4(box)
+function tp_bounding_box.convert_to_BB4(box)
     return {
         left_top = position.ensure_explicit(box.left_top or box[1]),
         right_bottom = position.ensure_explicit(box.right_bottom or box[2]),
@@ -79,8 +79,8 @@ end
 --- @param box BoundingBox
 --- @param delta number
 --- @return BoundingBox
-function tile_painter_bounding_box.resize(box, delta)
-    local ebox = tile_painter_bounding_box.ensure_explicit(box)
+function tp_bounding_box.resize(box, delta)
+    local ebox = tp_bounding_box.ensure_explicit(box)
     return {
         left_top = { x = ebox.left_top.x - delta, y = ebox.left_top.y - delta },
         right_bottom = { x = ebox.right_bottom.x + delta, y = ebox.right_bottom.y + delta },
@@ -93,9 +93,9 @@ end
 --- @param pos1 MapPosition start of the line
 --- @param pos2 MapPosition end of the line
 --- @param box BoundingBox The bounding box or rectangle
-function tile_painter_bounding_box.line_intersect_AABB(pos1, pos2, box)
+function tp_bounding_box.line_intersect_AABB(pos1, pos2, box)
     local pos1, pos2 = position.ensure_explicit(pos1), position.ensure_explicit(pos2)
-    local area = tile_painter_bounding_box.ensure_explicit(box)
+    local area = tp_bounding_box.ensure_explicit(box)
 
     local l, t, r, b = area.left_top.x, area.left_top.y, area.right_bottom.x, area.right_bottom.y
     local x1, y1, x2, y2 = pos1.x, pos1.y, pos2.x, pos2.y
@@ -146,9 +146,9 @@ end
 --- Take a BoundingBox and return the corresponding OrientedBoundingBox.
 --- @param box BoundingBox The bounding box or rectangle
 --- @return OrientedBoundingBox The corresponding CoordinateBox of the param
-function tile_painter_bounding_box.convert_to_OBB(box)
+function tp_bounding_box.convert_to_OBB(box)
     -- Convert [0,1] orientation to radians
-    local angle = box.orientation * tile_painter_bounding_box.orientation_to_rad
+    local angle = box.orientation * orientation_to_rad
     -- Calculate trig values
     local sin = math.sin(angle)
     local cos = math.cos(angle)
@@ -180,4 +180,4 @@ function tile_painter_bounding_box.convert_to_OBB(box)
     return rotated_area
 end
 
-return tile_painter_bounding_box
+return tp_bounding_box

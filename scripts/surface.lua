@@ -1,16 +1,16 @@
-local flib_boundingBox = require("__flib__/bounding-box")
-local bounding_box = require("__tile-painter__/scripts/bounding-box")
-local orientation = require("__flib__/orientation")
+local flib_boundingBox = require("__flib__.bounding-box")
+local bounding_box = require("scripts.bounding-box")
+local orientation = require("__flib__.orientation")
 
---- @class tile_painter_surface
-local tile_painter_surface = {}
+--- @class tp_surface
+local tp_surface = {}
 
 --- Build a tile ghost on the map.
 ---@param surface LuaSurface the surface to build the tile on
 ---@param tile_type string which tile to build
 ---@param position TilePosition where to build the tile
 ---@param force string|integer|LuaForce the force to build the tile for
-function tile_painter_surface.create_tile_ghost(surface, tile_type, position, force)
+function tp_surface.create_tile_ghost(surface, tile_type, position, force)
     if surface.can_place_entity { name = "tile-ghost", position = position, inner_name = tile_type, force = force } then
         surface.create_entity { name = "tile-ghost", position = position, inner_name = tile_type, force = force, expires = false }
     end
@@ -24,7 +24,7 @@ end
 ---@param surface LuaSurface the surface to find tiles on
 ---@param param LuaSurface.find_tiles_filtered_param
 ---@return (LuaTile)[]
-function tile_painter_surface.find_tiles_filtered(surface, param)
+function tp_surface.find_tiles_filtered(surface, param)
     local area = param.area
     -- If no area is specified
     if area == nil then
@@ -108,4 +108,4 @@ function tile_painter_surface.find_tiles_filtered(surface, param)
     return res
 end;
 
-return tile_painter_surface
+return tp_surface

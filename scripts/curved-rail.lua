@@ -19,12 +19,12 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 -- SOFTWARE.
 -- https://github.com/ElderAxe/LandfillEverything/blob/main/stdlib/curvedRail.lua
-local table = require("__flib__/table")
+local table = require("__flib__.table")
 local direction = defines.direction
 
 local MASK_DIM = 12
 
-local defaultCurve = {
+local default_curve = {
     { 9, 9, 9, 9, 9, 2, 2, 2, 2, 2, 9, 9 },
     { 9, 9, 9, 9, 2, 2, 1, 1, 1, 2, 2, 9 },
     { 9, 9, 9, 2, 2, 1, 1, 0, 1, 1, 2, 9 },
@@ -61,8 +61,8 @@ local function flipDiag(input)
     return out
 end
 
-curveMap = {}
-curveMap[direction.northeast] = defaultCurve
+local curveMap = {}
+curveMap[direction.northeast] = default_curve
 curveMap[direction.west] = flipDiag(curveMap[direction.northeast])
 curveMap[direction.southeast] = flipLR(curveMap[direction.west])
 curveMap[direction.south] = flipDiag(curveMap[direction.southeast])
@@ -71,7 +71,11 @@ curveMap[direction.east] = flipDiag(curveMap[direction.southwest])
 curveMap[direction.northwest] = flipLR(curveMap[direction.east])
 curveMap[direction.north] = flipDiag(curveMap[direction.northwest])
 
-function getCurveTiles(dir, delta)
+--- Get the mask for a curved rail given the direction and the delta (offset)
+--- @param dir defines.direction The direction of the rail
+--- @param delta number The offset of the rail
+--- @return table A list of {x, y} pairs
+local function curved_rail_mask(dir, delta)
     local out = {}
     if dir == nil then
         dir = direction.north
@@ -88,4 +92,4 @@ function getCurveTiles(dir, delta)
     return out
 end
 
-return getCurveTiles
+return curved_rail_mask
