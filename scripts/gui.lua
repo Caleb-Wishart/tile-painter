@@ -110,9 +110,9 @@ local function titlebar(caption, target, close)
     }
 
     if close then
-        table.insert(elems,
+        table.insert(elems, 3,
             frame_action_button("pin_button", "flib_pin", { 'gui.flib-keep-open' }, on_pin_button_click))
-        table.insert(elems,
+        table.insert(elems, 4,
             frame_action_button("close_button", "utility/close", { "gui.close-instruction" },
                 on_close_button_click))
     end
@@ -164,28 +164,27 @@ function gui.build_gui(player)
             direction = "vertical",
             name = "tp_config_window",
             style = "inner_frame_in_outer_frame",
+            titlebar({ "tile_painter_gui.tile_painter_title" }, "tp_window", true),
             {
-                titlebar({ "tile_painter_gui.tile_painter_title" }, "tp_window", true),
+                type = "frame",
+                style = "inside_shallow_frame",
+                direction = "vertical",
                 {
                     type = "frame",
-                    style = "inside_shallow_frame",
-                    direction = "vertical",
+                    style = "deep_frame_in_shallow_frame",
                     {
-                        type = "frame",
-                        style = "deep_frame_in_shallow_frame",
+                        type = "flow",
+                        direction = "horizontal",
                         {
-                            type = "flow",
-                            direction = "horizontal",
-                            {
-                                type = "table",
-                                name = "tp_config_table",
-                                style = "slot_table",
-                                column_count = 9,
-                            }
+                            type = "table",
+                            name = "tp_config_table",
+                            style = "slot_table",
+                            column_count = 9,
                         }
                     }
                 }
             }
+
         },
         -- Player Inventory Frame
         {
@@ -193,21 +192,19 @@ function gui.build_gui(player)
             direction = "vertical",
             name = "to_inventory_window",
             style = "tp_inventory_frame",
+            titlebar({ "tile_painter_gui.inventory_title" }, "tp_window", false),
             {
-                titlebar({ "tile_painter_gui.inventory_title" }, "tp_window", false),
+                type = "frame",
+                style = "inventory_frame",
                 {
-                    type = "frame",
-                    style = "inventory_frame",
+                    type = "scroll-pane",
+                    direction = "vertical",
+                    style = "tp_inventory_scroll_pane",
                     {
-                        type = "scroll-pane",
-                        direction = "vertical",
-                        style = "tp_inventory_scroll_pane",
-                        {
-                            type = "table",
-                            name = "tp_inventory_table",
-                            style = "slot_table",
-                            column_count = 10,
-                        }
+                        type = "table",
+                        name = "tp_inventory_table",
+                        style = "slot_table",
+                        column_count = 10,
                     }
                 }
             }
@@ -229,6 +226,14 @@ end
 --- @param self Gui
 function gui.hide(self)
     self.elems.tp_window.visible = false
+end
+
+--- @param self Gui
+--- @param player LuaPlayer
+function gui.show(self, player)
+    self.elems.tp_window.visible = true
+    gui.populate_config_table(self, player)
+    gui.populate_inventory_table(self, player)
 end
 
 --- @param e EventData.on_gui_click
@@ -357,6 +362,7 @@ function gui.populate_config_table(self, player)
 
     local player_data = global.players[player.index]
     local config_table = self.elems.tp_config_table
+    if config_table == nil then return end
     config_table.clear()
     build_heading(config_table)
     for row = 1, MAX_CONFIG_ROWS do
@@ -369,6 +375,7 @@ end
 function gui.populate_inventory_table(self, player)
     local player_data = global.players[player.index]
     local inventory_table = self.elems.tp_inventory_table
+    if inventory_table == nil then return end
     inventory_table.clear()
 
     local inventory = player.get_main_inventory()
@@ -395,7 +402,7 @@ function gui.populate_inventory_table(self, player)
             number = count,
             style = "slot_button",
             tags = tags,
-            handler = { [defines.events.on_gui_click] = gui.on_inventory_selection }
+            handler = { [defines.events.on_gui_click] = on_inventory_selection }
         })
     end
 end
@@ -403,7 +410,13 @@ end
 --- @param e EventData.on_mod_item_opened
 local function on_mod_item_opened(e)
     if e.item.name == util.defines.item_name then
-        gui.toggle_interface(e.player_index)
+        local player = game.get_player(e.player_index)
+        if player == nil then return end
+        local self = global.gui[player.index]
+        if not self then
+            self = gui.build_gui(player)
+        end
+        gui.show(self, player)
     end
 end
 

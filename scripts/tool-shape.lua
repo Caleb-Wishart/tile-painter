@@ -1,6 +1,7 @@
 --- @param e EventData.CustomInputEvent
 local function handle_fill_shape_click(e, isRight)
     local player_global = global.players[e.player_index]
+    if player_global == nil then return end
     if player_global.inventory_selected ~= item_name or player_global.mode ~= "fill-shape" then return end
     local position = e.cursor_position
     local surface = game.get_player(e.player_index).surface.name
