@@ -1,12 +1,13 @@
-local painter = require("__tile-painter__/scripts/painter")
-local gui = require("__tile-painter__/scripts/gui")
-local gui_handlers = require("__tile-painter__/scripts/guihandlers")
-local util = require("__tile-painter__/util")
+local painter = require("scripts/painter")
+local gui = require("scripts/gui")
+local util = require("util")
 
 local mod_name = util.defines.mod_name
 local mod_prefix = util.defines.mod_prefix
 local item_name = util.defines.item_name
 
+
+gui.handle_events()
 
 script.on_event(defines.events.on_mod_item_opened, function(event)
   if event.item.name == item_name then
@@ -46,7 +47,7 @@ script.on_event(defines.events.on_player_selected_area, function(event)
       end
       if setting[tile] then
         for _, e in pairs(entity) do
-          painter.paint_tiles_entity(p, e, setting[tile], i)
+          painter.paint_entity(p, e, setting[tile], i)
         end
       end
     end
@@ -61,24 +62,42 @@ script.on_event(defines.events.on_player_dropped_item, function(event)
 end)
 
 
-local function initialize_global(player)
-  global.players[player.index] = {
-    inventory_selected = nil,
-    elements = {},
-    config = {},
-  }
+local function initialize()
+  if global.players == nil then
+    global.players = {}
+  end
+  for _, player in pairs(game.players) do
+    initialize_player(player)
+  end
+end
+
+local function initialize_player(player)
+  local function init_attr(tbl, attr_name, default)
+    if tbl[attr_name] == nil then
+      tbl[attr_name] = default
+    end
+  end
+  if global.players[player.index] == nil then
+    global.players[player.index] = {}
+  end
+  player_data = global.players[player.index]
+  init_attr(player_data, "inventory_selected", nil)
+  init_attr(player_data, "elements", {})
+  init_attr(player_data, "config", {})
+  init_attr(player_data, "mode", "entity")
+  init_attr(player_data, "shape_fill", {})
+  init_attr(player_data.shape_fill, "centre", nil)
+  init_attr(player_data.shape_fill, "vertex", nil)
+  init_attr(player_data.shape_fill, "surface", nil)
 end
 
 script.on_init(function()
-  global.players = {}
-
-  for _, player in pairs(game.players) do
-    initialize_global(player)
-  end
+  initialize()
 end)
 
 script.on_configuration_changed(function(config_changed_data)
   if config_changed_data.mod_changes["tile-painter"] then
+    initialize()
     for _, player in pairs(game.players) do
       local player_global = global.players[player.index]
       if player_global.elements.main_frame ~= nil then gui.toggle_interface(player.index) end
@@ -89,7 +108,7 @@ end)
 
 script.on_event(defines.events.on_player_created, function(event)
   local player = game.get_player(event.player_index)
-  initialize_global(player)
+  initialize_player(player)
 end)
 
 script.on_event(defines.events.on_player_removed, function(event)
@@ -136,5 +155,41 @@ script.on_event(defines.events.on_gui_elem_changed, handle_gui_event)
 script.on_event(defines.events.on_gui_closed, function(event)
   if event.element and event.element.name == (mod_prefix .. "_main_frame") then
     gui.toggle_interface(event.player_index)
+  end
+end)
+
+local function handle_fill_shape_click(event, isRight)
+  local player_global = global.players[event.player_index]
+  if player_global.inventory_selected ~= item_name or player_global.mode ~= "fill-shape" then return end
+  local position = event.cursor_position
+  local surface = game.get_player(event.player_index).surface.name
+  local shape_fill = player_global.shape_fill
+  -- ensure that the position is on the same surface
+  if surface ~= shape_fill.surface then
+    shape_fill.centre = nil
+    shape_fill.vertex = nil
+    shape_fill.surface = surface
+  end
+  if isRight then
+    shape_fill.centre = position
+  else
+    shape_fill.vertex = position
+  end
+end
+
+script.on_event("tile-painter-fill-shape-left-click", function(event)
+  handle_fill_shape_click(event, true)
+end)
+script.on_event("tile-painter-fill-shape-right-click", function(event)
+  handle_fill_shape_click(event, false)
+end)
+
+script.on_event(defines.events.on_gui_selected_tab_changed, function(event)
+  local player_global = global.players[event.player_index]
+  if player_global == nil then return end
+  if event.element.name == mod_prefix .. "_tab_entity" then
+    player_global.mode = "entity"
+  elseif event.element.name == mod_prefix .. "_tab_fill" then
+    player_global.mode = "fill-shape"
   end
 end)

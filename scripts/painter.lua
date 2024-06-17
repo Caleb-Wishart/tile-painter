@@ -1,31 +1,29 @@
-local bounding_box = require("__tile-painter__/scripts/bounding-box")
-local surfacelib = require("__tile-painter__/scripts/surface")
-local tilelib = require("__tile-painter__/scripts/tile")
+local bounding_box = require("scripts.bounding-box")
+local surfacelib = require("scripts.surface")
+local tilelib = require("scripts.tile")
 
-local getCurveTiles = require("__tile-painter__/scripts/curved-rail")
+local curved_rail_mask = require("scripts.curved-rail")
+local get_player_settings = require("util").get_player_settings
 
-local orientation = require("__flib__/orientation")
+local orientation = require("__flib__.orientation")
 
-local mod_name = require("__tile-painter__/util").defines.mod_name
-
-
---- @class tile_painter_painter
-local tile_painter_painter = {}
+--- @class tp_painter
+local tp_painter = {}
 
 ---@param player LuaPlayer the player to paint the tiles for
 ---@param entity LuaEntity reference entity
 ---@param tile_type string the tile to ghost
 ---@param delta number the delta to grow the bounding box(es) by
-function tile_painter_painter.paint_tiles_entity(player, entity, tile_type, delta)
+function tp_painter.paint_entity(player, entity, tile_type, delta)
     local surface = entity.surface
     local box = bounding_box.ensure_explicit(entity.bounding_box)
     local search_boxes = { box }
 
     local force = player.force ---@cast force LuaForce
 
-    if settings.get_player_settings(player.index)[mod_name .. "-smooth-curved-rail"].value and entity.name == "curved-rail" then
+    if get_player_settings(player.index, "smooth-curved-rail") and entity.name == "curved-rail" then
         -- Use a special mapping
-        local tiles = getCurveTiles(entity.direction, delta)
+        local tiles = curved_rail_mask(entity.direction, delta)
         local pos = entity.position
         for i = #tiles, 1, -1 do
             local position = {
@@ -70,4 +68,33 @@ function tile_painter_painter.paint_tiles_entity(player, entity, tile_type, delt
     end
 end
 
-return tile_painter_painter
+--- @param tiles LuaTile[]
+local function flood_fill(tiles)
+    -- Templating
+end
+
+
+--- @param tiles LuaTile[]
+--- @param boundary String
+local function boundary_fill(tiles, boundary)
+    -- Templating
+end
+
+-- Paints tiles around the selected point.
+-- Combination of settings in player settings and the UI
+---@param player LuaPlayer the player to paint the tiles for
+---@param tile_type string the tile to ghost
+function tp_painter.paint_fill_tool(player, surface, position, tile_type, border)
+    --  Use a setting here to restrict to only admins to prevent griefing
+    local max_radius = get_player_settings(player.index, "fill-max-distance")
+    local search_param = { has_hidden_tile = false, position = position, radius = max_radius }
+    local tiles = surfacelib.find_tiles_filtered(surface, search_param)
+    -- Templating
+end
+
+function tp_painter.paint_shape(player, surface)
+    local player_global = global.players[player.index]
+    if player_global == nil then return end
+end
+
+return tp_painter
