@@ -1,56 +1,362 @@
-local util = require("__tile-painter__/util")
-local mod_prefix = util.defines.mod_prefix
+local flib_gui = require("__flib__.gui-lite")
 
 -- Max number of config rows
-MAX_CONFIG_ROWS = 6
-MAX_CONFIG_COLS = 2
+local MAX_CONFIG_ROWS = 6
+local CONFIG_ATTRS = 4
 
---- @class tile_painter_gui
-local tile_painter_gui = {}
 
-local function build_titlebar(parent, caption, target, close)
-    local titlebar = parent.add {
-        type = "flow",
-        direction = "horizontal",
-        style = "tp_flow_titlebar",
+-- GUI OOP Functions
+
+--- @class Gui
+--- @field elems table<string, LuaGuiElement>
+--- @field pinned boolean
+--- @field player LuaPlayer
+local gui = {}
+
+function gui.on_init()
+    --- @type table<integer, Gui>
+    global.gui = {}
+end
+
+-- GUI Build / Destroy
+
+--- @param player LuaPlayer
+function gui.destroy_gui(player)
+    local self = global.gui[player.index]
+    if not self then
+        return
+    end
+    global.gui[player.index] = nil
+    local window = self.elems.tp_window
+    if not window.valid then
+        return
+    end
+    window.destroy()
+end
+
+--- @param player LuaPlayer
+--- @return Gui
+function gui.build_gui(player)
+    gui.destroy_gui(player)
+
+    local elems = flib_gui.add(player.gui.screen, {
+        type = "frame",
+        name = "tp_window",
+        visible = false,
+        direction = "vertical",
+        style = "invisible_frame",
+        --- @diagnostic disable-next-line: missing-fields
+        elem_mods = { auto_center = true },
+        handler = { [defines.events.on_gui_closed] = gui.on_window_closed },
+        -- Children
+        -- Configuration Frame
+        {
+            type = "frame",
+            direction = "vertical",
+            name = "tp_config_window",
+            style = "inner_frame_in_outer_frame",
+            {
+                gui.titlebar({ "tile_painter_gui.tile_painter_title" }, "tp_window", true),
+                {
+                    type = "frame",
+                    style = "inside_shallow_frame",
+                    direction = "vertical",
+                    {
+                        type = "frame",
+                        style = "deep_frame_in_shallow_frame",
+                        {
+                            type = "flow",
+                            direction = "horizontal",
+                            {
+                                type = "table",
+                                name = "tp_config_table",
+                                style = "slot_table",
+                                column_count = 9,
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        -- Player Inventory Frame
+        {
+            type = "frame",
+            direction = "vertical",
+            name = "to_inventory_window",
+            style = "tp_inventory_frame",
+            {
+                gui.titlebar({ "tile_painter_gui.inventory_title" }, "tp_window", false),
+                {
+                    type = "frame",
+                    style = "inventory_frame",
+                    {
+                        type = "scroll-pane",
+                        direction = "vertical",
+                        style = "tp_inventory_scroll_pane",
+                        {
+                            type = "table",
+                            name = "tp_inventory_table",
+                            style = "slot_table",
+                            column_count = 10,
+                        }
+                    }
+                }
+            }
+        },
+    })
+
+    local self = {
+        elems = elems,
+        pinned = false,
+        player = player,
     }
-    titlebar.drag_target = target
+    global.gui[player.index] = self
 
-    local title = titlebar.add({
-        type = "label",
-        caption = caption,
-        style = "tp_titlebar_label",
-    })
-    title.drag_target = target
+    return self
+end
 
-    local handle = titlebar.add({
-        type = "empty-widget",
-        style = "tp_titlebar_handle",
-    })
-    handle.drag_target = target
+-- GUI Build Utilities
+
+--- @param name string
+--- @param sprite string
+--- @param tooltip LocalisedString
+--- @param handler function
+function gui.frame_action_button(name, sprite, tooltip, handler)
+    return {
+        type = "sprite-button",
+        name = name,
+        style = "frame_action_button",
+        sprite = sprite .. "_white",
+        hovered_sprite = sprite .. "_black",
+        clicked_sprite = sprite .. "_black",
+        tooltip = tooltip,
+        handler = handler,
+    }
+end
+
+--- @param caption LocalisedString
+---@param target string
+---@param close boolean
+function gui.titlebar(caption, target, close)
+    local elems = {
+        type = "flow",
+        style = "flib_titlebar_flow",
+        drag_target = target,
+        {
+            type = "label",
+            style = "frame_title",
+            caption = caption,
+            ignored_by_interaction = true,
+        },
+        { type = "empty-widget", style = "flib_titlebar_drag_handle", ignored_by_interaction = true },
+    }
+
     if close then
-        titlebar.add {
-            type = "sprite-button",
-            style = "frame_action_button",
-            sprite = "utility/close_white",
-            hovered_sprite = "utility/close_black",
-            clicked_sprite = "utility/close_black",
-            mouse_button_filter = { "left" },
-            tags = { action = "tp_gui_close" },
-        }
+        table.insert(elems,
+            gui.frame_action_button("pin_button", "flib_pin", { 'gui.flib-keep-open' }, gui.on_pin_button_click))
+        table.insert(elems,
+            gui.frame_action_button("close_button", "utility/close", { "gui.close-instruction" },
+                gui.on_close_button_click))
+    end
+
+    return elems
+end
+
+-- GUI Utilities
+
+--- @param self Gui
+function gui.hide(self)
+    self.elems.tp_window.visible = false
+end
+
+-- GUI Event Handlers
+
+--- @param e EventData.on_gui_click
+function gui.on_pin_button_click(e)
+    local self = global.gui[e.player_index]
+    if not self then
+        return
+    end
+    local pinned = not self.pinned
+    e.element.sprite = pinned and "flib_pin_black" or "flib_pin_white"
+    e.element.style = pinned and "flib_selected_frame_action_button" or "frame_action_button"
+    self.pinned = pinned
+    if pinned then
+        self.player.opened = nil
+        self.elems.close_button.tooltip = { "gui.close" }
+    else
+        self.player.opened = self.elems.tp_window
+        self.elems.close_button.tooltip = { "gui.close-instruction" }
     end
 end
 
-function tile_painter_gui.build_character_inventory(player, player_data)
-    local character_inventory_table = player_data.elements.character_inventory_table
-    character_inventory_table.clear()
+--- @param e EventData.on_gui_click
+function gui.on_close_button_click(e)
+    local self = global.gui[e.player_index]
+    if not self then
+        return
+    end
+    gui.hide(self)
+    if self.player.opened == self.elems.tp_window then
+        self.player.opened = nil
+    end
+end
 
-    -- copy the table so we can correctly place the hand icone
+--- @param e EventData.on_gui_closed
+function gui.on_window_closed(e)
+    local self = global.gui[e.player_index]
+    if not self or self.pinned then
+        return
+    end
+    gui.hide(self)
+end
+
+--- @param e EventData.on_gui_click
+function gui.on_inventory_selection(e)
+    local player = game.get_player(e.player_index)
+    if player == nil then return end
+
+    local inventory = player.get_main_inventory()
+    if inventory == nil then return end
+
+    local item = e.element.tags.item
+    player.clear_cursor()
+    if item ~= nil then
+        local stack, _ = inventory.find_item_stack(item)
+        if stack ~= nil then
+            player.cursor_stack.transfer_stack(stack)
+        end
+    end
+end
+
+--- @param e EventData.on_gui_elem_changed
+function gui.on_config_select(e)
+    local player = game.get_player(e.player_index)
+    if player == nil then return end
+
+    local player_global = global.players[player.index]
+    if player_global == nil then return end
+
+    local config = player_global.config[e.element.tags.index]
+    if config == nil then return end
+    config[e.element.tags.type] = e.element.elem_value
+end
+
+-- GUI Population
+
+--- @param self Gui
+--- @param player LuaPlayer
+function gui.populate_config_table(self, player)
+    local function build_heading(tbl)
+        local headings = {
+            "entity_caption",
+            "tile_caption_0",
+            "tile_caption_1",
+            "tile_caption_2",
+        }
+        for i = 1, #headings do
+            if i ~= 1 then
+                tbl.add {
+                    type = "empty-widget",
+                }.style.horizontally_stretchable = "on"
+            end
+            tbl.add {
+                type = "label",
+                style = "caption_label",
+                caption = { "tile_painter_gui." .. headings[i] },
+                tooltip = { "tile_painter_gui." .. headings[i] .. "_tt" },
+            }
+        end
+    end
+
+    local function build_row(tbl, row, player_data)
+        if row > MAX_CONFIG_ROWS then return end
+        if player_data.config == nil then player_data.config = {} end
+        local col = (CONFIG_ATTRS // 2) + 1
+        local index = (col - 1) * MAX_CONFIG_ROWS + (row % CONFIG_ATTRS)
+        if player_data.config[index] == nil then
+            player_data.config[index] = {
+                entity = nil,
+                tile_0 = nil,
+                tile_1 = nil,
+                tile_2 = nil,
+            }
+        end
+
+        local config = player_data.config[index]
+
+        flib_gui.add(tbl, {
+            type = "choose-elem-button",
+            style = "slot_button",
+            elem_type = "entity",
+            entity = config.entity,
+
+            elem_filters = {
+                { filter = "blueprintable", mode = "and" },
+                { filter = "rolling-stock", mode = "and", invert = true },
+                { filter = "hidden",        mode = "and", invert = true },
+                { filter = "flag",          mode = "and", invert = true, flag = "placeable-off-grid" },
+                -- Other / Hidden / Cheat Entities
+                { filter = "name",          mode = "and", invert = true, name = "infinity-chest" },
+                { filter = "name",          mode = "and", invert = true, name = "infinity-pipe" },
+                { filter = "name",          mode = "and", invert = true, name = "simple-entity-with-force" },
+                { filter = "name",          mode = "and", invert = true, name = "simple-entity-with-owner" },
+                { filter = "name",          mode = "and", invert = true, name = "linked-chest" },
+                { filter = "name",          mode = "and", invert = true, name = "linked-belt" },
+                { filter = "name",          mode = "and", invert = true, name = "burner-generator" },
+                { filter = "name",          mode = "and", invert = true, name = "electric-energy-interface" },
+                { filter = "name",          mode = "and", invert = true, name = "heat-interface" },
+            },
+            -- elem_filters = { { filter = "hidden", invert = true, mode = "and" } }
+            -- TODO fun hidden setting to enable placing on enemy spawners
+            tags = { action = "tp_config_select", type = "entity", index = index },
+            handler = { [defines.events.on_gui_elem_changed] = gui.on_config_select }
+        })
+        flib_gui.add(tbl, {
+            type = "empty-widget",
+            style_mods = { horizontally_stretchable = "on" }
+        })
+        local filter = { { filter = "blueprintable", mode = "and" } }
+        local tiles = {
+            "tile_0",
+            "tile_1",
+            "tile_2",
+        }
+        for i = 1, #tiles do
+            flib_gui.add(tbl, {
+                type = "choose-elem-button",
+                style = "slot_button",
+                elem_type = "tile",
+                tile = config[tiles[i]],
+                elem_filters = filter,
+                tags = { action = "tp_config_select", type = tiles[i], index = index },
+                handler = { [defines.events.on_gui_elem_changed] = gui.on_config_select }
+            })
+        end
+    end
+
+    local player_data = global.players[player.index]
+    local config_table = self.elems.tp_config_table
+    config_table.clear()
+    build_heading(config_table)
+    for row = 1, MAX_CONFIG_ROWS do
+        build_row(config_table, row, player_data)
+    end
+end
+
+--- @param self Gui
+--- @param player LuaPlayer
+function gui.populate_inventory_table(self, player)
+    local player_data = global.players[player.index]
+    local inventory_table = self.elems.tp_inventory_table
+    inventory_table.clear()
+
     local inventory = player.get_main_inventory()
     -- quickly flash insert the cursor stack to get the correct inventory contents
     inventory.insert(player.cursor_stack)
     local contents = inventory.get_contents()
     inventory.remove(player.cursor_stack)
+
     for item, count in pairs(contents) do
         local sprite = nil
         if player_data.inventory_selected == item then
@@ -62,227 +368,27 @@ function tile_painter_gui.build_character_inventory(player, player_data)
         local tags = {
             item = item,
             number = count,
-            action = "tp_picker_item",
         }
-        character_inventory_table.add({
+        flib_gui.add(inventory_table, {
             type = "sprite-button",
             sprite = sprite,
             number = count,
             style = "slot_button",
             tags = tags,
+            handler = { [defines.events.on_gui_click] = gui.on_inventory_selection }
         })
     end
 end
 
-local function build_character_interface(parent, player, player_global)
-    local character_window = parent.add { type = "frame", name = (mod_prefix .. "_character_window"), style = "tp_character_frame", direction = "vertical" }
-    -- character_window.style.size = { 448, 558 }
-    build_titlebar(character_window, { "tile_painter_gui.character_title" }, parent, false)
-
-
-    local character_inventory_frame = character_window.add({
-        type = "frame",
-        style = "inventory_frame",
-    })
-
-    local character_inventory = character_inventory_frame.add({
-        type = "scroll-pane",
-        direction = "vertical",
-        style = "tp_character_inventory_scroll_pane",
-    })
-
-    local character_inventory_table = character_inventory.add({
-        type = "table",
-        name = (mod_prefix .. "_character_inventory_table"),
-        column_count = 10,
-        style = "slot_table",
-    })
-    player_global.elements.character_inventory_table = character_inventory_table
-    tile_painter_gui.build_character_inventory(player, player_global)
-end
-
-local function build_config_row(parent, row, col, player_global)
-    if row > MAX_CONFIG_ROWS then return end
-    if player_global.config == nil then player_global.config = {} end
-    local index = (col - 1) * MAX_CONFIG_ROWS + row
-    if player_global.config[index] == nil then
-        player_global.config[index] = {
-            entity = nil,
-            tile_0 = nil,
-            tile_1 = nil,
-            tile_2 = nil,
-        }
+flib_gui.add_handlers(gui, function(e, handler)
+    local self = global.guis[e.player_index]
+    if self then
+        handler(self, e)
     end
-    local config = player_global.config[index]
-    parent.add {
-        type = "choose-elem-button",
-        elem_type = "entity",
-        style = "slot_button",
-        entity = config.entity,
+end)
 
-        elem_filters = {
-            { filter = "blueprintable", mode = "and" },
-            { filter = "rolling-stock", mode = "and", invert = true },
-            { filter = "hidden",        mode = "and", invert = true },
-            { filter = "flag",          mode = "and", invert = true, flag = "placeable-off-grid" },
-            -- Other / Hidden / Cheat Entities
-            { filter = "name",          mode = "and", invert = true, name = "infinity-chest" },
-            { filter = "name",          mode = "and", invert = true, name = "infinity-pipe" },
-            { filter = "name",          mode = "and", invert = true, name = "simple-entity-with-force" },
-            { filter = "name",          mode = "and", invert = true, name = "simple-entity-with-owner" },
-            { filter = "name",          mode = "and", invert = true, name = "linked-chest" },
-            { filter = "name",          mode = "and", invert = true, name = "linked-belt" },
-            { filter = "name",          mode = "and", invert = true, name = "burner-generator" },
-            { filter = "name",          mode = "and", invert = true, name = "electric-energy-interface" },
-            { filter = "name",          mode = "and", invert = true, name = "heat-interface" },
-        },
-        -- elem_filters = { { filter = "hidden", invert = true, mode = "and" } }
-        -- TODO fun hidden setting to enable placing on enemy spawners
-        tags = { action = "tp_config_select", type = "entity", index = index },
-    }
-    parent.add {
-        type = "empty-widget",
-    }.style.horizontally_stretchable = "on"
-    local filter = { { filter = "blueprintable", mode = "and" } }
-    parent.add {
-        type = "choose-elem-button",
-        elem_type = "tile",
-        style = "slot_button",
-        tile = config.tile_0,
-        elem_filters = filter,
-        tags = { action = "tp_config_select", type = "tile_0", index = index },
-    }
-    parent.add {
-        type = "choose-elem-button",
-        elem_type = "tile",
-        style = "slot_button",
-        tile = config.tile_1,
-        elem_filters = filter,
-        tags = { action = "tp_config_select", type = "tile_1", index = index },
-    }
-    parent.add {
-        type = "choose-elem-button",
-        elem_type = "tile",
-        style = "slot_button",
-        tile = config.tile_2,
-        elem_filters = filter,
-        tags = { action = "tp_config_select", type = "tile_2", index = index },
-    }
-end
 
-local function build_config_interface(parent, player_global)
-    local config_window = parent.add { type = "frame", name = (mod_prefix .. "_tile_painter_window"), style = "inner_frame_in_outer_frame", direction = "vertical" }
-    -- config_window.style.size = { 448, 372 }
-    build_titlebar(config_window, { "tile_painter_gui.tile_painter_title" }, parent, true)
+gui.handle_events = flib_gui.handle_events
+gui.dispatch = flib_gui.dispatch
 
-    local config_window_frame = config_window.add({
-        type = "frame",
-        style = "inside_shallow_frame",
-    })
-
-    local frame2 = config_window_frame.add({
-        type = "frame",
-        style = "deep_frame_in_shallow_frame",
-    })
-
-    local config_flow = frame2.add {
-        type = "flow",
-        direction = "horizontal",
-    }
-    config_flow.add {
-        type = "empty-widget",
-    }.style.horizontally_stretchable = "on"
-
-    for col = 1, MAX_CONFIG_COLS do
-        local config_table = config_flow.add {
-            type = "table",
-            column_count = 6,
-            style = "slot_table",
-        }
-        if col == 2 then
-            config_table.add {
-                type = "empty-widget",
-            }.style.horizontally_stretchable = "on"
-        end
-        config_table.add {
-            type = "label",
-            caption = { "tile_painter_gui.entity_caption" },
-            tooltip = { "tile_painter_gui.entity_caption_tt" },
-            style = "caption_label",
-        }
-        config_table.add {
-            type = "empty-widget",
-        }.style.horizontally_stretchable = "on"
-        config_table.add {
-            type = "label",
-            caption = { "tile_painter_gui.tile_caption_0" },
-            tooltip = { "tile_painter_gui.tile_caption_0_tt" },
-            style = "caption_label",
-        }
-        config_table.add {
-            type = "label",
-            caption = { "tile_painter_gui.tile_caption_1" },
-            tooltip = { "tile_painter_gui.tile_caption_1_tt" },
-            style = "caption_label",
-        }
-        config_table.add {
-            type = "label",
-            caption = { "tile_painter_gui.tile_caption_2" },
-            tooltip = { "tile_painter_gui.tile_caption_2_tt" },
-            style = "caption_label",
-        }
-        if col == 1 then
-            config_table.add {
-                type = "empty-widget",
-            }.style.horizontally_stretchable = "on"
-        end
-        for row = 1, MAX_CONFIG_ROWS * MAX_CONFIG_COLS do
-            if col == 2 then
-                config_table.add {
-                    type = "empty-widget",
-                }.style.horizontally_stretchable = "on"
-            end
-            build_config_row(config_table, row, col, player_global)
-            if col == 1 then
-                config_table.add {
-                    type = "empty-widget",
-                }.style.horizontally_stretchable = "on"
-            end
-        end
-        config_flow.add {
-            type = "empty-widget",
-        }.style.horizontally_stretchable = "on"
-    end
-end
-
-local function build_interface(index)
-    local player = game.get_player(index)
-    if player == nil then return end
-
-    local player_global = global.players[index]
-    local screen_element = player.gui.screen
-
-    local main_frame = screen_element.add { type = "frame", name = (mod_prefix .. "_main_frame"), style = "invisible_frame", direction = "vertical" }
-
-    main_frame.auto_center = true
-
-    player.opened = main_frame
-    player_global.elements.main_frame = main_frame
-
-    build_config_interface(main_frame, player_global)
-    build_character_interface(main_frame, player, player_global)
-end
-
-function tile_painter_gui.toggle_interface(index)
-    local player_global = global.players[index]
-    local main_frame = player_global.elements.main_frame
-
-    if main_frame == nil then
-        build_interface(index)
-    else
-        main_frame.destroy()
-        player_global.elements = {}
-    end
-end
-
-return tile_painter_gui
+return gui
