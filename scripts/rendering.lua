@@ -4,10 +4,48 @@ local polygon = require("scripts.polygon")
 --- @class tp_rendering
 local tp_rendering = {}
 
--- Rerender the prototype polygon with the new vertices
----@param player_global CustomTable the player global
-function tp_rendering.handle_fill_shape_change(player_global)
-    -- local vertices = polygon.polygon_vertices()
+local function angle(p1, p2)
+    return math.atan2(p2.y - p1.y, p2.x - p1.x)
+end
+
+-- Rerender the prototype polygon with the given centre and vertex
+---@param self ShapeGui
+function tp_rendering.draw_prospective_polygon(self)
+    local n = self.nsides
+    if self.renders.polygon ~= nil then
+        rendering.destroy(self.renders.polygon)
+    end
+    if self.renders.box ~= nil then
+        rendering.destroy(self.renders.box)
+    end
+    local r = position.distance(self.centre, self.vertex)
+    local theta = angle(self.centre, self.vertex)
+    if n == 0 then
+        self.renders.polygon = rendering.draw_circle({
+            radius = r,
+            color = { r = 1, g = 0.5, b = 0.31, a = 0.5 }, -- Coral
+            width = 1,
+            filled = false,
+            position = self.centre,
+            surface = self.surface,
+            players = { self.player.index }
+        })
+    elseif n >= 2 then
+        local vertices = polygon.polygon_vertices(n, r, self.centre, theta)
+        self.renders.polygon = redering.draw_polygon({
+            vertices = vertices,
+            color = { r = 1, g = 0.5, b = 0.31, a = 0.5 }, -- Coral
+            surface = self.surface,
+            players = { self.player.index }
+        })
+    end
+    self.renders.box = rendering.draw_rectangle({
+        left_top = position.add(self.centre, { x = -r, y = -r }),
+        right_bottom = position.add(self.centre, { x = r, y = r }),
+        color = { r = 1, g = 0.5, b = 0.31, a = 0.25 }, -- Coral
+        surface = self.surface,
+        players = { self.player.index }
+    })
 end
 
 return tp_rendering

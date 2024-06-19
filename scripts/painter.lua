@@ -93,8 +93,8 @@ function tp_painter.paint_fill_tool(player, surface, position, tile_type, border
 end
 
 function tp_painter.paint_shape(player, surface)
-    local player_global = global.players[player.index]
-    if player_global == nil then return end
+    local self = global.shapes[player.index]
+    if self == nil then return end
 end
 
 return tp_painter

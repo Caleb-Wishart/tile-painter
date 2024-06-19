@@ -6,10 +6,10 @@ local util = require("util")
 local function on_player_selected_area(e)
     if e.item ~= util.defines.item_name then return end
     local p = game.get_player(e.player_index) ---@cast p -nil
-    local player_global = global.players[p.index]
-    if player_global == nil then return end
+    local self = global.painter[p.index]
+    if self == nil then return end
 
-    local config = player_global.config
+    local config = self.config
     if config == nil then return end
 
     -- Iterate last to first

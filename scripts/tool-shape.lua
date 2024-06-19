@@ -1,21 +1,30 @@
+local renderinglib = require("scripts.rendering")
+local position = require("__flib__.position")
+
 --- @param e EventData.CustomInputEvent
 local function handle_fill_shape_click(e, isRight)
-    local player_global = global.players[e.player_index]
-    if player_global == nil then return end
-    if player_global.inventory_selected ~= item_name or player_global.mode ~= "fill-shape" then return end
-    local position = e.cursor_position
-    local surface = game.get_player(e.player_index).surface.name
-    local shape_fill = player_global.shape_fill
+    if e.item ~= "tile-painter-polygon" then return end
+
+    local self = global.shapes[e.player_index]
+    if self == nil then return end
+    local position = position.ensure_explicit(e.cursor_position)
+    local surface = game.get_player(e.player_index).surface.index
     -- ensure that the position is on the same surface
-    if surface ~= shape_fill.surface then
-        shape_fill.centre = nil
-        shape_fill.vertex = nil
-        shape_fill.surface = surface
+    if surface ~= self.surface then
+        self.centre = nil
+        self.vertex = nil
+        self.surface = surface
     end
+    local location = "(" .. position.x .. "," .. position.y .. ")"
     if isRight then
-        shape_fill.centre = position
+        self.centre = position
+        self.elems.tp_centre_text.text = location
     else
-        shape_fill.vertex = position
+        self.vertex = position
+        self.elems.tp_vertex_text.text = location
+    end
+    if self.centre ~= nil and self.vertex ~= nil then
+        renderinglib.draw_prospective_polygon(self)
     end
 end
 
