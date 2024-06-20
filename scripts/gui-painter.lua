@@ -5,16 +5,16 @@ local util = require("util")
 local MAX_CONFIG_ROWS = 6
 local CONFIG_ATTRS = 4
 
---- @class ShapeGui
+--- @class PainterGui
 --- @field elems table<string, LuaGuiElement>
 --- @field pinned boolean
 --- @field player LuaPlayer
---- @feld config table<integer, table>
+--- @field config table<integer, table>
 --- @field inventory_selected string | nil
 local gui = {}
 
 function gui.on_init()
-    --- @type table<integer, ShapeGui>
+    --- @type table<integer, PainterGui>
     global.painter = {}
 end
 
@@ -118,7 +118,7 @@ function gui.destroy_gui(player)
 end
 
 --- @param player LuaPlayer
---- @return ShapeGui
+--- @return PainterGui
 function gui.build_gui(player)
     gui.destroy_gui(player)
 
@@ -199,12 +199,12 @@ end
 
 -- GUI Build Utilities
 
---- @param self ShapeGui
+--- @param self PainterGui
 function gui.hide(self)
     self.elems.tp_window.visible = false
 end
 
---- @param self ShapeGui
+--- @param self PainterGui
 --- @param player LuaPlayer
 function gui.show(self, player)
     self.elems.tp_window.visible = true
@@ -245,7 +245,7 @@ end
 
 -- GUI Population
 
---- @param self ShapeGui
+--- @param self PainterGui
 --- @param player LuaPlayer
 function gui.populate_config_table(self, player)
     local function build_heading(tbl)
@@ -344,7 +344,7 @@ function gui.populate_config_table(self, player)
     end
 end
 
---- @param self ShapeGui
+--- @param self PainterGui
 --- @param player LuaPlayer
 function gui.populate_inventory_table(self, player)
     local inventory_table = self.elems.tp_inventory_table
@@ -352,6 +352,7 @@ function gui.populate_inventory_table(self, player)
     inventory_table.clear()
 
     local inventory = player.get_main_inventory()
+    if inventory == nil then return end
     -- quickly flash insert the cursor stack to get the correct inventory contents
     inventory.insert(player.cursor_stack)
     local contents = inventory.get_contents()

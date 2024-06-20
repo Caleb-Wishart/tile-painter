@@ -75,7 +75,7 @@ end
 
 
 --- @param tiles LuaTile[]
---- @param boundary String
+--- @param boundary string
 local function boundary_fill(tiles, boundary)
     -- Templating
 end

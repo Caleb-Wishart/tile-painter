@@ -4,16 +4,21 @@ local renderinglib = require("scripts.rendering")
 --- @class ShapeGui
 --- @field elems table<string, LuaGuiElement>
 --- @field player LuaPlayer
---- @field centre LuaPosition
---- @field vertex LuaPosition
+--- @field centre MapPosition
+--- @field vertex MapPosition
 --- @field nsides integer
---- @field surface integer
+--- @field surface uint
 --- @field renders table<string, uint64>
 local gui = {}
 
 function gui.on_init()
     --- @type table<integer, ShapeGui>
     global.polygon = {}
+end
+
+--- @param self ShapeGui
+function gui.hide(self)
+    self.elems.tp_window.visible = false
 end
 
 --- @param e EventData.on_gui_closed
@@ -69,6 +74,20 @@ local function on_nsides_text_changed(e)
     }
     local name = polygons[nsides]
     self.elems.tp_polygon_text.text = name
+end
+
+--- @param player LuaPlayer
+function gui.destroy_gui(player)
+    local self = global.polygon[player.index]
+    if not self then
+        return
+    end
+    global.polygon[player.index] = nil
+    local window = self.elems.tp_window
+    if not window.valid then
+        return
+    end
+    window.destroy()
 end
 
 --- @param player LuaPlayer
@@ -194,7 +213,7 @@ function gui.build_gui(player)
             polygon = nil,
         }
     }
-    global.painter[player.index] = self
+    global.polygon[player.index] = self
 
     return self
 end

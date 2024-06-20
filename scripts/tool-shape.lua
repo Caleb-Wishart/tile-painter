@@ -3,8 +3,10 @@ local position = require("__flib__.position")
 
 --- @param e EventData.CustomInputEvent
 local function handle_fill_shape_click(e, isRight)
-    if e.item ~= "tile-painter-polygon" then return end
-
+    local player = game.get_player(e.player_index)
+    if player == nil or player.cursor_stack.valid_for_read and player.cursor_stack.name ~= "tile-painter-polygon" then
+        return
+    end
     local self = global.shapes[e.player_index]
     if self == nil then return end
     local position = position.ensure_explicit(e.cursor_position)
