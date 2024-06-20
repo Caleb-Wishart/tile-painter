@@ -11,6 +11,8 @@ local function on_player_selected_area(e)
 
     local config = player_global.config
     if config == nil then return end
+    local self = global.gui[player.index]
+    if self == nil then return end
 
     -- Iterate last to first
     -- The first settings will have highest priority with tiles
@@ -25,11 +27,9 @@ local function on_player_selected_area(e)
                 entities = e.entities
             else -- if entity is set, get all entities of that type in the area
                 entities = {}
-                local count = 1
                 for _, entity in pairs(e.entities) do
-                    if entity.name == setting.entity then
-                        entities[count] = entity
-                        count = count + 1
+                    if (entity.name == setting.entity and self.whitelist) or (entity.name ~= setting.entity and not self.whitelist) then
+                        entities[#entities + 1] = entity
                     end
                 end
             end

@@ -143,6 +143,12 @@ function gui.destroy_gui(player)
     window.destroy()
 end
 
+--- @param e EventData.on_gui_switch_state_changed
+local function on_mode_switch(e)
+    local self = global.gui[player.index]
+    self.whitelist = e.element.switch_state == "left"
+end
+
 --- @param player LuaPlayer
 --- @return Gui
 function gui.build_gui(player)
@@ -172,6 +178,25 @@ function gui.build_gui(player)
                 {
                     type = "frame",
                     style = "deep_frame_in_shallow_frame",
+                    direction = "vertical",
+                    {
+                        type = "flow",
+                        direction = "horizontal",
+                        {
+                            type = "empty-widget",
+                            style = "flib_horizontal_pusher",
+                        },
+                        {
+                            type = "switch",
+                            name = "tp_mode_switch",
+                            switch_state = "left",
+                            left_label_caption = { "tile_painter_gui.whitelist" },
+                            left_label_tooltip = { "tile_painter_gui.whitelist_tt" },
+                            right_label_caption = { "tile_painter_gui.blacklist" },
+                            right_label_tooltip = { "tile_painter_gui.blacklist_tt" },
+                            handler = { [defines.events.on_gui_switch_state_changed] = on_mode_switch }
+                        },
+                    },
                     {
                         type = "flow",
                         direction = "horizontal",
@@ -180,10 +205,10 @@ function gui.build_gui(player)
                             name = "tp_config_table",
                             style = "slot_table",
                             column_count = 9,
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
 
         },
         -- Player Inventory Frame
@@ -205,9 +230,9 @@ function gui.build_gui(player)
                         name = "tp_inventory_table",
                         style = "slot_table",
                         column_count = 10,
-                    }
-                }
-            }
+                    },
+                },
+            },
         },
     })
 
@@ -215,6 +240,7 @@ function gui.build_gui(player)
         elems = elems,
         pinned = false,
         player = player,
+        whitelist = true,
     }
     global.gui[player.index] = self
 
