@@ -11,32 +11,45 @@ local function on_player_selected_area(e)
 
     local config = player_global.config
     if config == nil then return end
-    local self = global.gui[player.index]
+    local self = global.gui[p.index]
     if self == nil then return end
 
     -- Iterate last to first
     -- The first settings will have highest priority with tiles
     local tiles = { "tile_0", "tile_1", "tile_2" }
+    local blacklist = {}
+    if not self.whitelist then
+        for _, setting in pairs(config) do
+            if setting.entity then
+                blacklist[setting.entity] = true
+            end
+        end
+    end
     for i = 0, 2 do -- 0, 1, 2
         local tile = tiles[i + 1]
         for j = #config, 1, -1 do
             local setting = config[j]
-
-            local entities = nil
-            if setting.entity == nil then
-                entities = e.entities
-            else -- if entity is set, get all entities of that type in the area
-                entities = {}
-                for _, entity in pairs(e.entities) do
-                    if (entity.name == setting.entity and self.whitelist) or (entity.name ~= setting.entity and not self.whitelist) then
-                        entities[#entities + 1] = entity
+            local isAny = setting.entity == "signal-anything"
+            if setting[tile] then
+                local entities = nil
+                if setting.entity == nil then
+                    entities = {}
+                else
+                    entities = {}
+                    for _, entity in pairs(e.entities) do
+                        if (self.whitelist and entity.name == setting.entity) or
+                            (isAny and not blacklist[entity.name]) then
+                            entities[#entities + 1] = entity
+                        end
                     end
                 end
-            end
-            if setting[tile] then
                 for _, entity in pairs(entities) do
                     painter.paint_entity(p, entity, setting[tile], i)
                 end
+            end
+            -- Short Circuit
+            if isAny then
+                break
             end
         end
     end

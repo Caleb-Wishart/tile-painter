@@ -44,7 +44,7 @@ local tp_bounding_box = {}
 --- ```lua
 --- local angle = area.orientation * orientation_to_rad
 --- ```
-local orientation_to_rad = 2 * math.pi --- @type number
+tp_bounding_box.orientation_to_rad = 2 * math.pi --- @type number
 
 
 --- Return the box in explicit form.
@@ -148,7 +148,7 @@ end
 --- @return OrientedBoundingBox The corresponding CoordinateBox of the param
 function tp_bounding_box.convert_to_OBB(box)
     -- Convert [0,1] orientation to radians
-    local angle = box.orientation * orientation_to_rad
+    local angle = box.orientation * tp_bounding_box.orientation_to_rad
     -- Calculate trig values
     local sin = math.sin(angle)
     local cos = math.cos(angle)
