@@ -12,4 +12,10 @@ data:extend {
         name = mod_name .. "-fill-shape-right-click",
         key_sequence = "mouse-button-2"
     },
+    {
+        type = "custom-input",
+        name = "tile-painter-shape",
+        key_sequence = "",
+        action = "lua",
+    },
 }

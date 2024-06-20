@@ -1,6 +1,11 @@
 local flib_gui = require("__flib__.gui-lite")
-local renderinglib = require("scripts.rendering")
+local flib_boundingBox = require("__flib__.bounding-box")
+local position = require("__flib__.position")
 
+local renderinglib = require("scripts.rendering")
+local surfacelib = require("scripts.surface")
+local polygon = require("scripts.polygon")
+local bounding_box = require("scripts.bounding-box")
 --- @class ShapeGui
 --- @field elems table<string, LuaGuiElement>
 --- @field player LuaPlayer
@@ -19,6 +24,11 @@ end
 --- @param self ShapeGui
 function gui.hide(self)
     self.elems.tp_window.visible = false
+end
+
+--- @param self ShapeGui
+function gui.show(self)
+    self.elems.tp_window.visible = true
 end
 
 --- @param e EventData.on_gui_closed
@@ -88,6 +98,53 @@ function gui.destroy_gui(player)
         return
     end
     window.destroy()
+end
+
+local function angle(p1, p2)
+    return math.atan2(p2.y - p1.y, p2.x - p1.x)
+end
+-- TODO Resolve duplicate code
+
+--- @param e defines.events.on_gui_click
+local function on_confirm_click(e)
+    local self = global.polygon[e.player_index]
+    if self.centre == nil or self.vertex == nil then
+        return
+    end
+    local n = self.nsides
+    local r = position.distance(self.centre, self.vertex)
+    local theta = angle(self.centre, self.vertex)
+    local vertices = polygon.polygon_vertices(n, r, self.centre, theta)
+
+    local bb = {
+        left_top = position.add(self.centre, { x = -r, y = -r }),
+        right_bottom = position.add(self.centre, { x = r, y = r }),
+    }
+    local tiles = surfacelib.find_tiles_filtered(game.surfaces[self.surface], { area = bb })
+    local res = {}
+    for _, tile in pairs(tiles) do
+        for _, offset in pairs({ { 0, 0 }, { 0, 0.5 }, { 0, 1 }, { 0.5, 1 }, { 1, 1 }, { 1, 0.5 }, { 1, 0 }, { 0.5, 0 }, { 0.5, 0.5 }, }) do
+            if polygon.point_in_polygon(position.add(tile.position, offset), n, vertices) then
+                table.insert(res, tile)
+            end
+            break
+        end
+        for i = 1, n + 1 do
+            local p1 = vertices[i]
+            local p2 = vertices[i % n + 1]
+            if bounding_box.line_intersect_AABB(p1, p2, flib_boundingBox.from_position(tile.position, true)) then
+                table.insert(res, tile)
+                break
+            end
+        end
+    end
+    renderinglib.destroy_renders(self)
+    self.centre                          = nil
+    self.vertex                          = nil
+    self.surface                         = nil
+    self.elems.tp_centre_text.text       = ""
+    self.elems.tp_vertex_text.text       = ""
+    self.elems.tp_confirm_button.enabled = false
 end
 
 --- @param player LuaPlayer
@@ -195,6 +252,25 @@ function gui.build_gui(player)
 
                         },
                     },
+                    {
+                        type = "flow",
+                        direction = "horizontal",
+                        {
+                            type = "empty-widget",
+                            style = "flib_horizontal_pusher",
+                        },
+                        {
+                            type = "button",
+                            name = "tp_confirm_button",
+                            caption = { 'tile_painter_gui.confirm' },
+                            handler = { [defines.events.on_gui_click] = on_confirm_click },
+                            enabled = false,
+                        },
+                        {
+                            type = "empty-widget",
+                            style = "flib_horizontal_pusher",
+                        },
+                    },
 
                 }
             },
@@ -217,12 +293,5 @@ function gui.build_gui(player)
 
     return self
 end
-
-local function on_polygon_options_changed(e)
-end
-
-gui.events = {
-    [defines.events.on_polygon_options_changed] = on_polygon_options_changed,
-}
 
 return gui

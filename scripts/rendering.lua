@@ -20,12 +20,7 @@ end
 ---@param self ShapeGui
 function tp_rendering.draw_prospective_polygon(self)
     local n = self.nsides
-    if self.renders.polygon ~= nil then
-        rendering.destroy(self.renders.polygon)
-    end
-    if self.renders.box ~= nil then
-        rendering.destroy(self.renders.box)
-    end
+    tp_rendering.destroy_renders(self)
     local r = position.distance(self.centre, self.vertex)
     local theta = angle(self.centre, self.vertex)
     if n == 0 then
@@ -55,6 +50,16 @@ function tp_rendering.draw_prospective_polygon(self)
         players = { self.player.index },
         filled = false,
     })
+end
+
+---@param self ShapeGui
+function tp_rendering.destroy_renders(self)
+    if self.renders.polygon ~= nil then
+        rendering.destroy(self.renders.polygon)
+    end
+    if self.renders.box ~= nil then
+        rendering.destroy(self.renders.box)
+    end
 end
 
 return tp_rendering
