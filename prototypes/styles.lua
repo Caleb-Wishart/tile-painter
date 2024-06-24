@@ -17,6 +17,7 @@ styles["tp_config_table"] = {
     parent = "slot_table",
     horizontally_stretchable = "on",
     right_cell_padding = 1,
+    horizontal_spacing = 4,
 }
 
 styles["tp_inventory_scroll_pane"] = {
