@@ -46,6 +46,12 @@ function gui.on_init()
     end
 end
 
+function gui.on_configuration_changed()
+    for _, player in pairs(game.players) do
+        gui.destroy_gui(player)
+    end
+end
+
 --- @param e EventData.on_gui_click
 local function on_pin_button_click(e)
     local self = global.gui[e.player_index]
@@ -393,7 +399,7 @@ function gui.populate_config_table(self, player)
                 type = "choose-elem-button",
                 style = "slot_button",
                 elem_type = "tile",
-                enabled = whitelist,
+                enabled = whitelist or row == 1,
                 tile = whitelist and config[tiles[i]] or nil,
                 elem_filters = filter,
                 tags = { type = tiles[i], index = row },
