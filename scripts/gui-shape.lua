@@ -114,27 +114,29 @@ local function on_confirm_click(e)
     local n = self.nsides
     local r = position.distance(self.centre, self.vertex)
     local theta = angle(self.centre, self.vertex)
-    local vertices = polygon.polygon_vertices(n, r, self.centre, theta)
-
     local bb = {
         left_top = position.add(self.centre, { x = -r, y = -r }),
         right_bottom = position.add(self.centre, { x = r, y = r }),
     }
     local tiles = surfacelib.find_tiles_filtered(game.surfaces[self.surface], { area = bb })
-    local res = {}
-    for _, tile in pairs(tiles) do
-        for _, offset in pairs({ { 0, 0 }, { 0, 0.5 }, { 0, 1 }, { 0.5, 1 }, { 1, 1 }, { 1, 0.5 }, { 1, 0 }, { 0.5, 0 }, { 0.5, 0.5 }, }) do
-            if polygon.point_in_polygon(position.add(tile.position, offset), n, vertices) then
+    if n == 0 then
+
+
+    else
+        local vertices = polygon.polygon_vertices(n, r, self.centre, theta)
+
+        local res = {}
+        for _, tile in pairs(tiles) do
+            if polygon.point_in_polygon(tile.position, n, vertices) then
                 table.insert(res, tile)
             end
-            break
-        end
-        for i = 1, n + 1 do
-            local p1 = vertices[i]
-            local p2 = vertices[i % n + 1]
-            if bounding_box.line_intersect_AABB(p1, p2, flib_boundingBox.from_position(tile.position, true)) then
-                table.insert(res, tile)
-                break
+            for i = 1, n + 1 do
+                local p1 = vertices[i]
+                local p2 = vertices[i % n + 1]
+                if bounding_box.line_intersect_AABB(p1, p2, flib_boundingBox.from_position(tile.position, true)) then
+                    table.insert(res, tile)
+                    break
+                end
             end
         end
     end
