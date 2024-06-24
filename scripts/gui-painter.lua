@@ -4,6 +4,7 @@ local util = require("util")
 -- Max number of config rows
 local MAX_CONFIG_ROWS = 6
 local CONFIG_ATTRS = 4
+local TABLE_COLS = 11
 
 --- @class PainterGui
 --- @field elems table<string, LuaGuiElement>
@@ -11,11 +12,18 @@ local CONFIG_ATTRS = 4
 --- @field player LuaPlayer
 --- @field config table<integer, table>
 --- @field inventory_selected string | nil
+--- @field whitelist boolean
 local gui = {}
 
 function gui.on_init()
     --- @type table<integer, PainterGui>
     global.painter = {}
+end
+
+function gui.on_configuration_changed()
+    for _, player in pairs(game.players) do
+        gui.destroy_gui(player)
+    end
 end
 
 --- @param e EventData.on_gui_click
@@ -35,6 +43,13 @@ local function on_pin_button_click(e)
         self.player.opened = self.elems.tp_window
         self.elems.close_button.tooltip = { "gui.close-instruction" }
     end
+end
+
+--- @param e EventData.on_gui_switch_state_changed
+local function on_mode_switch(e)
+    local self = global.painter[e.player_index]
+    self.whitelist = e.element.switch_state == "left"
+    gui.populate_config_table(self, game.get_player(e.player_index))
 end
 
 --- @param e EventData.on_gui_click
@@ -146,6 +161,25 @@ function gui.build_gui(player)
                 {
                     type = "frame",
                     style = "deep_frame_in_shallow_frame",
+                    direction = "vertical",
+                    {
+                        type = "flow",
+                        direction = "horizontal",
+                        {
+                            type = "empty-widget",
+                            style = "flib_horizontal_pusher",
+                        },
+                        {
+                            type = "switch",
+                            name = "tp_mode_switch",
+                            switch_state = "left",
+                            left_label_caption = { "tile_painter_gui.whitelist" },
+                            left_label_tooltip = { "tile_painter_gui.whitelist_entity_tt" },
+                            right_label_caption = { "tile_painter_gui.blacklist" },
+                            right_label_tooltip = { "tile_painter_gui.blacklist_entity_tt" },
+                            handler = { [defines.events.on_gui_switch_state_changed] = on_mode_switch },
+                        },
+                    },
                     {
                         type = "flow",
                         direction = "horizontal",
@@ -153,12 +187,11 @@ function gui.build_gui(player)
                             type = "table",
                             name = "tp_config_table",
                             style = "slot_table",
-                            column_count = 9,
-                        }
-                    }
-                }
-            }
-
+                            column_count = TABLE_COLS,
+                        },
+                    },
+                },
+            },
         },
         -- Player Inventory Frame
         {
@@ -179,9 +212,9 @@ function gui.build_gui(player)
                         name = "tp_inventory_table",
                         style = "slot_table",
                         column_count = 10,
-                    }
-                }
-            }
+                    },
+                },
+            },
         },
     })
 
@@ -191,6 +224,7 @@ function gui.build_gui(player)
         player = player,
         inventory_selected = nil,
         config = {},
+        whitelist = true,
     }
     global.painter[player.index] = self
 
@@ -208,6 +242,7 @@ end
 --- @param player LuaPlayer
 function gui.show(self, player)
     self.elems.tp_window.visible = true
+    self.player.opened = self.elems.tp_window
     gui.populate_config_table(self, player)
     gui.populate_inventory_table(self, player)
 end
@@ -249,73 +284,85 @@ end
 --- @param player LuaPlayer
 function gui.populate_config_table(self, player)
     local function build_heading(tbl)
+        local col = math.floor(TABLE_COLS / CONFIG_ATTRS)
         local headings = {
             "entity_caption",
             "tile_caption_0",
             "tile_caption_1",
             "tile_caption_2",
         }
-        for i = 1, #headings do
-            if i ~= 1 then
-                tbl.add {
-                    type = "empty-widget",
-                }.style.horizontally_stretchable = "on"
+        flib_gui.add(tbl, {
+            type = "empty-widget",
+            style_mods = { horizontally_stretchable = "on" }
+        })
+        for _ = 1, col do
+            for i = 1, #headings do
+                flib_gui.add(tbl, {
+                    type = "label",
+                    style = "caption_label",
+                    caption = { "tile_painter_gui." .. headings[i] },
+                    tooltip = { "tile_painter_gui." .. headings[i] .. "_tt" },
+                })
             end
-            tbl.add {
-                type = "label",
-                style = "caption_label",
-                caption = { "tile_painter_gui." .. headings[i] },
-                tooltip = { "tile_painter_gui." .. headings[i] .. "_tt" },
-            }
+            flib_gui.add(tbl, {
+                type = "empty-widget",
+                style_mods = { horizontally_stretchable = "on" }
+            })
         end
     end
 
     local function build_row(self, tbl, row)
-        if row > MAX_CONFIG_ROWS then return end
-        local col = math.floor(CONFIG_ATTRS / 2) + 1
-        local index = (col - 1) * MAX_CONFIG_ROWS + (row % CONFIG_ATTRS)
-        if self.config[index] == nil then
-            self.config[index] = {
-                entity = nil,
+        if self.config[row] == nil then
+            self.config[row] = {
+                entity = row == 1 and "signal-anything" or nil,
                 tile_0 = nil,
                 tile_1 = nil,
                 tile_2 = nil,
             }
         end
 
-        local config = self.config[index]
+        local config = self.config[row]
 
-        flib_gui.add(tbl, {
-            type = "choose-elem-button",
-            style = "slot_button",
-            elem_type = "entity",
-            entity = config.entity,
+        if row == 1 then
+            flib_gui.add(tbl, {
+                type = "choose-elem-button",
+                style = "slot_button",
+                elem_type = "signal",
+                signal = { type = "virtual", name = "signal-anything" },
+                tags = { type = "signal", index = row },
+                tooltip = { "tile_painter_gui.anything_tt" },
+                enabled = false,
+            })
+        else
+            flib_gui.add(tbl, {
+                type = "choose-elem-button",
+                style = "slot_button",
+                elem_type = "entity",
+                entity = config.entity,
 
-            elem_filters = {
-                { filter = "blueprintable", mode = "and" },
-                { filter = "rolling-stock", mode = "and", invert = true },
-                { filter = "hidden",        mode = "and", invert = true },
-                { filter = "flag",          mode = "and", invert = true, flag = "placeable-off-grid" },
-                -- Other / Hidden / Cheat Entities
-                { filter = "name",          mode = "and", invert = true, name = "infinity-chest" },
-                { filter = "name",          mode = "and", invert = true, name = "infinity-pipe" },
-                { filter = "name",          mode = "and", invert = true, name = "simple-entity-with-force" },
-                { filter = "name",          mode = "and", invert = true, name = "simple-entity-with-owner" },
-                { filter = "name",          mode = "and", invert = true, name = "linked-chest" },
-                { filter = "name",          mode = "and", invert = true, name = "linked-belt" },
-                { filter = "name",          mode = "and", invert = true, name = "burner-generator" },
-                { filter = "name",          mode = "and", invert = true, name = "electric-energy-interface" },
-                { filter = "name",          mode = "and", invert = true, name = "heat-interface" },
-            },
-            -- elem_filters = { { filter = "hidden", invert = true, mode = "and" } }
-            -- TODO fun hidden setting to enable placing on enemy spawners
-            tags = { type = "entity", index = index },
-            handler = { [defines.events.on_gui_elem_changed] = on_config_select }
-        })
-        flib_gui.add(tbl, {
-            type = "empty-widget",
-            style_mods = { horizontally_stretchable = "on" }
-        })
+                elem_filters = {
+                    { filter = "blueprintable", mode = "and" },
+                    { filter = "rolling-stock", mode = "and", invert = true },
+                    { filter = "hidden",        mode = "and", invert = true },
+                    { filter = "flag",          mode = "and", invert = true, flag = "placeable-off-grid" },
+                    -- Other / Hidden / Cheat Entities
+                    { filter = "name",          mode = "and", invert = true, name = "infinity-chest" },
+                    { filter = "name",          mode = "and", invert = true, name = "infinity-pipe" },
+                    { filter = "name",          mode = "and", invert = true, name = "simple-entity-with-force" },
+                    { filter = "name",          mode = "and", invert = true, name = "simple-entity-with-owner" },
+                    { filter = "name",          mode = "and", invert = true, name = "linked-chest" },
+                    { filter = "name",          mode = "and", invert = true, name = "linked-belt" },
+                    { filter = "name",          mode = "and", invert = true, name = "burner-generator" },
+                    { filter = "name",          mode = "and", invert = true, name = "electric-energy-interface" },
+                    { filter = "name",          mode = "and", invert = true, name = "heat-interface" },
+                },
+                -- elem_filters = { { filter = "hidden", invert = true, mode = "and" } }
+                -- TODO fun hidden setting to enable placing on enemy spawners
+                tags = { type = "entity", index = row },
+                handler = { [defines.events.on_gui_elem_changed] = on_config_select }
+            })
+        end
+
         local filter = { { filter = "blueprintable", mode = "and" } }
         local tiles = {
             "tile_0",
@@ -327,9 +374,10 @@ function gui.populate_config_table(self, player)
                 type = "choose-elem-button",
                 style = "slot_button",
                 elem_type = "tile",
-                tile = config[tiles[i]],
+                enabled = self.whitelist or row == 1,
+                tile = self.whitelist and config[tiles[i]] or nil,
                 elem_filters = filter,
-                tags = { type = tiles[i], index = index },
+                tags = { type = tiles[i], index = row },
                 handler = { [defines.events.on_gui_elem_changed] = on_config_select }
             })
         end
@@ -339,8 +387,21 @@ function gui.populate_config_table(self, player)
     if config_table == nil then return end
     config_table.clear()
     build_heading(config_table)
-    for row = 1, MAX_CONFIG_ROWS do
+    -- for row = 1, MAX_CONFIG_ROWS do
+    --     build_row(self, config_table, row)
+    -- end
+    for row = 1, MAX_CONFIG_ROWS * math.floor(TABLE_COLS / CONFIG_ATTRS) do
+        if row % 2 == 1 then
+            flib_gui.add(config_table, {
+                type = "empty-widget",
+                style_mods = { horizontally_stretchable = "on" }
+            })
+        end
         build_row(self, config_table, row)
+        flib_gui.add(config_table, {
+            type = "empty-widget",
+            style_mods = { horizontally_stretchable = "on" }
+        })
     end
 end
 
@@ -423,6 +484,7 @@ flib_gui.add_handlers({
     on_window_closed = on_window_closed,
     on_inventory_selection = on_inventory_selection,
     on_config_select = on_config_select,
+    on_mode_switch = on_mode_switch,
 })
 
 gui.events = {
