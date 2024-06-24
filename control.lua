@@ -5,7 +5,9 @@ handler.add_libraries({
 
   require("__flib__.gui-lite"),
 
-  require("scripts.gui"),
-  require("scripts.tool-entity"),
+  require("scripts.gui-painter"),
+  require("scripts.tool-painter"),
+
+  require("scripts.gui-shape"),
   require("scripts.tool-shape"),
 })

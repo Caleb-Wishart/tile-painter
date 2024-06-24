@@ -4,12 +4,12 @@ local position = require("__flib__.position")
 local tp_polygon = {}
 
 -- Return the vertices of a polygon with n sides and a radius of r, centred about the given position, rotation of theta
---- @param n integer
+---@param n integer
 ---@param r integer
----@param centre LuaPosition the centre of the polygon
+---@param centre MapPosition the centre of the polygon
 ---@param theta number the rotation of the polygon
+---@return MapPosition[]
 function tp_polygon.polygon_vertices(n, r, centre, theta)
-    if n < 3 then return end
     local step = 2 * math.pi / n
 
     local rotation = math.pi / 2 - step

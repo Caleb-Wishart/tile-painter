@@ -9,7 +9,6 @@ local by_version = {
                 end
             end
         end
-        global = { gui = {}, players = {} }
     end,
 }
 

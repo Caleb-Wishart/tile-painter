@@ -6,44 +6,18 @@ local MAX_CONFIG_ROWS = 6
 local CONFIG_ATTRS = 4
 local TABLE_COLS = 11
 
-
-local function initialize_player(player)
-    local function init_attr(tbl, attr_name, default)
-        if tbl[attr_name] == nil then
-            tbl[attr_name] = default
-        end
-    end
-    if global.players[player.index] == nil then
-        global.players[player.index] = {}
-    end
-    local player_data = global.players[player.index]
-    init_attr(player_data, "inventory_selected", nil)
-    init_attr(player_data, "elements", {})
-    init_attr(player_data, "config", {})
-    init_attr(player_data, "mode", "entity")
-    init_attr(player_data, "shape_fill", {})
-    init_attr(player_data.shape_fill, "centre", nil)
-    init_attr(player_data.shape_fill, "vertex", nil)
-    init_attr(player_data.shape_fill, "surface", nil)
-end
-
---- @class Gui
+--- @class PainterGui
 --- @field elems table<string, LuaGuiElement>
 --- @field pinned boolean
 --- @field player LuaPlayer
+--- @field config table<integer, table>
+--- @field inventory_selected string | nil
 --- @field whitelist boolean
 local gui = {}
 
 function gui.on_init()
-    --- @type table<integer, Gui>
-    global.gui = {}
-
-    if global.players == nil then
-        global.players = {}
-    end
-    for _, player in pairs(game.players) do
-        initialize_player(player)
-    end
+    --- @type table<integer, PainterGui>
+    global.painter = {}
 end
 
 function gui.on_configuration_changed()
@@ -54,7 +28,7 @@ end
 
 --- @param e EventData.on_gui_click
 local function on_pin_button_click(e)
-    local self = global.gui[e.player_index]
+    local self = global.painter[e.player_index]
     if not self then
         return
     end
@@ -71,9 +45,16 @@ local function on_pin_button_click(e)
     end
 end
 
+--- @param e EventData.on_gui_switch_state_changed
+local function on_mode_switch(e)
+    local self = global.painter[e.player_index]
+    self.whitelist = e.element.switch_state == "left"
+    gui.populate_config_table(self, game.get_player(e.player_index))
+end
+
 --- @param e EventData.on_gui_click
 local function on_close_button_click(e)
-    local self = global.gui[e.player_index]
+    local self = global.painter[e.player_index]
     if not self then
         return
     end
@@ -130,7 +111,7 @@ end
 
 --- @param e EventData.on_gui_closed
 local function on_window_closed(e)
-    local self = global.gui[e.player_index]
+    local self = global.painter[e.player_index]
     if not self or self.pinned then
         return
     end
@@ -139,11 +120,11 @@ end
 
 --- @param player LuaPlayer
 function gui.destroy_gui(player)
-    local self = global.gui[player.index]
+    local self = global.painter[player.index]
     if not self then
         return
     end
-    global.gui[player.index] = nil
+    global.painter[player.index] = nil
     local window = self.elems.tp_window
     if not window.valid then
         return
@@ -151,15 +132,8 @@ function gui.destroy_gui(player)
     window.destroy()
 end
 
---- @param e EventData.on_gui_switch_state_changed
-local function on_mode_switch(e)
-    local self = global.gui[e.player_index]
-    self.whitelist = e.element.switch_state == "left"
-    gui.populate_config_table(self, game.get_player(e.player_index))
-end
-
 --- @param player LuaPlayer
---- @return Gui
+--- @return PainterGui
 function gui.build_gui(player)
     gui.destroy_gui(player)
 
@@ -214,12 +188,10 @@ function gui.build_gui(player)
                             name = "tp_config_table",
                             style = "slot_table",
                             column_count = TABLE_COLS,
-                            style_mods = { horizontal_spacing = 4 },
                         },
                     },
                 },
             },
-
         },
         -- Player Inventory Frame
         {
@@ -250,21 +222,23 @@ function gui.build_gui(player)
         elems = elems,
         pinned = false,
         player = player,
+        inventory_selected = nil,
+        config = {},
         whitelist = true,
     }
-    global.gui[player.index] = self
+    global.painter[player.index] = self
 
     return self
 end
 
 -- GUI Build Utilities
 
---- @param self Gui
+--- @param self PainterGui
 function gui.hide(self)
     self.elems.tp_window.visible = false
 end
 
---- @param self Gui
+--- @param self PainterGui
 --- @param player LuaPlayer
 function gui.show(self, player)
     self.elems.tp_window.visible = true
@@ -296,17 +270,17 @@ local function on_config_select(e)
     local player = game.get_player(e.player_index)
     if player == nil then return end
 
-    local player_global = global.players[player.index]
-    if player_global == nil then return end
+    local self = global.painter[player.index]
+    if self == nil then return end
 
-    local config = player_global.config[e.element.tags.index]
+    local config = self.config[e.element.tags.index]
     if config == nil then return end
     config[e.element.tags.type] = e.element.elem_value
 end
 
 -- GUI Population
 
---- @param self Gui
+--- @param self PainterGui
 --- @param player LuaPlayer
 function gui.populate_config_table(self, player)
     local function build_heading(tbl)
@@ -337,10 +311,9 @@ function gui.populate_config_table(self, player)
         end
     end
 
-    local function build_row(tbl, row, player_data, whitelist)
-        if player_data.config == nil then player_data.config = {} end
-        if player_data.config[row] == nil then
-            player_data.config[row] = {
+    local function build_row(self, tbl, row)
+        if self.config[row] == nil then
+            self.config[row] = {
                 entity = row == 1 and "signal-anything" or nil,
                 tile_0 = nil,
                 tile_1 = nil,
@@ -348,7 +321,8 @@ function gui.populate_config_table(self, player)
             }
         end
 
-        local config = player_data.config[row]
+        local config = self.config[row]
+
         if row == 1 then
             flib_gui.add(tbl, {
                 type = "choose-elem-button",
@@ -388,6 +362,7 @@ function gui.populate_config_table(self, player)
                 handler = { [defines.events.on_gui_elem_changed] = on_config_select }
             })
         end
+
         local filter = { { filter = "blueprintable", mode = "and" } }
         local tiles = {
             "tile_0",
@@ -399,8 +374,8 @@ function gui.populate_config_table(self, player)
                 type = "choose-elem-button",
                 style = "slot_button",
                 elem_type = "tile",
-                enabled = whitelist or row == 1,
-                tile = whitelist and config[tiles[i]] or nil,
+                enabled = self.whitelist or row == 1,
+                tile = self.whitelist and config[tiles[i]] or nil,
                 elem_filters = filter,
                 tags = { type = tiles[i], index = row },
                 handler = { [defines.events.on_gui_elem_changed] = on_config_select }
@@ -408,11 +383,13 @@ function gui.populate_config_table(self, player)
         end
     end
 
-    local player_data = global.players[player.index]
     local config_table = self.elems.tp_config_table
     if config_table == nil then return end
     config_table.clear()
     build_heading(config_table)
+    -- for row = 1, MAX_CONFIG_ROWS do
+    --     build_row(self, config_table, row)
+    -- end
     for row = 1, MAX_CONFIG_ROWS * math.floor(TABLE_COLS / CONFIG_ATTRS) do
         if row % 2 == 1 then
             flib_gui.add(config_table, {
@@ -420,7 +397,7 @@ function gui.populate_config_table(self, player)
                 style_mods = { horizontally_stretchable = "on" }
             })
         end
-        build_row(config_table, row, player_data, self.whitelist)
+        build_row(self, config_table, row)
         flib_gui.add(config_table, {
             type = "empty-widget",
             style_mods = { horizontally_stretchable = "on" }
@@ -428,15 +405,15 @@ function gui.populate_config_table(self, player)
     end
 end
 
---- @param self Gui
+--- @param self PainterGui
 --- @param player LuaPlayer
 function gui.populate_inventory_table(self, player)
-    local player_data = global.players[player.index]
     local inventory_table = self.elems.tp_inventory_table
     if inventory_table == nil then return end
     inventory_table.clear()
 
     local inventory = player.get_main_inventory()
+    if inventory == nil then return end
     -- quickly flash insert the cursor stack to get the correct inventory contents
     inventory.insert(player.cursor_stack)
     local contents = inventory.get_contents()
@@ -444,7 +421,7 @@ function gui.populate_inventory_table(self, player)
 
     for item, count in pairs(contents) do
         local sprite = nil
-        if player_data.inventory_selected == item then
+        if self.inventory_selected == item then
             sprite = "utility/hand"
             count = nil
         else
@@ -470,7 +447,7 @@ local function on_mod_item_opened(e)
     if e.item.name == util.defines.item_name then
         local player = game.get_player(e.player_index)
         if player == nil then return end
-        local self = global.gui[player.index]
+        local self = global.painter[player.index]
         if not self then
             self = gui.build_gui(player)
         end
@@ -478,15 +455,9 @@ local function on_mod_item_opened(e)
     end
 end
 
---- @param e EventData.on_player_created
-local function on_player_created(e)
-    local player = game.get_player(e.player_index)
-    initialize_player(player)
-end
-
 --- @param e EventData.on_player_removed
 local function on_player_removed(e)
-    global.players[e.player_index] = nil
+    global.painter[e.player_index] = nil
 end
 
 
@@ -495,17 +466,14 @@ local function on_player_cursor_stack_changed(e)
     local player = game.get_player(e.player_index)
     if player == nil then return end
 
-    local self = global.gui[e.player_index]
+    local self = global.painter[e.player_index]
     if not self or self.pinned then
         return
     end
 
-    local player_global = global.players[player.index]
-    if player_global == nil then return end
+    self.inventory_selected = player.cursor_stack.valid_for_read and player.cursor_stack.name or nil
 
-    player_global.inventory_selected = player.cursor_stack.valid_for_read and player.cursor_stack.name or nil
-
-    if player_global.elements.main_frame ~= nil then
+    if self.player.opened == self.elems.tp_window then
         gui.populate_inventory_table(self, player)
     end
 end
@@ -521,7 +489,6 @@ flib_gui.add_handlers({
 
 gui.events = {
     [defines.events.on_mod_item_opened] = on_mod_item_opened,
-    [defines.events.on_player_created] = on_player_created,
     [defines.events.on_player_removed] = on_player_removed,
     [defines.events.on_player_cursor_stack_changed] = on_player_cursor_stack_changed,
 }
