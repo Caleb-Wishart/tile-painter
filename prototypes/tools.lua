@@ -32,8 +32,8 @@ local polygon_tool = {
     show_in_library = true,
     icons = {
         {
-            icon = "__tile-painter__/graphics/tile-painter-polygon.png",
-            icon_size = 64,
+            icon = "__tile-painter__/graphics/icons/paintbrush-white-64.png",
+            icon_size = 64
         }
     },
     flags = { "hidden", "not-stackable", "spawnable", "only-in-cursor" },
@@ -41,6 +41,7 @@ local polygon_tool = {
     selection_color = { 0, 0, 0, 0 },
     alt_selection_color = { 0, 0, 0, 0 },
     selection_mode = { "nothing" },
+    alt_selection_mode = { "nothing" },
     selection_cursor_box_type = "entity",
     alt_selection_cursor_box_type = "entity",
     -- TODO make selection tool cursor custom

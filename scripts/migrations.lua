@@ -9,6 +9,7 @@ local by_version = {
                 end
             end
         end
+        global = { painter = {}, shapes = {} }
     end,
 }
 
