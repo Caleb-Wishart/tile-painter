@@ -1,3 +1,5 @@
+local orientation = require("__flib__.orientation")
+
 local bounding_box = require("scripts.bounding-box")
 local surfacelib = require("scripts.surface")
 local tilelib = require("scripts.tile")
@@ -5,7 +7,6 @@ local tilelib = require("scripts.tile")
 local curved_rail_mask = require("scripts.curved-rail")
 local get_player_settings = require("util").get_player_settings
 
-local orientation = require("__flib__.orientation")
 
 --- @class tp_painter
 local tp_painter = {}

@@ -6,6 +6,7 @@ local renderinglib = require("scripts.rendering")
 local surfacelib = require("scripts.surface")
 local polygon = require("scripts.polygon")
 local bounding_box = require("scripts.bounding-box")
+
 --- @class ShapeGui
 --- @field elems table<string, LuaGuiElement>
 --- @field player LuaPlayer
@@ -188,8 +189,8 @@ function gui.build_gui(player)
                     direction = "horizontal",
                     {
                         type = "label",
-                        caption = { 'tile_painter_gui.polygon_select' },
-                        tooltip = { 'tile_painter_gui.polygon_select_tt' },
+                        caption = { 'gui.tp-label-polygon-select' },
+                        tooltip = { 'gui.tp-label-tt-polygon-select' },
                     },
                     {
                         type = "textfield",
@@ -209,8 +210,8 @@ function gui.build_gui(player)
                         direction = "horizontal",
                         {
                             type = "label",
-                            caption = { 'tile_painter_gui.polygon_name' },
-                            tooltip = { 'tile_painter_gui.polygon_name_tt' },
+                            caption = { 'gui.tp-label-polygon-name' },
+                            tooltip = { 'gui.tp-label-tt-polygon-name' },
                         },
                         {
                             type = "textfield",
@@ -225,8 +226,8 @@ function gui.build_gui(player)
                         direction = "horizontal",
                         {
                             type = "label",
-                            caption = { 'tile_painter_gui.position_centre' },
-                            tooltip = { 'tile_painter_gui.position_centre_tt' },
+                            caption = { 'gui.tp-label-position-centre' },
+                            tooltip = { 'gui.tp-label-tt-position-centre' },
                         },
                         {
                             type = "textfield",
@@ -242,8 +243,8 @@ function gui.build_gui(player)
                         direction = "horizontal",
                         {
                             type = "label",
-                            caption = { 'tile_painter_gui.position_vertex' },
-                            tooltip = { 'tile_painter_gui.position_vertex_tt' },
+                            caption = { 'gui.tp-label-position-vertex' },
+                            tooltip = { 'gui.tp-label-tt-position-vertex' },
                         },
                         {
                             type = "textfield",
@@ -264,7 +265,7 @@ function gui.build_gui(player)
                         {
                             type = "button",
                             name = "tp_confirm_button",
-                            caption = { 'tile_painter_gui.confirm' },
+                            caption = { 'gui.tp-confirm' },
                             handler = { [defines.events.on_gui_click] = on_confirm_click },
                             enabled = false,
                         },

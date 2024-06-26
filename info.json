@@ -1,9 +1,9 @@
 {
-  "name": "tile-painter",
+  "name": "TilePainter",
   "version": "0.2.0",
   "title": "Tile Painter",
   "author": "AckEmma",
   "factorio_version": "1.1",
-  "description": "TODO",
+  "description": "Set of tools to help paint tiles",
   "dependencies": ["base", "flib"]
 }

@@ -1,10 +1,8 @@
 local painter = require("scripts/painter")
 
-local util = require("util")
-
 --- @param e EventData.on_player_selected_area
 local function on_player_selected_area(e)
-    if e.item ~= util.defines.item_name then return end
+    if e.item ~= "tp-entity-tool" then return end
     local p = game.get_player(e.player_index) ---@cast p -nil
     local self = global.painter[p.index]
     if self == nil then return end
@@ -54,7 +52,7 @@ local function on_player_selected_area(e)
 end
 
 local function on_player_dropped_item(e)
-    if e.entity and e.entity.name == util.defines.item_name then
+    if e.entity and e.entity.name == "tp-entity-tool" then
         e.entity.destroy()
     end
 end

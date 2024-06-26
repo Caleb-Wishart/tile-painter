@@ -1,43 +1,41 @@
-local util = require("util")
-local item_name = util.defines.item_name
-
-local shortcut = {
+local entity_shortcut = {
     type = "shortcut",
-    name = "shortcut-" .. item_name .. "-item",
-    action = "spawn-item",
-    item_to_spawn = item_name,
-    order = "b[blueprints]-p[" .. item_name .. "]",
-    style = "blue",
+    name = "tp-entity-selector",
+    order = "d[tools]-p[paint-entity]",
+    style = "default",
     icon = {
-        filename = "__tile-painter__/graphics/icons/paintbrush-white-64.png",
+        filename = "__TilePainter__/graphics/icons/paintbrush-white-64.png",
         flags = {
             "gui-icon"
         },
         priority = "extra-high-no-scale",
         scale = 1,
         size = 64
-    }
+    },
+    associated_control_input = "tp-get-entity-tool",
+    action = "spawn-item",
+    item_to_spawn = "tp-entity-tool",
 }
 
 local shape_shortcut = {
     type = "shortcut",
-    name = "shortcut-" .. item_name .. "-shape",
-    action = "lua",
-    associated_control_input = "tile-painter-shape",
-    order = "b[blueprints]-p[" .. item_name .. "-polygon]",
+    name = "tp-shape-selector",
+    order = "d[tools]-p[paint-shape]",
     style = "default",
     icon = {
-        filename = "__tile-painter__/graphics/shortcuts/shape-shortcut-x32-white.png",
+        filename = "__TilePainter__/graphics/shortcuts/shape-shortcut-x32-white.png",
         size = 32,
         mipmap_count = 2,
         flags = { "gui-icon" },
     },
     disabled_icon = {
-        filename = "__tile-painter__/graphics/shortcuts/shape-shortcut-x32-black.png",
+        filename = "__TilePainter__/graphics/shortcuts/shape-shortcut-x32-black.png",
         size = 32,
         mipmap_count = 2,
         flags = { "gui-icon" },
-    }
+    },
+    associated_control_input = "tp-get-shape-tool",
+    action = "lua",
 }
 
-data:extend { shortcut, shape_shortcut }
+data:extend { entity_shortcut, shape_shortcut }

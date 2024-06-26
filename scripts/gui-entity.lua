@@ -1,5 +1,4 @@
 local flib_gui = require("__flib__.gui-lite")
-local util = require("util")
 
 -- Max number of config rows
 local MAX_CONFIG_ROWS = 6
@@ -120,6 +119,9 @@ end
 
 --- @param player LuaPlayer
 function gui.destroy_gui(player)
+    if global.painter == nil then
+        return
+    end
     local self = global.painter[player.index]
     if not self then
         return
@@ -153,7 +155,7 @@ function gui.build_gui(player)
             direction = "vertical",
             name = "tp_config_window",
             style = "inner_frame_in_outer_frame",
-            titlebar({ "tile_painter_gui.tile_painter_title" }, "tp_window", true),
+            titlebar({ "gui.tp-title-entity-window" }, "tp_window", true),
             {
                 type = "frame",
                 style = "inside_shallow_frame",
@@ -173,11 +175,15 @@ function gui.build_gui(player)
                             type = "switch",
                             name = "tp_mode_switch",
                             switch_state = "left",
-                            left_label_caption = { "tile_painter_gui.whitelist" },
-                            left_label_tooltip = { "tile_painter_gui.whitelist_entity_tt" },
-                            right_label_caption = { "tile_painter_gui.blacklist" },
-                            right_label_tooltip = { "tile_painter_gui.blacklist_entity_tt" },
+                            left_label_caption = { "gui.whitelist" },
+                            left_label_tooltip = { "gui.tp-whitelist-tt-entity" },
+                            right_label_caption = { "gui.blacklist" },
+                            right_label_tooltip = { "gui.tp-blacklist-tt-entity" },
                             handler = { [defines.events.on_gui_switch_state_changed] = on_mode_switch },
+                        },
+                        {
+                            type = "empty-widget",
+                            style = "flib_horizontal_pusher",
                         },
                     },
                     {
@@ -199,7 +205,7 @@ function gui.build_gui(player)
             direction = "vertical",
             name = "to_inventory_window",
             style = "tp_inventory_frame",
-            titlebar({ "tile_painter_gui.inventory_title" }, "tp_window", false),
+            titlebar({ "gui.tp-title-inventory-window" }, "tp_window", false),
             {
                 type = "frame",
                 style = "inventory_frame",
@@ -281,27 +287,26 @@ end
 -- GUI Population
 
 --- @param self PainterGui
---- @param player LuaPlayer
-function gui.populate_config_table(self, player)
+function gui.populate_config_table(self)
     local function build_heading(tbl)
         local col = math.floor(TABLE_COLS / CONFIG_ATTRS)
-        local headings = {
-            "entity_caption",
-            "tile_caption_0",
-            "tile_caption_1",
-            "tile_caption_2",
-        }
         flib_gui.add(tbl, {
             type = "empty-widget",
             style_mods = { horizontally_stretchable = "on" }
         })
         for _ = 1, col do
-            for i = 1, #headings do
+            flib_gui.add(tbl, {
+                type = "label",
+                style = "caption_label",
+                caption = { "gui.tp-caption-entity" },
+                tooltip = { "gui.tp-caption-tt-entity" },
+            })
+            for i = 0, 2 do
                 flib_gui.add(tbl, {
                     type = "label",
                     style = "caption_label",
-                    caption = { "tile_painter_gui." .. headings[i] },
-                    tooltip = { "tile_painter_gui." .. headings[i] .. "_tt" },
+                    caption = { "gui.tp-caption-tile", i },
+                    tooltip = { "gui.tp-caption-tt-tile", i },
                 })
             end
             flib_gui.add(tbl, {
@@ -330,7 +335,7 @@ function gui.populate_config_table(self, player)
                 elem_type = "signal",
                 signal = { type = "virtual", name = "signal-anything" },
                 tags = { type = "signal", index = row },
-                tooltip = { "tile_painter_gui.anything_tt" },
+                tooltip = { "gui.tp-anything-tt" },
                 enabled = false,
             })
         else
@@ -423,6 +428,7 @@ function gui.populate_inventory_table(self, player)
         local sprite = nil
         if self.inventory_selected == item then
             sprite = "utility/hand"
+            ---@diagnostic disable-next-line: cast-local-type
             count = nil
         else
             sprite = "item/" .. item
@@ -444,13 +450,13 @@ end
 
 --- @param e EventData.on_mod_item_opened
 local function on_mod_item_opened(e)
-    if e.item.name == util.defines.item_name then
+    if e.item.name == "tp-entity-tool" then
         local player = game.get_player(e.player_index)
         if player == nil then return end
-        local self = global.painter[player.index]
-        if not self then
-            self = gui.build_gui(player)
-        end
+        -- local self = global.painter[player.index]
+        -- if not self then
+        self = gui.build_gui(player)
+        -- end
         gui.show(self, player)
     end
 end

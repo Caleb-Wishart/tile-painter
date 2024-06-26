@@ -1,11 +1,12 @@
-local renderinglib = require("scripts.rendering")
 local position = require("__flib__.position")
+
+local renderinglib = require("scripts.rendering")
 local gui = require("scripts.gui-shape")
 
 --- @param e EventData.CustomInputEvent
 local function handle_fill_shape_click(e, isRight)
     local player = game.get_player(e.player_index)
-    if player == nil or player.cursor_stack.valid_for_read and player.cursor_stack.name ~= "tile-painter-polygon" then
+    if player == nil or player.cursor_stack.valid_for_read and player.cursor_stack.name ~= "tp-shape-tool" then
         return
     end
     local self = global.shapes[e.player_index]
@@ -47,7 +48,7 @@ end
 --- @param e EventData.CustomInputEvent|EventData.on_lua_shortcut
 local function on_shortcut(e)
     local name = e.input_name or e.prototype_name
-    if name ~= "tile-painter-shape" then
+    if name ~= "tp-shape-selector" then
         return
     end
     local player = game.get_player(e.player_index)
@@ -55,7 +56,7 @@ local function on_shortcut(e)
         return
     end
     local cursor_stack = player.cursor_stack
-    if cursor_stack and cursor_stack.valid_for_read and cursor_stack.name == "tile-painter-polygon" then
+    if cursor_stack and cursor_stack.valid_for_read and cursor_stack.name == "tp-shape-tool" then
         local self = global.gui[e.player_index]
         if self == nil then
             self = gui.build_gui(player)
@@ -68,16 +69,16 @@ local function on_shortcut(e)
     if not cursor_stack or not player.clear_cursor() then
         return
     end
-    cursor_stack.set_stack({ name = "tile-painter-polygon", count = 1 })
+    cursor_stack.set_stack({ name = "tp-shape-tool", count = 1 })
 end
 
 --- @class Tool
 local tool = {}
 
 tool.events = {
-    ["tile-painter-fill-shape-left-click"] = on_left_click,
-    ["tile-painter-fill-shape-right-click"] = on_right_click,
-    ["tile-painter-shape"] = on_shortcut,
+    ["tp-fill-shape-left-click"] = on_left_click,
+    ["tp-fill-shape-right-click"] = on_right_click,
+    ["tp-get-shape-tool"] = on_shortcut,
     [defines.events.on_lua_shortcut] = on_shortcut,
 
 }

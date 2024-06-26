@@ -1,6 +1,7 @@
 local flib_boundingBox = require("__flib__.bounding-box")
-local bounding_box = require("scripts.bounding-box")
 local orientation = require("__flib__.orientation")
+
+local bounding_box = require("scripts.bounding-box")
 
 --- @class tp_surface
 local tp_surface = {}

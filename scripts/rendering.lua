@@ -1,4 +1,5 @@
 local position = require("__flib__.position")
+
 local polygon = require("scripts.polygon")
 
 --- @class tp_rendering
