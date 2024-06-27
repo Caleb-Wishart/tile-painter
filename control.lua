@@ -10,4 +10,6 @@ handler.add_libraries({
 
   require("scripts.gui-shape"),
   require("scripts.tool-shape"),
+
+  require("scripts.shortcut"),
 })

@@ -28,8 +28,7 @@ local entity_shortcut = {
         flags = { "gui-icon" },
     },
     associated_control_input = "tp-get-entity-tool",
-    action = "spawn-item",
-    item_to_spawn = "tp-entity-tool",
+    action = "lua",
 }
 
 local shape_shortcut = {
@@ -62,9 +61,7 @@ local shape_shortcut = {
         flags = { "gui-icon" },
     },
     associated_control_input = "tp-get-shape-tool",
-    -- action = "lua",
-    action = "spawn-item",
-    item_to_spawn = "tp-shape-tool",
+    action = "lua",
 }
 
 data:extend { entity_shortcut, shape_shortcut }

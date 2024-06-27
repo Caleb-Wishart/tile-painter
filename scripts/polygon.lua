@@ -3,6 +3,35 @@ local position = require("__flib__.position")
 --- @class tp_polygon
 local tp_polygon = {}
 
+---@param vertices MapPosition[]
+---@return ScriptRenderVertexTarget[]
+local function position_to_vertex_target(vertices)
+    local targets = {}
+    for i = 1, #vertices do
+        targets[i] = { target = vertices[i] }
+    end
+    return targets
+end
+
+-- reorders the given array to result in: last, first, second last, second, etc...
+-- more visually: 1, 2, 3, 4, 5, 6, 7, 8 -> 8, 1, 7, 2, 6, 3, 5, 4
+-- translates a shape into a strip used for draw_polygon
+-- @jansharp factorio discord
+local function shape_to_strip(shape)
+    local strip = {}
+    local shape_length = #shape
+    local next_index = shape_length
+    for i = 1, shape_length do
+        strip[i] = shape[next_index]
+        next_index = (shape_length - next_index) + (i % 2)
+    end
+    return strip
+end
+
+function tp_polygon.polygon_vertex_targets(n, r, centre, theta)
+    return position_to_vertex_target(shape_to_strip(tp_polygon.polygon_vertices(n, r, centre, theta)))
+end
+
 -- Return the vertices of a polygon with n sides and a radius of r, centred about the given position, rotation of theta
 ---@param n integer
 ---@param r integer
@@ -12,11 +41,11 @@ local tp_polygon = {}
 function tp_polygon.polygon_vertices(n, r, centre, theta)
     local step = 2 * math.pi / n
 
-    local rotation = math.pi / 2 - step
+    local rotation = 0
     local vertices = {}
     for i = 1, n do
-        local x = r * math.cos(theta + step)
-        local y = r * math.sin(theta + step)
+        local x = r * math.cos(theta + rotation)
+        local y = r * math.sin(theta + rotation)
         vertices[i] = position.add(centre, { x = x, y = y })
         rotation = rotation + step
     end

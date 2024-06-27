@@ -15,7 +15,7 @@ local entity_tool = {
         },
     },
 
-    flags = { "hidden", "not-stackable", "spawnable", "mod-openable" },
+    flags = { "hidden", "not-stackable", "spawnable", "only-in-cursor" },
     stack_size = 1,
 
     selection_mode = { "buildable-type", "same-force" },

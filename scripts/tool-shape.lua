@@ -1,7 +1,6 @@
 local position = require("__flib__.position")
 
 local renderinglib = require("scripts.rendering")
-local gui = require("scripts.gui-shape")
 
 --- @param e EventData.CustomInputEvent
 local function handle_fill_shape_click(e, isRight)
@@ -9,7 +8,7 @@ local function handle_fill_shape_click(e, isRight)
     if player == nil or player.cursor_stack.valid_for_read and player.cursor_stack.name ~= "tp-shape-tool" then
         return
     end
-    local self = global.shapes[e.player_index]
+    local self = global.gui_shape[e.player_index]
     if self == nil then return end
     local position = position.ensure_explicit(e.cursor_position)
     local surface = game.get_player(e.player_index).surface.index
@@ -28,7 +27,7 @@ local function handle_fill_shape_click(e, isRight)
         self.elems.tp_vertex_text.text = location
     end
     if self.centre ~= nil and self.vertex ~= nil then
-        self.elems.tp_confirm_button.enabled = true
+        self.elems.tp_confirm_button.enabled = self.tile_type ~= nil
         renderinglib.draw_prospective_polygon(self)
     else
         self.elems.tp_confirm_button.enabled = false
@@ -45,42 +44,12 @@ local function on_right_click(e)
     handle_fill_shape_click(e, true)
 end
 
---- @param e EventData.CustomInputEvent|EventData.on_lua_shortcut
-local function on_shortcut(e)
-    local name = e.input_name or e.prototype_name
-    if name ~= "tp-shape-selector" then
-        return
-    end
-    local player = game.get_player(e.player_index)
-    if not player then
-        return
-    end
-    local cursor_stack = player.cursor_stack
-    if cursor_stack and cursor_stack.valid_for_read and cursor_stack.name == "tp-shape-tool" then
-        local self = global.gui[e.player_index]
-        if self == nil then
-            self = gui.build_gui(player)
-        end
-        if self and self.elems.tp_shape_window.valid then
-            gui.show(self)
-        end
-        return
-    end
-    if not cursor_stack or not player.clear_cursor() then
-        return
-    end
-    cursor_stack.set_stack({ name = "tp-shape-tool", count = 1 })
-end
-
 --- @class Tool
 local tool = {}
 
 tool.events = {
     ["tp-fill-shape-left-click"] = on_left_click,
     ["tp-fill-shape-right-click"] = on_right_click,
-    ["tp-get-shape-tool"] = on_shortcut,
-    [defines.events.on_lua_shortcut] = on_shortcut,
-
 }
 
 return tool

@@ -45,5 +45,11 @@ styles["tp_titlebar_handle"] = {
     left_margin = 4,
     right_margin = 4,
     height = 24,
-    horizontally_stretchable = "on"
+    horizontally_stretchable = "on",
+}
+
+styles["tp_textfield_number"] = {
+    type = "textbox_style",
+    width = 36,
+    natural_width = 36,
 }

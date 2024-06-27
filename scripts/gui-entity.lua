@@ -16,7 +16,7 @@ local gui = {}
 
 function gui.on_init()
     --- @type table<integer, PainterGui>
-    global.painter = {}
+    global.gui_entity = {}
 end
 
 function gui.on_configuration_changed()
@@ -27,7 +27,7 @@ end
 
 --- @param e EventData.on_gui_click
 local function on_pin_button_click(e)
-    local self = global.painter[e.player_index]
+    local self = global.gui_entity[e.player_index]
     if not self then
         return
     end
@@ -39,26 +39,26 @@ local function on_pin_button_click(e)
         self.player.opened = nil
         self.elems.close_button.tooltip = { "gui.close" }
     else
-        self.player.opened = self.elems.tp_window
+        self.player.opened = self.elems.tp_entity_window
         self.elems.close_button.tooltip = { "gui.close-instruction" }
     end
 end
 
 --- @param e EventData.on_gui_switch_state_changed
 local function on_mode_switch(e)
-    local self = global.painter[e.player_index]
+    local self = global.gui_entity[e.player_index]
     self.whitelist = e.element.switch_state == "left"
     gui.populate_config_table(self, game.get_player(e.player_index))
 end
 
 --- @param e EventData.on_gui_click
 local function on_close_button_click(e)
-    local self = global.painter[e.player_index]
+    local self = global.gui_entity[e.player_index]
     if not self then
         return
     end
     gui.hide(self)
-    if self.player.opened == self.elems.tp_window then
+    if self.player.opened == self.elems.tp_entity_window then
         self.player.opened = nil
     end
 end
@@ -109,8 +109,8 @@ local function titlebar(caption, target, close)
 end
 
 --- @param e EventData.on_gui_closed
-local function on_window_closed(e)
-    local self = global.painter[e.player_index]
+local function on_entity_window_closed(e)
+    local self = global.gui_entity[e.player_index]
     if not self or self.pinned then
         return
     end
@@ -119,15 +119,15 @@ end
 
 --- @param player LuaPlayer
 function gui.destroy_gui(player)
-    if global.painter == nil then
+    if global.gui_entity == nil then
         return
     end
-    local self = global.painter[player.index]
+    local self = global.gui_entity[player.index]
     if not self then
         return
     end
-    global.painter[player.index] = nil
-    local window = self.elems.tp_window
+    global.gui_entity[player.index] = nil
+    local window = self.elems.tp_entity_window
     if not window.valid then
         return
     end
@@ -141,13 +141,13 @@ function gui.build_gui(player)
 
     local elems = flib_gui.add(player.gui.screen, {
         type = "frame",
-        name = "tp_window",
+        name = "tp_entity_window",
         visible = false,
         direction = "vertical",
         style = "invisible_frame",
         --- @diagnostic disable-next-line: missing-fields
         elem_mods = { auto_center = true },
-        handler = { [defines.events.on_gui_closed] = on_window_closed },
+        handler = { [defines.events.on_gui_closed] = on_entity_window_closed },
         -- Children
         -- Configuration Frame
         {
@@ -155,7 +155,7 @@ function gui.build_gui(player)
             direction = "vertical",
             name = "tp_config_window",
             style = "inner_frame_in_outer_frame",
-            titlebar({ "gui.tp-title-entity-window" }, "tp_window", true),
+            titlebar({ "gui.tp-title-entity-window" }, "tp_entity_window", true),
             {
                 type = "frame",
                 style = "inside_shallow_frame",
@@ -205,7 +205,7 @@ function gui.build_gui(player)
             direction = "vertical",
             name = "to_inventory_window",
             style = "tp_inventory_frame",
-            titlebar({ "gui.tp-title-inventory-window" }, "tp_window", false),
+            titlebar({ "gui.tp-title-inventory-window" }, "tp_entity_window", false),
             {
                 type = "frame",
                 style = "inventory_frame",
@@ -232,7 +232,7 @@ function gui.build_gui(player)
         config = {},
         whitelist = true,
     }
-    global.painter[player.index] = self
+    global.gui_entity[player.index] = self
 
     return self
 end
@@ -241,16 +241,15 @@ end
 
 --- @param self PainterGui
 function gui.hide(self)
-    self.elems.tp_window.visible = false
+    self.elems.tp_entity_window.visible = false
 end
 
 --- @param self PainterGui
---- @param player LuaPlayer
-function gui.show(self, player)
-    self.elems.tp_window.visible = true
-    self.player.opened = self.elems.tp_window
-    gui.populate_config_table(self, player)
-    gui.populate_inventory_table(self, player)
+function gui.show(self)
+    self.elems.tp_entity_window.visible = true
+    self.player.opened = self.elems.tp_entity_window
+    gui.populate_config_table(self)
+    gui.populate_inventory_table(self)
 end
 
 --- @param e EventData.on_gui_click
@@ -276,7 +275,7 @@ local function on_config_select(e)
     local player = game.get_player(e.player_index)
     if player == nil then return end
 
-    local self = global.painter[player.index]
+    local self = global.gui_entity[player.index]
     if self == nil then return end
 
     local config = self.config[e.element.tags.index]
@@ -411,8 +410,8 @@ function gui.populate_config_table(self)
 end
 
 --- @param self PainterGui
---- @param player LuaPlayer
-function gui.populate_inventory_table(self, player)
+function gui.populate_inventory_table(self)
+    local player = self.player
     local inventory_table = self.elems.tp_inventory_table
     if inventory_table == nil then return end
     inventory_table.clear()
@@ -453,17 +452,17 @@ local function on_mod_item_opened(e)
     if e.item.name == "tp-entity-tool" then
         local player = game.get_player(e.player_index)
         if player == nil then return end
-        -- local self = global.painter[player.index]
+        -- local self = global.gui_entity[player.index]
         -- if not self then
-        self = gui.build_gui(player)
+        local self = gui.build_gui(player)
         -- end
-        gui.show(self, player)
+        gui.show(self)
     end
 end
 
 --- @param e EventData.on_player_removed
 local function on_player_removed(e)
-    global.painter[e.player_index] = nil
+    global.gui_entity[e.player_index] = nil
 end
 
 
@@ -472,22 +471,22 @@ local function on_player_cursor_stack_changed(e)
     local player = game.get_player(e.player_index)
     if player == nil then return end
 
-    local self = global.painter[e.player_index]
+    local self = global.gui_entity[e.player_index]
     if not self or self.pinned then
         return
     end
 
     self.inventory_selected = player.cursor_stack.valid_for_read and player.cursor_stack.name or nil
 
-    if self.player.opened == self.elems.tp_window then
-        gui.populate_inventory_table(self, player)
+    if self.player.opened == self.elems.tp_entity_window then
+        gui.populate_inventory_table(self)
     end
 end
 
 flib_gui.add_handlers({
     on_pin_button_click = on_pin_button_click,
     on_close_button_click = on_close_button_click,
-    on_window_closed = on_window_closed,
+    on_entity_window_closed = on_entity_window_closed,
     on_inventory_selection = on_inventory_selection,
     on_config_select = on_config_select,
     on_mode_switch = on_mode_switch,
