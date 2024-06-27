@@ -12,8 +12,11 @@ local tp_surface = {}
 ---@param position TilePosition where to build the tile
 ---@param force string|integer|LuaForce the force to build the tile for
 function tp_surface.create_tile_ghost(surface, tile_type, position, force)
-    if surface.can_place_entity { name = "tile-ghost", position = position, inner_name = tile_type, force = force } then
-        surface.create_entity { name = "tile-ghost", position = position, inner_name = tile_type, force = force, expires = false }
+    -- TilePosition should be interchangeable with MapPosition
+    ---@diagnostic disable-next-line: cast-type-mismatch
+    local pos = position ---@cast pos MapPosition
+    if surface.can_place_entity { name = "tile-ghost", position = pos, inner_name = tile_type, force = force } then
+        surface.create_entity { name = "tile-ghost", position = pos, inner_name = tile_type, force = force, expires = false }
     end
 end
 
