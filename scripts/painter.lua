@@ -94,8 +94,10 @@ function tp_painter.paint_fill_tool(player, surface, position, tile_type, border
 end
 
 function tp_painter.paint_shape(player, surface)
-    local self = global.gui_shape[player.index]
+    local self = global.gui[player.index]
     if self == nil then return end
+    local tdata = self.tabs["shape"]
+    if tdata == nil then return end
 end
 
 return tp_painter

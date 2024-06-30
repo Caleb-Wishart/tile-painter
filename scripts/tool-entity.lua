@@ -2,19 +2,20 @@ local painter = require("scripts/painter")
 
 --- @param e EventData.on_player_selected_area
 local function on_player_selected_area(e)
-    if e.item ~= "tp-entity-tool" then return end
+    if e.item ~= "tp-tool-entity" then return end
     local p = game.get_player(e.player_index) ---@cast p -nil
-    local self = global.gui_entity[p.index]
+    local self = global.gui[p.index]
     if self == nil then return end
+    local tdata = self.tabs["entity"]
 
-    local config = self.config
+    local config = tdata.config
     if config == nil then return end
 
     -- Iterate last to first
     -- The first settings will have highest priority with tiles
     local tiles = { "tile_0", "tile_1", "tile_2" }
     local blacklist = {}
-    if not self.whitelist then
+    if not tdata.whitelist then
         for _, setting in pairs(config) do
             if setting.entity then
                 blacklist[setting.entity] = true
@@ -33,7 +34,7 @@ local function on_player_selected_area(e)
                 else
                     entities = {}
                     for _, entity in pairs(e.entities) do
-                        if (self.whitelist and entity.name == setting.entity) or
+                        if (tdata.whitelist and entity.name == setting.entity) or
                             (isAny and not blacklist[entity.name]) then
                             entities[#entities + 1] = entity
                         end
@@ -52,7 +53,7 @@ local function on_player_selected_area(e)
 end
 
 local function on_player_dropped_item(e)
-    if e.entity and e.entity.name == "tp-entity-tool" then
+    if e.entity and e.entity.name == "tp-tool-entity" then
         e.entity.destroy()
     end
 end

@@ -11,16 +11,9 @@ data:extend {
     },
     {
         type = "custom-input",
-        name = "tp-get-entity-tool",
+        name = "tp-get-tool",
         key_sequence = "",
         action = "lua",
-        localised_name = { "tp-get-tool", "entity" }
-    },
-    {
-        type = "custom-input",
-        name = "tp-get-shape-tool",
-        key_sequence = "",
-        action = "lua",
-        localised_name = { "tp-get-tool", "shape" }
+        localised_name = { "tp-get-tool" }
     },
 }

@@ -65,4 +65,8 @@ function tp_polygon.point_in_polygon(p, n, poly)
     return inside
 end
 
+function tp_polygon.angle(p1, p2)
+    return math.atan2(p2.y - p1.y, p2.x - p1.x)
+end
+
 return tp_polygon

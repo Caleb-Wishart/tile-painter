@@ -1,67 +1,34 @@
-local entity_shortcut = {
+local shortcut = {
     type = "shortcut",
-    name = "tp-get-entity-tool",
-    order = "d[tools]-p[paint-entity]",
+    name = "tp-get-tool",
+    order = "d[tools]-p[tile-painter]",
     style = "default",
     icon = {
-        filename = "__TilePainter__/graphics/tool-entity-x32.png",
+        filename = "__TilePainter__/graphics/paintbrush-x32.png",
         size = 32,
         mipmap_count = 2,
         flags = { "gui-icon" },
     },
     disabled_icon = {
-        filename = "__TilePainter__/graphics/tool-entity-x32-white.png",
+        filename = "__TilePainter__/graphics/paintbrush-x32-white.png",
         size = 32,
         mipmap_count = 2,
         flags = { "gui-icon" },
     },
     small_icon = {
-        filename = "__TilePainter__/graphics/tool-entity-x24.png",
+        filename = "__TilePainter__/graphics/paintbrush-x24.png",
         size = 24,
         mipmap_count = 2,
         flags = { "gui-icon" },
     },
     disabled_small_icon = {
-        filename = "__TilePainter__/graphics/tool-entity-x24-white.png",
+        filename = "__TilePainter__/graphics/paintbrush-x24-white.png",
         size = 24,
         mipmap_count = 2,
         flags = { "gui-icon" },
     },
-    associated_control_input = "tp-get-entity-tool",
+    associated_control_input = "tp-get-tool",
     action = "lua",
 }
 
-local shape_shortcut = {
-    type = "shortcut",
-    name = "tp-get-shape-tool",
-    order = "d[tools]-p[paint-shape]",
-    style = "default",
-    icon = {
-        filename = "__TilePainter__/graphics/tool-shape-x32.png",
-        size = 32,
-        mipmap_count = 2,
-        flags = { "gui-icon" },
-    },
-    disabled_icon = {
-        filename = "__TilePainter__/graphics/tool-shape-x32-white.png",
-        size = 32,
-        mipmap_count = 2,
-        flags = { "gui-icon" },
-    },
-    small_icon = {
-        filename = "__TilePainter__/graphics/tool-shape-x24.png",
-        size = 24,
-        mipmap_count = 2,
-        flags = { "gui-icon" },
-    },
-    disabled_small_icon = {
-        filename = "__TilePainter__/graphics/tool-shape-x24-white.png",
-        size = 24,
-        mipmap_count = 2,
-        flags = { "gui-icon" },
-    },
-    associated_control_input = "tp-get-shape-tool",
-    action = "lua",
-}
-
-data:extend { entity_shortcut, shape_shortcut }
+data:extend { shortcut }

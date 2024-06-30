@@ -2,7 +2,7 @@ local data_util = require("__flib__.data-util")
 
 local entity_tool = {
     type = "selection-tool",
-    name = "tp-entity-tool",
+    name = "tp-tool-entity",
     subgroup = "tool",
     order = "d[tools]-p[paint-entity]",
 
@@ -29,7 +29,7 @@ local entity_tool = {
 
 local shape_tool = {
     type = "selection-tool",
-    name = "tp-shape-tool",
+    name = "tp-tool-shape",
     subgroup = "tool",
     order = "d[tools]-p[paint-shape]",
 
@@ -54,4 +54,31 @@ local shape_tool = {
     alt_selection_color = { 0, 0, 0, 0 },
 }
 
-data:extend { entity_tool, shape_tool }
+local fill_tool = {
+    type = "selection-tool",
+    name = "tp-tool-fill",
+    subgroup = "tool",
+    order = "d[tools]-p[paint-fill]",
+
+    icons = {
+        { icon = data_util.black_image, icon_size = 1, scale = 64 },
+        {
+            icon = "__TilePainter__/graphics/tool-fill-x32-white.png",
+            icon_size = 32,
+            mipmap_count = 2,
+        },
+    },
+
+    flags = { "hidden", "not-stackable", "spawnable", "only-in-cursor" },
+    stack_size = 1,
+
+    selection_mode = { "nothing" },
+    selection_cursor_box_type = "entity",
+    selection_color = { 0, 0, 0, 0 },
+
+    alt_selection_mode = { "nothing" },
+    alt_selection_cursor_box_type = "entity",
+    alt_selection_color = { 0, 0, 0, 0 },
+}
+
+data:extend { entity_tool, shape_tool, fill_tool }

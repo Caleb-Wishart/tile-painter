@@ -9,7 +9,7 @@ local by_version = {
                 end
             end
         end
-        global = { gui_entity = {}, gui_shape = {} }
+        global = { gui = {} }
     end,
 }
 
