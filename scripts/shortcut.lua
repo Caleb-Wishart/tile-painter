@@ -13,9 +13,9 @@ local function on_shortcut(e)
     end
 
     local self = global.gui[e.player_index]
-    -- if self == nil then
-    self = gui.build_gui(player)
-    -- end
+    if self == nil then
+        self = gui.build_gui(player)
+    end
     if self.elems["tp_main_window"].valid then
         gui.show(self)
     end
