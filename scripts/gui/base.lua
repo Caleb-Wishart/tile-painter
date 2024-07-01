@@ -58,11 +58,6 @@ local function on_close_button_click(e)
         return
     end
     gui.hide(self)
-    if self.player.opened == self.elems.tp_main_window then
-        self.player.opened = nil
-    end
-
-    self.player.clear_cursor()
 end
 
 --- @param e EventData.on_gui_closed
@@ -130,7 +125,7 @@ function gui.build_gui(player)
         {
             type = "frame",
             direction = "vertical",
-            name = "to_inventory_window",
+            name = "tp_inventory_window",
             style = "tp_inventory_frame",
             templates.titlebar({ "gui.tp-title-inventory-window" }, "tp_main_window"),
             {
@@ -181,6 +176,10 @@ function gui.hide(self)
     if tab.hide then
         tab.hide(self)
     end
+    if self.player.opened == self.elems.tp_main_window then
+        self.player.opened = nil
+    end
+    self.player.clear_cursor()
 end
 
 --- @param self Gui
@@ -293,7 +292,6 @@ local function on_header_tab_selected(e)
     local tags = tabAndContent.tab.tags
     if tags == nil or tags.mod ~= "TilePainter" then return end
     local tab = tabs[self.mode]
-    game.print("Selected tab: " .. tags.name .. " was " .. self.mode)
     if tab.hide then
         tab.hide(self)
     end

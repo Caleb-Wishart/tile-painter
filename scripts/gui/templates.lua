@@ -18,8 +18,8 @@ function tp_gui_template.frame_action_button(name, sprite, tooltip, handler)
 end
 
 --- @class TitleBarOpts
---- @field on_close_handler function
---- @field on_pin_handler function
+--- @field on_close_handler function?
+--- @field on_pin_handler function?
 
 --- @param caption LocalisedString
 ---@param target string
