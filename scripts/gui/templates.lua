@@ -20,10 +20,11 @@ end
 --- @class TitleBarOpts
 --- @field on_close_handler function?
 --- @field on_pin_handler function?
+--- @field on_titlebar_click_handler function?
 
 --- @param caption LocalisedString
----@param target string
----@param opts TitleBarOpts?
+--- @param target string
+--- @param opts TitleBarOpts?
 function tp_gui_template.titlebar(caption, target, opts)
     local elems = {
         type = "flow",
@@ -47,6 +48,11 @@ function tp_gui_template.titlebar(caption, target, opts)
             table.insert(elems, #elems + 1,
                 tp_gui_template.frame_action_button("pin_button", "flib_pin", { "gui.flib-keep-open" },
                     opts.on_pin_handler))
+        end
+        if opts.on_titlebar_click_handler then
+            elems.handler = {
+                [defines.events.on_gui_click] = opts.on_titlebar_click_handler
+            }
         end
     end
     return elems

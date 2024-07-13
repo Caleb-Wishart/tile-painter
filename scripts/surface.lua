@@ -1,5 +1,5 @@
 local flib_boundingBox = require("__flib__.bounding-box")
-local orientation = require("__flib__.orientation")
+local flib_orientation = require("__flib__.orientation")
 
 local bounding_box = require("scripts.bounding-box")
 
@@ -7,10 +7,10 @@ local bounding_box = require("scripts.bounding-box")
 local tp_surface = {}
 
 --- Build a tile ghost on the map.
----@param surface LuaSurface the surface to build the tile on
----@param tile_type string which tile to build
----@param position TilePosition where to build the tile
----@param force string|integer|LuaForce the force to build the tile for
+--- @param surface LuaSurface the surface to build the tile on
+--- @param tile_type string which tile to build
+--- @param position TilePosition where to build the tile
+--- @param force string|integer|LuaForce the force to build the tile for
 function tp_surface.create_tile_ghost(surface, tile_type, position, force)
     -- TilePosition should be interchangeable with MapPosition
     ---@diagnostic disable-next-line: cast-type-mismatch
@@ -25,9 +25,9 @@ end
 --- If no filters are given, this returns all tiles in the search area.
 ---
 --- If no `area` or `position` and `radius` is given, the entire surface is searched. If `position` and `radius` are given, only tiles within the radius of the position are included.
----@param surface LuaSurface the surface to find tiles on
----@param param LuaSurface.find_tiles_filtered_param
----@return (LuaTile)[]
+--- @param surface LuaSurface the surface to find tiles on
+--- @param param LuaSurface.find_tiles_filtered_param
+--- @return (LuaTile)[]
 function tp_surface.find_tiles_filtered(surface, param)
     local area = param.area
     -- If no area is specified
@@ -36,11 +36,11 @@ function tp_surface.find_tiles_filtered(surface, param)
     end
     area = bounding_box.ensure_explicit(area)
     -- if no orientation is specified or is specified but has no effect
-    if area.orientation == nil or area.orientation == orientation.north or area.orientation == orientation.south then
+    if area.orientation == nil or area.orientation == flib_orientation.north or area.orientation == flib_orientation.south then
         return surface.find_tiles_filtered(param)
     end
     -- If the orientation is east or west, (90/270 degree rotation) we can just rotate the area normally
-    if area.orientation == orientation.east or area.orientation == orientation.west then
+    if area.orientation == flib_orientation.east or area.orientation == flib_orientation.west then
         param.area = flib_boundingBox.rotate(area)
         return surface.find_tiles_filtered(param)
     end

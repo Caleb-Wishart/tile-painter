@@ -1,4 +1,4 @@
-local position = require("__flib__.position")
+local flib_position = require("__flib__.position")
 -- note that these functions will destroy any Orientation data passed in
 local flib_boundingBox = require("__flib__.bounding-box")
 
@@ -54,8 +54,8 @@ tp_bounding_box.orientation_to_rad = 2 * math.pi --- @type number
 --- @return BoundingBox
 function tp_bounding_box.ensure_explicit(box)
     return {
-        left_top = position.ensure_explicit(box.left_top or box[1]),
-        right_bottom = position.ensure_explicit(box.right_bottom or box[2]),
+        left_top = flib_position.ensure_explicit(box.left_top or box[1]),
+        right_bottom = flib_position.ensure_explicit(box.right_bottom or box[2]),
         orientation = box.orientation or box[3] or 0
     }
 end
@@ -65,8 +65,8 @@ end
 --- @return BoundingBox4
 function tp_bounding_box.convert_to_BB4(box)
     return {
-        left_top = position.ensure_explicit(box.left_top or box[1]),
-        right_bottom = position.ensure_explicit(box.right_bottom or box[2]),
+        left_top = flib_position.ensure_explicit(box.left_top or box[1]),
+        right_bottom = flib_position.ensure_explicit(box.right_bottom or box[2]),
         right_top = { x = box.right_bottom.x or box[2][1], y = box.left_top.y or box[1][2] },
         left_bottom = { x = box.left_top.x or box[1][1], y = box.right_bottom.y or box[2][2] },
         orientation = box.orientation or box[3] or 0
@@ -94,7 +94,7 @@ end
 --- @param pos2 MapPosition end of the line
 --- @param box BoundingBox The bounding box or rectangle
 function tp_bounding_box.line_intersect_AABB(pos1, pos2, box)
-    local pos1, pos2 = position.ensure_explicit(pos1), position.ensure_explicit(pos2)
+    local pos1, pos2 = flib_position.ensure_explicit(pos1), flib_position.ensure_explicit(pos2)
     local area = tp_bounding_box.ensure_explicit(box)
 
     local l, t, r, b = area.left_top.x, area.left_top.y, area.right_bottom.x, area.right_bottom.y
@@ -167,13 +167,13 @@ function tp_bounding_box.convert_to_OBB(box)
     -- using calculations from applying a RotationMatrix.
     -- left_top in this context refers to left_top in initial box and may may not be the left_top in the rotated box
     local rotated_area = {
-        left_top = position.add({ x = cen_lt.x * cos - cen_lt.y * sin, y = cen_lt.x * sin + cen_lt.y * cos },
+        left_top = flib_position.add({ x = cen_lt.x * cos - cen_lt.y * sin, y = cen_lt.x * sin + cen_lt.y * cos },
             midpoint),
-        right_top = position.add({ x = cen_br.x * cos - cen_lt.y * sin, y = cen_br.x * sin + cen_lt.y * cos },
+        right_top = flib_position.add({ x = cen_br.x * cos - cen_lt.y * sin, y = cen_br.x * sin + cen_lt.y * cos },
             midpoint),
-        left_bottom = position.add({ x = cen_lt.x * cos - cen_br.y * sin, y = cen_lt.x * sin + cen_br.y * cos },
+        left_bottom = flib_position.add({ x = cen_lt.x * cos - cen_br.y * sin, y = cen_lt.x * sin + cen_br.y * cos },
             midpoint),
-        right_bottom = position.add(
+        right_bottom = flib_position.add(
             { x = cen_br.x * cos - cen_br.y * sin, y = cen_br.x * sin + cen_br.y * cos },
             midpoint),
     }

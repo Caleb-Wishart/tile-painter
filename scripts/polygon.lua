@@ -1,10 +1,10 @@
-local position = require("__flib__.position")
+local flib_position = require("__flib__.position")
 
 --- @class tp_polygon
 local tp_polygon = {}
 
----@param vertices MapPosition[]
----@return ScriptRenderVertexTarget[]
+--- @param vertices MapPosition[]
+--- @return ScriptRenderVertexTarget[]
 local function position_to_vertex_target(vertices)
     local targets = {}
     for i = 1, #vertices do
@@ -17,7 +17,7 @@ end
 -- more visually: 1, 2, 3, 4, 5, 6, 7, 8 -> 8, 1, 7, 2, 6, 3, 5, 4
 -- translates a shape into a strip used for draw_polygon
 -- @jansharp factorio discord
-local function shape_to_strip(shape)
+function tp_polygon.shape_to_strip(shape)
     local strip = {}
     local shape_length = #shape
     local next_index = shape_length
@@ -28,16 +28,21 @@ local function shape_to_strip(shape)
     return strip
 end
 
-function tp_polygon.polygon_vertex_targets(n, r, centre, theta)
-    return position_to_vertex_target(shape_to_strip(tp_polygon.polygon_vertices(n, r, centre, theta)))
+-- Return the vertices of a polygon with n sides and a radius of r, centred about the given position, rotation of theta
+--- @param n integer
+--- @param r integer
+--- @param centre MapPosition the centre of the polygon
+--- @param theta number the rotation of the polygon
+function tp_polygon.polygon_targets(n, r, centre, theta)
+    return position_to_vertex_target(tp_polygon.polygon_vertices(n, r, centre, theta))
 end
 
 -- Return the vertices of a polygon with n sides and a radius of r, centred about the given position, rotation of theta
----@param n integer
----@param r integer
----@param centre MapPosition the centre of the polygon
----@param theta number the rotation of the polygon
----@return MapPosition[]
+--- @param n integer
+--- @param r integer
+--- @param centre MapPosition the centre of the polygon
+--- @param theta number the rotation of the polygon
+--- @return MapPosition[]
 function tp_polygon.polygon_vertices(n, r, centre, theta)
     local step = 2 * math.pi / n
 
@@ -46,14 +51,14 @@ function tp_polygon.polygon_vertices(n, r, centre, theta)
     for i = 1, n do
         local x = r * math.cos(theta + rotation)
         local y = r * math.sin(theta + rotation)
-        vertices[i] = position.add(centre, { x = x, y = y })
+        vertices[i] = flib_position.add(centre, { x = x, y = y })
         rotation = rotation + step
     end
     return vertices
 end
 
 function tp_polygon.point_in_polygon(p, n, poly)
-    p = position.ensure_explicit(p)
+    p = flib_position.ensure_explicit(p)
     local j = n
     local inside = false
     for i = 1, n do

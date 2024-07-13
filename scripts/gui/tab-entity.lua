@@ -4,7 +4,7 @@ local templates = require("scripts.gui.templates")
 
 local base64 = require("lib.base64")
 
-local MAX_CONFIG_ROWS = 6
+local MAX_CONFIG_ROWS = 7
 local CONFIG_ATTRS = 4
 local TABLE_COLS = 11
 local TABLE_ROWS = MAX_CONFIG_ROWS * math.floor(TABLE_COLS / CONFIG_ATTRS)
@@ -165,7 +165,7 @@ end
 --- @param e EventData.on_gui_click
 --- @param self Gui
 --- @param tdata EntityTabData
-local function on_reset_click(e, self, tdata)
+local function on_entity_reset_click(e, self, tdata)
     tdata.config = {}
     tp_tab_entity.populate_config_table(self)
 end
@@ -201,7 +201,7 @@ local tab_def = {
             style = "tool_button_red",
             sprite = "utility/reset",
             tooltip = { "gui.tp-tooltip-reset" },
-            handler = { [defines.events.on_gui_click] = on_reset_click },
+            handler = { [defines.events.on_gui_click] = on_entity_reset_click },
         }
     },
     contents = {
@@ -403,7 +403,7 @@ flib_gui.add_handlers({
     on_export_click = on_export_click,
     on_import_click = on_import_click,
     on_import_confirm_click = on_import_confirm_click,
-    on_reset_click = on_reset_click,
+    on_reset_click = on_entity_reset_click,
     on_export_window_closed = on_import_export_dialog_closed,
 }, templates.tab_wrapper("entity"))
 

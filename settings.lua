@@ -22,4 +22,11 @@ data:extend({
         maximum_value = 500,
         order = "ba"
     },
+    {
+        type = "string-setting",
+        name = "tp-default-gui-location",
+        setting_type = "runtime-per-user",
+        default_value = "top-left",
+        allowed_values = { "top-left", "center" },
+    },
 })

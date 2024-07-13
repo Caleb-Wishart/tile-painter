@@ -1,4 +1,5 @@
 local flib_gui = require("__flib__.gui-lite")
+local flib_position = require("__flib__.position")
 
 local tab_entity = require("scripts.gui.tab-entity")
 local tab_shape = require("scripts.gui.tab-shape")
@@ -51,6 +52,31 @@ local function on_pin_button_click(e)
     end
 end
 
+-- Thx Raiguard
+--- @type GuiLocation
+local top_left_location = { x = 15, y = 58 + 15 }
+
+--- @param self Gui
+local function reset_location(self)
+    local value = self.player.mod_settings["tp-default-gui-location"].value
+    local window = self.elems.tp_main_window
+    if value == "top-left" then
+        local scale = self.player.display_scale
+        window.location = flib_position.mul(top_left_location, { scale, scale })
+    else
+        window.auto_center = true
+    end
+end
+
+--- @param e EventData.on_gui_click
+local function on_titlebar_click(e)
+    local self = global.gui[e.player_index]
+    if not self or e.button ~= defines.mouse_button_type.middle then
+        return
+    end
+    reset_location(self)
+end
+
 --- @param e EventData.on_gui_click
 local function on_close_button_click(e)
     local self = global.gui[e.player_index]
@@ -98,7 +124,7 @@ function gui.build_gui(player)
         direction = "vertical",
         style = "invisible_frame",
         --- @diagnostic disable-next-line: missing-fields
-        elem_mods = { auto_center = true },
+        style_mods = { width = 448 },
         handler = { [defines.events.on_gui_closed] = on_entity_window_closed },
         -- Children
         -- Configuration Frame
@@ -108,7 +134,12 @@ function gui.build_gui(player)
             name = "tp_config_window",
             style = "inner_frame_in_outer_frame",
             templates.titlebar({ "gui.tp-title-main-window" }, "tp_main_window",
-                { on_close_handler = on_close_button_click, on_pin_handler = on_pin_button_click }),
+                {
+                    on_close_handler = on_close_button_click,
+                    on_pin_handler = on_pin_button_click,
+                    on_titlebar_click_handler =
+                        on_titlebar_click
+                }),
             {
                 type = "frame",
                 style = "tp_inside_frame",
@@ -122,28 +153,28 @@ function gui.build_gui(player)
             },
         },
         -- Player Inventory Frame
-        {
-            type = "frame",
-            direction = "vertical",
-            name = "tp_inventory_window",
-            style = "tp_inventory_frame",
-            templates.titlebar({ "gui.tp-title-inventory-window" }, "tp_main_window"),
-            {
-                type = "frame",
-                style = "inventory_frame",
-                {
-                    type = "scroll-pane",
-                    direction = "vertical",
-                    style = "tp_inventory_scroll_pane",
-                    {
-                        type = "table",
-                        name = "tp_inventory_table",
-                        style = "slot_table",
-                        column_count = 10,
-                    },
-                },
-            },
-        },
+        -- {
+        --     type = "frame",
+        --     direction = "vertical",
+        --     name = "tp_inventory_window",
+        --     style = "tp_inventory_frame",
+        --     templates.titlebar({ "gui.tp-title-inventory-window" }, "tp_main_window"),
+        --     {
+        --         type = "frame",
+        --         style = "inventory_frame",
+        --         {
+        --             type = "scroll-pane",
+        --             direction = "vertical",
+        --             style = "tp_inventory_scroll_pane",
+        --             {
+        --                 type = "table",
+        --                 name = "tp_inventory_table",
+        --                 style = "slot_table",
+        --                 column_count = 10,
+        --             },
+        --         },
+        --     },
+        -- },
     })
 
     for _, tab in pairs(tabs) do
@@ -163,6 +194,8 @@ function gui.build_gui(player)
     for _, tab in pairs(tabs) do
         tab.init(self)
     end
+
+    reset_location(self)
 
     return self
 end
@@ -313,6 +346,7 @@ flib_gui.add_handlers({
     on_close_button_click = on_close_button_click,
     on_entity_window_closed = on_entity_window_closed,
     on_inventory_selection = on_inventory_selection,
+    on_titlebar_click = on_titlebar_click,
 })
 
 gui.events = {
