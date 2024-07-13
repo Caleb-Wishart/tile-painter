@@ -1,14 +1,11 @@
 local flib_gui = require("__flib__.gui-lite")
-local flib_boundingBox = require("__flib__.bounding-box")
 local flib_position = require("__flib__.position")
 local flib_math = require("__flib__.math")
 
 local templates = require("scripts.gui.templates")
 
 local renderinglib = require("scripts.rendering")
-local surfacelib = require("scripts.surface")
 local polygon = require("scripts.polygon")
-local bounding_box = require("scripts.bounding-box")
 local painter = require("scripts.painter")
 
 local tp_tab_shape = {}
