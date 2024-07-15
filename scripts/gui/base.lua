@@ -204,6 +204,11 @@ local function on_player_cursor_stack_changed(e)
     local cursor_stack = self.player.cursor_stack --[[@as LuaItemStack]]
     local last_stack = self.inventory_selected
     if last_stack == nil then last_stack = "" end
+    if cursor_stack.valid and not cursor_stack.valid_for_read then
+        self.inventory_selected = nil
+        gui.hide(self)
+        return
+    end
     if cursor_stack.valid_for_read then
         self.inventory_selected = cursor_stack.name
         if cursor_stack.name ~= last_stack
@@ -303,6 +308,15 @@ local function on_previous_setting(e)
     end
 end
 
+local function on_player_dropped_item(e)
+    if e.entity and e.entity.name:sub(1, 8) == "tp-tool-" then
+        e.entity.destroy()
+        local self = global.gui[e.player_index]
+        if self == nil then return end
+        self:hide()
+    end
+end
+
 flib_gui.add_handlers({
     on_pin_button_click = on_pin_button_click,
     on_close_button_click = on_close_button_click,
@@ -314,6 +328,7 @@ gui.events = {
     [defines.events.on_player_removed] = on_player_removed,
     [defines.events.on_player_cursor_stack_changed] = on_player_cursor_stack_changed,
     [defines.events.on_gui_selected_tab_changed] = on_header_tab_selected,
+    [defines.events.on_player_dropped_item] = on_player_dropped_item,
     ["tp-next-tool"] = on_next_tool,
     ["tp-previous-tool"] = on_previous_tool,
     ["tp-next-tool-setting"] = on_next_setting,

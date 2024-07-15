@@ -54,10 +54,10 @@ local function on_player_selected_area(e)
     end
 end
 
-local function on_player_dropped_item(e)
-    if e.entity and e.entity.name == "tp-tool-entity" then
-        e.entity.destroy()
-    end
+
+--- @param e EventData.on_player_reverse_selected_area
+local function on_player_reverse_selected_area(e)
+    return
 end
 
 --- @class ToolEntity
@@ -65,7 +65,6 @@ local tool = {}
 
 tool.events = {
     [defines.events.on_player_selected_area] = on_player_selected_area,
-    [defines.events.on_player_dropped_item] = on_player_dropped_item,
 }
 
 return tool
