@@ -88,24 +88,29 @@ function tp_painter.paint_polygon(player, tdata, whatIf)
     local surface = game.surfaces[tdata.surface]
     local area = surfacelib.find_tiles_filtered(surface, { area = bb })
     local tiles = {}
-    for _, tile in pairs(area) do
-        if n == 1 then
-            local c = tdata.center ---@cast c -nil
+    if n == 1 then
+        local c = tdata.center ---@cast c -nil
+        local delta = math.sqrt(2) / 2
+        for _, tile in pairs(area) do
             local pos = flib_position.ensure_explicit(tile.position)
             pos = flib_position.add(pos, { 0.5, 0.5 })
-            local delta = math.sqrt(2) / 2
             local d = math.sqrt(math.pow(pos.x - c.x, 2) + math.pow(pos.y - c.y, 2))
             if tdata.fill and d <= r or math.abs(d - r) < delta then
                 table.insert(tiles, tile)
             end
-        elseif n == 2 then
-            local p1 = tdata.center ---@cast p1 -nil
-            local p2 = tdata.vertex ---@cast p2 -nil
+        end
+    elseif n == 2 then
+        local p1 = tdata.center ---@cast p1 -nil
+        local p2 = tdata.vertex ---@cast p2 -nil
+        for _, tile in pairs(area) do
             if bounding_box.line_intersect_AABB(p1, p2, flib_boundingBox.from_position(tile.position, true)) then
                 table.insert(tiles, tile)
             end
-        elseif n > 2 then
-            local vertices = polygon.polygon_vertices(n, r, tdata.center, theta)
+        end
+    elseif n > 2 then
+        -- TODO: find inner BB and exclude from search area to reduce number of tiles to check
+        local vertices = polygon.polygon_vertices(n, r, tdata.center, theta)
+        for _, tile in pairs(area) do
             local insert = false
             if n ~= 2 and tdata.fill and polygon.point_in_polygon(tile.position, n, vertices) then
                 insert = true
