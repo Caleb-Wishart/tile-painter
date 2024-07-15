@@ -8,6 +8,17 @@ local MAX_CONFIG_ROWS = 7
 local CONFIG_ATTRS = 4
 local TABLE_COLS = 11
 local TABLE_ROWS = MAX_CONFIG_ROWS * math.floor(TABLE_COLS / CONFIG_ATTRS)
+local MAX_PRESETS = 10
+
+local preset_list = {}
+for i = 1, MAX_PRESETS do
+    preset_list[i] = tostring(i)
+end
+
+local function default_name(i)
+    if i == nil then return "<Unnamed Preset>" end
+    return "<Unnamed Preset " .. i .. ">"
+end
 
 local tp_tab_entity = {}
 
@@ -15,18 +26,51 @@ local tp_tab_entity = {}
 --- @param e EventData.on_gui_switch_state_changed
 --- @param self Gui
 --- @param tdata EntityTabData
-local function on_mode_switch(e, self, tdata)
-    tdata.whitelist = e.element.switch_state == "left"
+--- @param pdata EntityPresetData
+local function on_mode_switch(e, self, tdata, pdata)
+    pdata.whitelist = e.element.switch_state == "left"
     tp_tab_entity.populate_config_table(self)
 end
 
 --- @param e EventData.on_gui_elem_changed
 --- @param self Gui
 --- @param tdata EntityTabData
-local function on_config_select(e, self, tdata)
-    local config = tdata.config[e.element.tags.index]
+--- @param pdata EntityPresetData
+local function on_config_select(e, self, tdata, pdata)
+    local config = pdata.config[e.element.tags.index]
     if config == nil then return end
     config[e.element.tags.type] = e.element.elem_value
+end
+
+--- @param self Gui
+--- @param tdata EntityTabData
+--- @param pdata EntityPresetData
+--- @param isEdit boolean
+local function label_edit_mode(self, tdata, pdata, isEdit)
+    local name_label = self.elems.tp_entity_preset_name_label
+    local name_textfield = self.elems.tp_entity_preset_name_textfield
+    local edit_button = self.elems.tp_entity_rename_button
+    name_label.visible = not isEdit
+    name_textfield.visible = isEdit
+    if isEdit then
+        name_textfield.text = pdata.name
+        name_textfield.focus()
+        edit_button.tooltip = { "gui-edit-label.save-label" }
+    else
+        name_label.caption = pdata.name
+        name_label.tooltip = pdata.name
+        edit_button.tooltip = { "gui-edit-label.edit-label" }
+    end
+end
+
+local function load_preset(self, tdata, pdata)
+    label_edit_mode(self, tdata, pdata, false)
+    self.elems.tp_mode_switch.switch_state = pdata.whitelist and "left" or "right"
+    self.elems.tp_entity_preset_dropdown.selected_index = tdata.preset
+    tp_tab_entity.populate_config_table(self)
+
+    self.elems.tp_entity_preset_name_label.visible = true
+    self.elems.tp_entity_preset_name_textfield.visible = false
 end
 
 local function destroy_import_export_dialog(self)
@@ -39,7 +83,8 @@ end
 --- @param e EventData.on_gui_closed
 --- @param self Gui
 --- @param tdata EntityTabData
-local function on_import_export_dialog_closed(e, self, tdata)
+--- @param pdata EntityPresetData
+local function on_import_export_dialog_closed(e, self, tdata, pdata)
     destroy_import_export_dialog(self)
 end
 
@@ -79,21 +124,23 @@ end
 --- @param e EventData.on_gui_click
 --- @param self Gui
 --- @param tdata EntityTabData
-local function on_export_click(e, self, tdata)
+--- @param pdata EntityPresetData
+local function on_export_click(e, self, tdata, pdata)
     create_import_export_dialog(self, { "gui.tp-export-entity" }, {
         type = "button",
         style = "dialog_button",
         caption = { "gui.ok" },
         handler = { [defines.events.on_gui_click] = on_import_export_dialog_closed }
     })
-    local text = base64.encode(game.table_to_json(tdata.config)) --[[@as string]]
+    local text = base64.encode(game.table_to_json(pdata)) --[[@as string]]
     self.elems.tp_export_text.text = text
 end
 
 --- @param e EventData.on_gui_click
 --- @param self Gui
 --- @param tdata EntityTabData
-local function on_import_confirm_click(e, self, tdata)
+--- @param pdata EntityPresetData
+local function on_import_confirm_click(e, self, tdata, pdata)
     local function create_error_text(message)
         self.player.surface.create_entity({
             name = "flying-text",
@@ -104,15 +151,23 @@ local function on_import_confirm_click(e, self, tdata)
     end
     local text = self.elems.tp_export_text.text
     local success, import = pcall(game.json_to_table, base64.decode(text))
-    import = import --[[@as table<number, table<string, string|nil>>]]
+    import = import --[[@as EntityPresetData]]
     local config = {}
 
     if not success or import == nil then
         create_error_text({ "failed-to-import-string", "Invalid Config" })
         return
     end
+    if import.whitelist == nil or import.name == nil or import.config == nil then
+        create_error_text({ "failed-to-import-string", "Invalid Config" })
+        return
+    end
+    if type(import.whitelist) ~= "boolean" or type(import.name) ~= "string" or type(import.config) ~= "table" then
+        create_error_text({ "failed-to-import-string", "Invalid Config" })
+        return
+    end
     local c = 0
-    for _, setting in pairs(import) do
+    for _, setting in pairs(import.config) do
         if c == 0 and setting.entity ~= "signal-anything" then
             create_error_text({ "failed-to-import-string", "Invalid Config" })
             return
@@ -145,15 +200,18 @@ local function on_import_confirm_click(e, self, tdata)
         create_error_text({ "failed-to-import-string", "Invalid Config" })
         return
     end
-    tdata.config = config
-    tp_tab_entity.populate_config_table(self)
+    pdata.config = config
+    pdata.whitelist = import.whitelist
+    pdata.name = import.name
+    load_preset(self, tdata, pdata)
     destroy_import_export_dialog(self)
 end
 
 --- @param e EventData.on_gui_click
 --- @param self Gui
 --- @param tdata EntityTabData
-local function on_import_click(e, self, tdata)
+--- @param pdata EntityPresetData
+local function on_import_click(e, self, tdata, pdata)
     create_import_export_dialog(self, { "gui-blueprint-library.import-string" }, {
         type = "button",
         style = "dialog_button",
@@ -165,9 +223,43 @@ end
 --- @param e EventData.on_gui_click
 --- @param self Gui
 --- @param tdata EntityTabData
-local function on_entity_reset_click(e, self, tdata)
-    tdata.config = {}
+--- @param pdata EntityPresetData
+local function on_entity_reset_click(e, self, tdata, pdata)
+    pdata.config = {}
+    local name = default_name(tdata.preset)
+    pdata.name = name
+    self.elems.tp_entity_preset_name_label.caption = name
+    pdata.whitelist = true
+    self.elems.tp_mode_switch.switch_state = "left"
     tp_tab_entity.populate_config_table(self)
+end
+
+--- @param e EventData.on_gui_confirmed
+--- @param self Gui
+--- @param tdata EntityTabData
+--- @param pdata EntityPresetData
+local function on_preset_name_text_changed(e, self, tdata, pdata)
+    pdata.name = e.element.text
+    label_edit_mode(self, tdata, pdata, false)
+end
+
+--- @param e EventData.on_gui_click
+--- @param self Gui
+--- @param tdata EntityTabData
+--- @param pdata EntityPresetData
+local function on_rename_click(e, self, tdata, pdata)
+    local isEditMode = self.elems.tp_entity_preset_name_textfield.visible
+    label_edit_mode(self, tdata, pdata, not isEditMode)
+end
+
+--- @param e EventData.on_gui_selection_state_changed
+--- @param self Gui
+--- @param tdata EntityTabData
+--- @param pdata EntityPresetData
+local function on_preset_select(e, self, tdata, pdata)
+    tdata.preset = e.element.selected_index
+    pdata = tdata.presets[tdata.preset]
+    load_preset(self, tdata, pdata)
 end
 
 local tab_def = {
@@ -175,12 +267,40 @@ local tab_def = {
     subheading = {
         {
             type = "label",
-            caption = "Default Name",
-            style = "heading_2_label",
+            name = "tp_entity_preset_name_label",
+            caption = default_name(1),
+            style_mods = { maximal_width = 230 },
+            style = "subheader_caption_label",
+        },
+        {
+            type = "textfield",
+            name = "tp_entity_preset_name_textfield",
+            text = default_name(1),
+            looe_focus_on_confirm = true,
+            clear_and_focus_on_right_click = true,
+            visible = false,
+            handler = { [defines.events.on_gui_confirmed] = on_preset_name_text_changed }
+        },
+        {
+            type = "sprite-button",
+            name = "tp_entity_rename_button",
+            style = "mini_button_aligned_to_text_vertically_when_centered",
+            sprite = "utility/rename_icon_small_black",
+            tooltip = { "gui-edit-label.edit-label" },
+            handler = { [defines.events.on_gui_click] = on_rename_click },
         },
         {
             type = "empty-widget",
             style = "flib_horizontal_pusher",
+        },
+        {
+            type = "drop-down",
+            style = "dropdown",
+            style_mods = { maximal_width = 60 },
+            name = "tp_entity_preset_dropdown",
+            items = preset_list,
+            selected_index = 1,
+            handler = { [defines.events.on_gui_selection_state_changed] = on_preset_select },
         },
         {
             type = "sprite-button",
@@ -278,7 +398,8 @@ function tp_tab_entity.populate_config_table(self)
     --- @param self Gui
     local function build_row(self, tbl, row)
         local tdata = self.tabs["entity"]
-        local config_data = tdata.config
+        local pdata = tdata.presets[tdata.preset]
+        local config_data = pdata.config
         if config_data[row] == nil then
             config_data[row] = {
                 entity = row == 1 and "signal-anything" or nil,
@@ -336,7 +457,7 @@ function tp_tab_entity.populate_config_table(self)
             "tile_1",
             "tile_2",
         }
-        local enabled = tdata.whitelist or row == 1
+        local enabled = pdata.whitelist or row == 1
         for i = 1, #tiles do
             flib_gui.add(tbl, {
                 type = "choose-elem-button",
@@ -377,15 +498,27 @@ function tp_tab_entity.populate_config_table(self)
     end
 end
 
---- @class EntityTabData
+--- @class EntityPresetData
 --- @field config table<number, table<string, string|nil>>
 --- @field whitelist boolean
+--- @field name string
+
+--- @class EntityTabData
+--- @field preset number
+--- @field presets table<number, EntityPresetData>
 
 function tp_tab_entity.init(self)
     local tab = {
-        config = {},
-        whitelist = true,
-    } --[[@as EntityTabData]]
+        preset = 1,
+        presets = {},
+    }
+    for i = 1, MAX_PRESETS do
+        tab.presets[i] = {
+            config = {},
+            whitelist = true,
+            name = default_name(i),
+        } --[[@as EntityPresetData]]
+    end
     self.tabs["entity"] = tab
 end
 
@@ -397,6 +530,41 @@ function tp_tab_entity.hide(self)
     destroy_import_export_dialog(self)
 end
 
+--- @param self Gui
+--- @param tdata EntityTabData
+function tp_tab_entity.on_next_setting(self, tdata)
+    tdata.preset = tdata.preset + 1
+    if tdata.preset > MAX_PRESETS then
+        tdata.preset = 1
+    end
+    local pdata = tdata.presets[tdata.preset]
+    if pdata == nil then return end
+    load_preset(self, tdata, pdata)
+end
+
+--- @param self Gui
+--- @param tdata EntityTabData
+function tp_tab_entity.on_previous_setting(self, tdata)
+    tdata.preset = tdata.preset - 1
+    if tdata.preset < 1 then
+        tdata.preset = MAX_PRESETS
+    end
+    local pdata = tdata.presets[tdata.preset]
+    if pdata == nil then return end
+    load_preset(self, tdata, pdata)
+end
+
+--- @param e {player_index: uint}
+local function wrapper(e, handler)
+    local self = global.gui[e.player_index]
+    if self == nil then return end
+    local tdata = self.tabs["entity"]
+    if tdata == nil then return end
+    local pdata = tdata.presets[tdata.preset]
+    if pdata == nil then return end
+    handler(e, self, tdata, pdata)
+end
+
 flib_gui.add_handlers({
     on_mode_switch = on_mode_switch,
     on_config_select = on_config_select,
@@ -405,6 +573,9 @@ flib_gui.add_handlers({
     on_import_confirm_click = on_import_confirm_click,
     on_reset_click = on_entity_reset_click,
     on_export_window_closed = on_import_export_dialog_closed,
-}, templates.tab_wrapper("entity"))
+    on_preset_name_text_changed = on_preset_name_text_changed,
+    on_rename_click = on_rename_click,
+    on_preset_select = on_preset_select,
+}, wrapper)
 
 return tp_tab_entity

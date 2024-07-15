@@ -10,6 +10,9 @@ local painter = require("scripts.painter")
 
 local get_player_settings = require("util").get_player_settings
 
+local MAX_NSIDES = 9
+local MIN_NSIDES = 1
+
 local tp_tab_shape = {}
 
 local function num_to_text(num, opts)
@@ -184,10 +187,10 @@ end
 --- @param tdata ShapeTabData
 local function on_nsides_text_changed(e, self, tdata)
     local nsides = tonumber(e.element.text) or -1 -- -1 is an invalid value
-    if nsides > 9 then
-        nsides = 9
-    elseif nsides < 1 then
-        nsides = 1
+    if nsides > MAX_NSIDES then
+        nsides = MAX_NSIDES
+    elseif nsides < MIN_NSIDES then
+        nsides = MIN_NSIDES
     end
     tdata.nsides = nsides
     e.element.text = tostring(nsides)
@@ -296,7 +299,7 @@ end
 
 --- @param e EventData.on_gui_click
 --- @param self Gui
---- @param tdata EntityTabData
+--- @param tdata ShapeTabData
 local function on_shape_reset_click(e, self, tdata)
     reset_polygon(self, tdata)
 end
@@ -357,8 +360,8 @@ local tab_def = {
         {
             type = "slider",
             name = "tp_nsides_slider",
-            minimum_value = 1,
-            maximum_value = 9,
+            minimum_value = MIN_NSIDES,
+            maximum_value = MAX_NSIDES,
             value = 3,
             style = "notched_slider",
             handler = { [defines.events.on_gui_value_changed] = on_nsides_slider_changed }
@@ -652,6 +655,7 @@ tp_tab_shape.def = templates.tab_heading(tab_def)
 --- @field settings table {show_vertex:boolean, show_center:boolean, show_radius:boolean, show_bounding_box:boolean, angle_degrees:boolean, is_angle:boolean, show_tiles:boolean}
 --- @field tiles Tile[]
 
+--- @param self Gui
 function tp_tab_shape.init(self)
     local tab = {
         center = nil,
@@ -682,16 +686,42 @@ function tp_tab_shape.init(self)
     self.elems.tp_shape_config_table.style.column_alignments[4] = "right"
 end
 
+--- @param self Gui
 function tp_tab_shape.hide(self)
     local tdata = self.tabs["shape"] --[[@as ShapeTabData]]
     renderinglib.destroy_renders(tdata)
 end
 
+--- @param self Gui
 function tp_tab_shape.refresh(self)
     local tdata = self.tabs["shape"] --[[@as ShapeTabData]]
     if tdata.center ~= nil and tdata.vertex ~= nil then
         renderinglib.draw_prospective_polygon(tdata, self.player)
     end
+end
+
+--- @param self Gui
+--- @param tdata ShapeTabData
+function tp_tab_shape.on_next_setting(self, tdata)
+    tdata.nsides = tdata.nsides + 1
+    if tdata.nsides > MAX_NSIDES then
+        tdata.nsides = MIN_NSIDES
+    end
+    self.elems.tp_nsides_slider.slider_value = tdata.nsides
+    self.elems.tp_nsides_text.text = tostring(tdata.nsides)
+    on_nsides_changed(self, tdata)
+end
+
+--- @param self Gui
+--- @param tdata ShapeTabData
+function tp_tab_shape.on_previous_setting(self, tdata)
+    tdata.nsides = tdata.nsides - 1
+    if tdata.nsides < MIN_NSIDES then
+        tdata.nsides = MAX_NSIDES
+    end
+    self.elems.tp_nsides_slider.slider_value = tdata.nsides
+    self.elems.tp_nsides_text.text = tostring(tdata.nsides)
+    on_nsides_changed(self, tdata)
 end
 
 flib_gui.add_handlers({

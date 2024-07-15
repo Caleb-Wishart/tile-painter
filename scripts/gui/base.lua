@@ -175,7 +175,7 @@ function gui.hide(self)
     if self.player.opened == self.elems.tp_main_window then
         self.player.opened = nil
     end
-    if self.player.cursor_stack.valid_for_read and string.sub(self.player.cursor_stack.name, 1, 8) == "tp-tool-" then
+    if self.player.cursor_stack.valid_for_read and self.player.cursor_stack.name:sub(1, 8) == "tp-tool-" then
         self.player.clear_cursor()
     end
 end
@@ -207,8 +207,8 @@ local function on_player_cursor_stack_changed(e)
     if cursor_stack.valid_for_read then
         self.inventory_selected = cursor_stack.name
         if cursor_stack.name ~= last_stack
-            and string.sub(last_stack, 1, 8) == "tp-tool-"
-            and string.sub(cursor_stack.name, 1, 8) ~= "tp-tool-"
+            and last_stack:sub(1, 8) == "tp-tool-"
+            and cursor_stack.name:sub(1, 8) ~= "tp-tool-"
         then
             gui.hide(self)
         end
@@ -252,7 +252,7 @@ local function on_next_tool(e)
     local self = global.gui[e.player_index]
     if self == nil then return end
     local tab_elems = self.elems.tp_header_tabs
-    local selected = tab_elems.selected_tab_index
+    local selected = tab_elems.selected_tab_index or 1
     if selected == #tab_elems.tabs then
         selected = 1
     else
@@ -268,7 +268,7 @@ local function on_previous_tool(e)
     local self = global.gui[e.player_index]
     if self == nil then return end
     local tab_elems = self.elems.tp_header_tabs
-    local selected = tab_elems.selected_tab_index
+    local selected = tab_elems.selected_tab_index or 1
     if selected == 1 then
         selected = #tab_elems.tabs
     else
@@ -277,6 +277,30 @@ local function on_previous_tool(e)
     tab_elems.selected_tab_index = selected
     ---@diagnostic disable-next-line: missing-fields
     on_header_tab_selected({ player_index = e.player_index, element = tab_elems })
+end
+
+--- @param e EventData.CustomInputEvent
+local function on_next_setting(e)
+    local self = global.gui[e.player_index]
+    if self == nil then return end
+    local tab = tabs[self.mode]
+    if tab.on_next_setting then
+        ---@diagnostic disable-next-line: param-type-mismatch
+        -- Disable to match for any tab type
+        tab.on_next_setting(self, self.tabs[self.mode])
+    end
+end
+
+--- @param e EventData.CustomInputEvent
+local function on_previous_setting(e)
+    local self = global.gui[e.player_index]
+    if self == nil then return end
+    local tab = tabs[self.mode]
+    if tab.on_previous_setting then
+        ---@diagnostic disable-next-line: param-type-mismatch
+        -- Disable to match for any tab type
+        tab.on_previous_setting(self, self.tabs[self.mode])
+    end
 end
 
 flib_gui.add_handlers({
@@ -292,6 +316,8 @@ gui.events = {
     [defines.events.on_gui_selected_tab_changed] = on_header_tab_selected,
     ["tp-next-tool"] = on_next_tool,
     ["tp-previous-tool"] = on_previous_tool,
+    ["tp-next-tool-setting"] = on_next_setting,
+    ["tp-previous-tool-setting"] = on_previous_setting,
 }
 
 return gui
