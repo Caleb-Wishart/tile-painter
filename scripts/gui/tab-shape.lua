@@ -8,40 +8,17 @@ local renderinglib = require("scripts.rendering")
 local polygon = require("scripts.polygon")
 local painter = require("scripts.painter")
 
+local get_player_settings = require("util").get_player_settings
+
 local tp_tab_shape = {}
 
 local function num_to_text(num, opts)
     return tostring(flib_math.round_to(num, opts and opts.round or 2))
 end
 
-local function on_polygon_changed(self, tdata)
-    if tdata.centre ~= nil and tdata.vertex ~= nil then
-        if tdata.settings.show_tiles then
-            tdata.tiles = painter.paint_polygon(self.player, tdata, true)
-        else
-            tdata.tiles = {}
-        end
-        renderinglib.draw_prospective_polygon(tdata, self.player)
-    end
-end
-
---- @param self Gui
---- @param tdata ShapeTabData
-local function on_nsides_changed(self, tdata)
-    local polygons = {
-        [1] = "Circle",
-        [2] = "Line",
-        [3] = "Triangle",
-        [4] = "Square",
-        [5] = "Pentagon",
-        [6] = "Hexagon",
-        [7] = "Heptagon",
-        [8] = "Octagon",
-        [9] = "Nonagon",
-    }
-    local name = polygons[tdata.nsides]
-    self.elems.tp_heading_shape.caption = name
-    on_polygon_changed(self, tdata)
+local function position_to_text(self, position)
+    local invertY = get_player_settings(self.player.index, "shape-invert-y-axis")
+    return "(" .. num_to_text(position.x) .. "," .. num_to_text(position.y * (invertY and -1 or 1)) .. ")"
 end
 
 local function on_angle_changed(self, tdata)
@@ -49,13 +26,15 @@ local function on_angle_changed(self, tdata)
         return
     end
     local angle = nil
+    local invertY = get_player_settings(self.player.index, "shape-invert-y-axis")
+    local theta = tdata.theta * (invertY and -1 or 1)
     if tdata.settings.is_angle then
         if tdata.settings.angle_degrees then
-            angle = num_to_text(-tdata.theta * flib_math.rad_to_deg)
+            angle = num_to_text((theta * flib_math.rad_to_deg + 360) % 360)
         else
             local delta = 0.01
-            angle = -tdata.theta + 2 * math.pi * (tdata.theta > 0 and 1 or 0)
-            if angle < delta then
+            angle = theta + 2 * math.pi * (theta > 0 and 0 or 1)
+            if angle < delta or 2 * math.pi - angle < delta then
                 angle = "0"
             elseif angle % math.pi < delta then
                 angle = num_to_text(angle / math.pi, { round = 0 }) .. "π"
@@ -77,6 +56,26 @@ local function on_angle_changed(self, tdata)
     self.elems.tp_angle_text.text = angle
 end
 
+local function on_angle_config_change(self, tdata)
+    if not tdata.settings.is_angle or tdata.settings.angle_degrees then
+        self.elems.tp_angle_text.enabled = true
+        self.elems.tp_angle_text.tooltip = ""
+    else
+        self.elems.tp_angle_text.enabled = false
+        self.elems.tp_angle_text.tooltip = { "gui.tp-tooltip-angle-text-radians" }
+    end
+    if tdata.settings.is_angle then
+        self.elems.tp_show_angle_degrees.enabled = true
+        self.elems.tp_show_angle_radians.enabled = true
+        self.elems.tp_angle_label.caption = { "gui.tp-angle" }
+    else
+        self.elems.tp_show_angle_degrees.enabled = false
+        self.elems.tp_show_angle_radians.enabled = false
+        self.elems.tp_angle_label.caption = { "gui.tp-bearing" }
+    end
+    on_angle_changed(self, tdata)
+end
+
 local function reset_polygon(self, tdata)
     tdata.centre                   = nil
     tdata.vertex                   = nil
@@ -91,6 +90,17 @@ local function reset_polygon(self, tdata)
     tdata.tiles = {}
 end
 
+local function on_polygon_changed(self, tdata)
+    if tdata.centre ~= nil and tdata.vertex ~= nil then
+        if tdata.settings.show_tiles then
+            tdata.tiles = painter.paint_polygon(self.player, tdata, true)
+        else
+            tdata.tiles = {}
+        end
+        renderinglib.draw_prospective_polygon(tdata, self.player)
+    end
+end
+
 function tp_tab_shape.on_position_changed(self, position, surface, isCentre)
     local tdata = self.tabs["shape"] --[[@as ShapeTabData]]
     if tdata == nil then
@@ -103,7 +113,7 @@ function tp_tab_shape.on_position_changed(self, position, surface, isCentre)
         tdata.surface = surface
     end
 
-    local position_text = "(" .. num_to_text(position.x) .. "," .. num_to_text(position.y) .. ")"
+    local position_text = position_to_text(self, position)
 
     if isCentre then
         tdata.centre = position
@@ -127,39 +137,6 @@ function tp_tab_shape.on_position_changed(self, position, surface, isCentre)
     end
 end
 
---- @param e EventData.on_gui_value_changed
---- @param self Gui
---- @param tdata ShapeTabData
-local function on_nsides_slider_changed(e, self, tdata)
-    tdata.nsides = e.element.slider_value
-    self.elems.tp_nsides_text.text = tostring(tdata.nsides)
-
-    on_nsides_changed(self, tdata)
-end
-
---- @param e EventData.on_gui_text_changed
---- @param self Gui
---- @param tdata ShapeTabData
-local function on_nsides_text_changed(e, self, tdata)
-    local nsides = tonumber(e.element.text) or -1 -- -1 is an invalid value
-    if nsides > 9 or nsides < 1 then
-        return
-    end
-    e.element.text = tostring(tdata.nsides)
-    tdata.nsides = nsides
-
-    on_nsides_changed(self, tdata)
-end
-
---- @param e EventData.on_gui_elem_changed
---- @param self Gui
---- @param tdata ShapeTabData
-local function on_shape_tile_select(e, self, tdata)
-    local tile = e.element.elem_value --- @cast tile -SignalID
-    tdata.tile_type = tile
-    self.elems.tp_confirm_button.enabled = tdata.centre ~= nil and tdata.vertex ~= nil and tile ~= nil
-end
-
 --- @param e defines.events.on_gui_click
 --- @param self Gui
 --- @param tdata ShapeTabData
@@ -171,6 +148,62 @@ local function on_confirm_click(e, self, tdata)
     end
     renderinglib.destroy_renders(tdata)
     reset_polygon(self, tdata)
+end
+
+--- @param self Gui
+--- @param tdata ShapeTabData
+local function on_nsides_changed(self, tdata)
+    local polygons = {
+        [1] = "Circle",
+        [2] = "Line",
+        [3] = "Triangle",
+        [4] = "Square",
+        [5] = "Pentagon",
+        [6] = "Hexagon",
+        [7] = "Heptagon",
+        [8] = "Octagon",
+        [9] = "Nonagon",
+    }
+    local name = polygons[tdata.nsides]
+    self.elems.tp_heading_shape.caption = name
+    on_polygon_changed(self, tdata)
+end
+
+--- @param e EventData.on_gui_value_changed
+--- @param self Gui
+--- @param tdata ShapeTabData
+local function on_nsides_slider_changed(e, self, tdata)
+    tdata.nsides = e.element.slider_value
+    self.elems.tp_nsides_text.text = tostring(tdata.nsides)
+
+    on_nsides_changed(self, tdata)
+end
+
+--- @param e EventData.on_gui_confirmed
+--- @param self Gui
+--- @param tdata ShapeTabData
+local function on_nsides_text_changed(e, self, tdata)
+    local nsides = tonumber(e.element.text) or -1 -- -1 is an invalid value
+    game.print(nsides)
+    if nsides > 9 then
+        nsides = 9
+    elseif nsides < 1 then
+        nsides = 1
+    end
+    tdata.nsides = nsides
+    e.element.text = tostring(nsides)
+    self.elems.tp_nsides_slider.slider_value = nsides
+
+    on_nsides_changed(self, tdata)
+end
+
+--- @param e EventData.on_gui_elem_changed
+--- @param self Gui
+--- @param tdata ShapeTabData
+local function on_shape_tile_select(e, self, tdata)
+    local tile = e.element.elem_value --- @cast tile -SignalID
+    tdata.tile_type = tile
+    self.elems.tp_confirm_button.enabled = tdata.centre ~= nil and tdata.vertex ~= nil and tile ~= nil
 end
 
 --- @param e EventData.on_gui_switch_state_changed
@@ -241,16 +274,7 @@ end
 local function on_shape_angle_switch(e, self, tdata)
     local is_angle = e.element.switch_state == "left"
     tdata.settings.is_angle = is_angle
-    if is_angle then
-        self.elems.tp_show_angle_degrees.enabled = true
-        self.elems.tp_show_angle_radians.enabled = true
-        self.elems.tp_angle_label.caption = { "gui.tp-angle" }
-    else
-        self.elems.tp_show_angle_degrees.enabled = false
-        self.elems.tp_show_angle_radians.enabled = false
-        self.elems.tp_angle_label.caption = { "gui.tp-bearing" }
-    end
-    on_angle_changed(self, tdata)
+    on_angle_config_change(self, tdata)
 end
 
 --- @param e EventData.on_gui_checked_state_changed
@@ -259,7 +283,7 @@ end
 local function on_show_angle_degrees_changed(e, self, tdata)
     tdata.settings.angle_degrees = e.element.state
     self.elems.tp_show_angle_radians.state = not e.element.state
-    on_angle_changed(self, tdata)
+    on_angle_config_change(self, tdata)
 end
 
 --- @param e EventData.on_gui_checked_state_changed
@@ -268,15 +292,54 @@ end
 local function on_show_angle_radians_changed(e, self, tdata)
     tdata.settings.angle_degrees = not e.element.state
     self.elems.tp_show_angle_degrees.state = not e.element.state
-    on_angle_changed(self, tdata)
+    on_angle_config_change(self, tdata)
 end
-
 
 --- @param e EventData.on_gui_click
 --- @param self Gui
 --- @param tdata EntityTabData
 local function on_shape_reset_click(e, self, tdata)
     reset_polygon(self, tdata)
+end
+
+--- @param e EventData.on_gui_confirmed
+--- @param self Gui
+--- @param tdata ShapeTabData
+local function on_angle_text_changed(e, self, tdata)
+    local angle = tonumber(e.element.text) or "NaN"
+    if angle == "NaN" then
+        on_angle_changed(self, tdata)
+        return
+    end
+    if not tdata.settings.is_angle then
+        if angle < 0 or angle > 360 then angle = 0 end
+        tdata.theta = (angle - 90) * flib_math.deg_to_rad
+    else
+        local invertY = get_player_settings(self.player.index, "shape-invert-y-axis")
+        -- Should only be degrees mode
+        tdata.theta = angle * flib_math.deg_to_rad * (invertY and -1 or 1)
+    end
+    tdata.vertex = polygon.calculate_vertex(tdata.centre, tdata.radius, tdata.theta)
+    self.elems.tp_vertex_text.text = position_to_text(self, tdata.vertex)
+    on_angle_changed(self, tdata)
+    on_polygon_changed(self, tdata)
+end
+
+--- @param e EventData.on_gui_confirmed
+--- @param self Gui
+--- @param tdata ShapeTabData
+local function on_radius_text_changed(e, self, tdata)
+    local radius = tonumber(e.element.text) or "NaN"
+    if radius == "NaN" then
+        self.elems.tp_angle_text.text = num_to_text(tdata.radius)
+        return
+    end
+    radius = radius ---@cast radius -string
+    tdata.radius = radius
+    self.elems.tp_angle_text.text = num_to_text(tdata.radius)
+    tdata.vertex = polygon.calculate_vertex(tdata.centre, tdata.radius, tdata.theta)
+    self.elems.tp_vertex_text.text = position_to_text(self, tdata.vertex)
+    on_polygon_changed(self, tdata)
 end
 
 local tab_def = {
@@ -311,7 +374,7 @@ local tab_def = {
             allow_negative = false,
             looe_focus_on_confirm = true,
             clear_and_focus_on_right_click = true,
-            handler = { [defines.events.on_gui_text_changed] = on_nsides_text_changed }
+            handler = { [defines.events.on_gui_confirmed] = on_nsides_text_changed }
         },
 
     },
@@ -433,7 +496,12 @@ local tab_def = {
                         text = "",
                         style = "short_number_textfield",
                         style_mods = { horizontal_align = "center" },
-                        enabled = false,
+                        enabled = true,
+                        numeric = true,
+                        allow_negative = true,
+                        looe_focus_on_confirm = true,
+                        clear_and_focus_on_right_click = true,
+                        handler = { [defines.events.on_gui_confirmed] = on_angle_text_changed }
 
                     },
                     {
@@ -463,7 +531,11 @@ local tab_def = {
                         text = "",
                         style = "short_number_textfield",
                         style_mods = { horizontal_align = "center" },
-                        enabled = false,
+                        numeric = true,
+                        allow_negative = false,
+                        looe_focus_on_confirm = true,
+                        clear_and_focus_on_right_click = true,
+                        handler = { [defines.events.on_gui_confirmed] = on_radius_text_changed }
                     },
                 },
             },
@@ -638,6 +710,8 @@ flib_gui.add_handlers({
     on_shape_angle_switch = on_shape_angle_switch,
     on_shape_reset_click = on_shape_reset_click,
     on_show_tiles_state_canged = on_show_tiles_state_canged,
+    on_angle_text_changed = on_angle_text_changed,
+    on_radius_text_changed = on_radius_text_changed,
 }, templates.tab_wrapper("shape"))
 
 return tp_tab_shape

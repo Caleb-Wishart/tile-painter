@@ -47,7 +47,7 @@ local function on_right_click_forced(e)
     handle_fill_shape_click(e, true, true)
 end
 
---- @class Tool
+--- @class ToolShape
 local tool = {}
 
 tool.events = {

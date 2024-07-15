@@ -74,4 +74,8 @@ function tp_polygon.angle(p1, p2)
     return math.atan2(p2.y - p1.y, p2.x - p1.x)
 end
 
+function tp_polygon.calculate_vertex(p1, r, theta)
+    return { x = p1.x + r * math.cos(theta), y = p1.y + r * math.sin(theta) }
+end
+
 return tp_polygon

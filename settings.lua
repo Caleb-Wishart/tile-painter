@@ -7,11 +7,26 @@ data:extend({
         order = "aa"
     },
     {
+        type = "string-setting",
+        name = "tp-default-gui-location",
+        setting_type = "runtime-per-user",
+        default_value = "top-left",
+        allowed_values = { "top-left", "center" },
+        order = "ab"
+    },
+    {
         type = "bool-setting",
-        name = "tp-smooth-curved-rail",
+        name = "tp-entity-smooth-curved-rail",
         setting_type = "runtime-per-user",
         default_value = true,
-        order = "ab"
+        order = "ba"
+    },
+    {
+        type = "bool-setting",
+        name = "tp-shape-invert-y-axis",
+        setting_type = "runtime-per-user",
+        default_value = true,
+        order = "bb"
     },
     {
         type = "int-setting",
@@ -20,13 +35,6 @@ data:extend({
         default_value = 50,
         minimum_value = 10,
         maximum_value = 500,
-        order = "ba"
-    },
-    {
-        type = "string-setting",
-        name = "tp-default-gui-location",
-        setting_type = "runtime-per-user",
-        default_value = "top-left",
-        allowed_values = { "top-left", "center" },
+        order = "bc"
     },
 })

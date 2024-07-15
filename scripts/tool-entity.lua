@@ -58,7 +58,7 @@ local function on_player_dropped_item(e)
     end
 end
 
---- @class Tool
+--- @class ToolEntity
 local tool = {}
 
 tool.events = {
