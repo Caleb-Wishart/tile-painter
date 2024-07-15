@@ -7,15 +7,17 @@ local function on_player_selected_area(e)
     local self = global.gui[p.index]
     if self == nil then return end
     local tdata = self.tabs["entity"]
+    if tdata == nil then return end
+    local pdata = tdata.presets[tdata.preset]
 
-    local config = tdata.config
+    local config = pdata.config
     if config == nil then return end
 
     -- Iterate last to first
     -- The first settings will have highest priority with tiles
     local tiles = { "tile_0", "tile_1", "tile_2" }
     local blacklist = {}
-    if not tdata.whitelist then
+    if not pdata.whitelist then
         for _, setting in pairs(config) do
             if setting.entity then
                 blacklist[setting.entity] = true
@@ -34,7 +36,7 @@ local function on_player_selected_area(e)
                 else
                     entities = {}
                     for _, entity in pairs(e.entities) do
-                        if (tdata.whitelist and entity.name == setting.entity) or
+                        if (pdata.whitelist and entity.name == setting.entity) or
                             (isAny and not blacklist[entity.name]) then
                             entities[#entities + 1] = entity
                         end

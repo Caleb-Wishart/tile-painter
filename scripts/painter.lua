@@ -26,7 +26,7 @@ function tp_painter.paint_entity(player, entity, tile_type, delta, whatIf)
 
     local force = player.force ---@cast force LuaForce
 
-    if get_player_settings(player.index, "smooth-curved-rail") and entity.name == "curved-rail" then
+    if get_player_settings(player.index, "entity-smooth-curved-rail") and entity.name == "curved-rail" then
         -- Use a special mapping
         local tiles = curved_rail_mask(entity.direction, delta)
         local pos = entity.position

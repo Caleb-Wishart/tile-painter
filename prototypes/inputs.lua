@@ -26,7 +26,7 @@ data:extend {
     {
         type = "custom-input",
         name = "tp-get-tool",
-        key_sequence = "",
+        key_sequence = "ALT + P",
         action = "lua",
         localised_name = { "tp-get-tool" },
         order = "ab",

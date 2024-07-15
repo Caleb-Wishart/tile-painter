@@ -481,6 +481,7 @@ local tab_def = {
                         text = "",
                         style = "long_number_textfield",
                         style_mods = { horizontal_align = "center" },
+                        tooltip = { "gui.tp-tooltip-position-vertex-text" },
                         enabled = false,
                     },
                     {
@@ -516,6 +517,7 @@ local tab_def = {
                         name = "tp_center_text",
                         text = "",
                         style = "long_number_textfield",
+                        tooltip = { "gui.tp-tooltip-position-center-text" },
                         style_mods = { horizontal_align = "center" },
                         enabled = false,
                     },

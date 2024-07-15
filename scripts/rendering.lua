@@ -137,7 +137,7 @@ function tp_rendering.draw_prospective_polygon(tdata, player)
     if tdata.settings.show_radius and n ~= 2 then
         tdata.renders[#tdata.renders + 1] = rendering.draw_line({
             color = color.debian_red(0.5),
-            width = 1,
+            width = 2,
             from = tdata.center,
             to = tdata.vertex,
             surface = tdata.surface,
