@@ -28,13 +28,13 @@ data:extend({
         default_value = true,
         order = "bb"
     },
-    {
-        type = "int-setting",
-        name = "tp-fill-max-distance",
-        setting_type = "runtime-global",
-        default_value = 50,
-        minimum_value = 10,
-        maximum_value = 500,
-        order = "bc"
-    },
+    -- {
+    --     type = "int-setting",
+    --     name = "tp-fill-max-distance",
+    --     setting_type = "runtime-global",
+    --     default_value = 50,
+    --     minimum_value = 10,
+    --     maximum_value = 500,
+    --     order = "bc"
+    -- },
 })

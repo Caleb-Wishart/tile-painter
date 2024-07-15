@@ -16,7 +16,7 @@ local function on_shortcut(e)
     if self == nil then
         self = gui.build_gui(player)
     end
-    if self.elems["tp_main_window"].valid then
+    if self.elems.tp_main_window.valid then
         gui.show(self)
     end
     local cursor_stack = player.cursor_stack

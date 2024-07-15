@@ -82,15 +82,15 @@ function tp_painter.paint_polygon(player, tdata, whatIf)
     local r = tdata.radius ---@cast r -nil
     local theta = tdata.theta ---@cast theta -nil
     local bb = {
-        left_top = flib_position.add(tdata.centre, { x = -r, y = -r }),
-        right_bottom = flib_position.add(tdata.centre, { x = r, y = r }),
+        left_top = flib_position.add(tdata.center, { x = -r, y = -r }),
+        right_bottom = flib_position.add(tdata.center, { x = r, y = r }),
     }
     local surface = game.surfaces[tdata.surface]
     local area = surfacelib.find_tiles_filtered(surface, { area = bb })
     local tiles = {}
     for _, tile in pairs(area) do
         if n == 1 then
-            local c = tdata.centre ---@cast c -nil
+            local c = tdata.center ---@cast c -nil
             local pos = flib_position.ensure_explicit(tile.position)
             pos = flib_position.add(pos, { 0.5, 0.5 })
             local delta = math.sqrt(2) / 2
@@ -99,13 +99,13 @@ function tp_painter.paint_polygon(player, tdata, whatIf)
                 table.insert(tiles, tile)
             end
         elseif n == 2 then
-            local p1 = tdata.centre ---@cast p1 -nil
+            local p1 = tdata.center ---@cast p1 -nil
             local p2 = tdata.vertex ---@cast p2 -nil
             if bounding_box.line_intersect_AABB(p1, p2, flib_boundingBox.from_position(tile.position, true)) then
                 table.insert(tiles, tile)
             end
         elseif n > 2 then
-            local vertices = polygon.polygon_vertices(n, r, tdata.centre, theta)
+            local vertices = polygon.polygon_vertices(n, r, tdata.center, theta)
             local insert = false
             if n ~= 2 and tdata.fill and polygon.point_in_polygon(tile.position, n, vertices) then
                 insert = true

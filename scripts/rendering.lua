@@ -14,14 +14,14 @@ function tp_rendering.draw_polygon_points(tdata, player, clear)
     if clear then
         tp_rendering.destroy_renders(tdata)
     end
-    -- Draw the centre and vertex
-    if tdata.settings.show_centre and tdata.centre then
+    -- Draw the center and vertex
+    if tdata.settings.show_center and tdata.center then
         tdata.renders[#tdata.renders + 1] = rendering.draw_circle({
             radius = 0.2,
             color = color.cyan(0.5), -- Cyan
             width = 1,
             filled = true,
-            target = tdata.centre,
+            target = tdata.center,
             surface = tdata.surface,
             players = { player.index },
             draw_on_ground = true,
@@ -55,7 +55,7 @@ function tp_rendering.draw_polygon_tiles(tdata, player)
     end
 end
 
--- Rerender the prototype polygon with the given centre and vertex
+-- Rerender the prototype polygon with the given center and vertex
 --- @param tdata ShapeTabData
 --- @param player LuaPlayer
 function tp_rendering.draw_prospective_polygon(tdata, player)
@@ -66,8 +66,8 @@ function tp_rendering.draw_prospective_polygon(tdata, player)
     -- Draw the bounding box
     if tdata.settings.show_bounding_box then
         tdata.renders[#tdata.renders + 1] = rendering.draw_rectangle({
-            left_top = flib_position.add(tdata.centre, { x = -r, y = -r }),
-            right_bottom = flib_position.add(tdata.centre, { x = r, y = r }),
+            left_top = flib_position.add(tdata.center, { x = -r, y = -r }),
+            right_bottom = flib_position.add(tdata.center, { x = r, y = r }),
             color = color.lavender_magenta(0.5),
             surface = tdata.surface,
             players = { player.index },
@@ -85,7 +85,7 @@ function tp_rendering.draw_prospective_polygon(tdata, player)
                 color = color.gray(0.1),
                 width = 0,
                 filled = tdata.fill,
-                target = tdata.centre,
+                target = tdata.center,
                 surface = tdata.surface,
                 players = { player.index },
                 draw_on_ground = true,
@@ -96,7 +96,7 @@ function tp_rendering.draw_prospective_polygon(tdata, player)
             color = color.coral(),
             width = 2,
             filled = false,
-            target = tdata.centre,
+            target = tdata.center,
             surface = tdata.surface,
             players = { player.index },
             draw_on_ground = true,
@@ -105,14 +105,14 @@ function tp_rendering.draw_prospective_polygon(tdata, player)
         tdata.renders[#tdata.renders + 1] = rendering.draw_line({
             color = color.coral(),
             width = 1,
-            from = tdata.centre,
+            from = tdata.center,
             to = tdata.vertex,
             surface = tdata.surface,
             players = { player.index },
             draw_on_ground = true,
         })
     elseif n > 2 then
-        local vertices = polygon.polygon_targets(n, r, tdata.centre, theta)
+        local vertices = polygon.polygon_targets(n, r, tdata.center, theta)
         if tdata.fill and not tdata.settings.show_tiles then
             tdata.renders[#tdata.renders + 1] = rendering.draw_polygon {
                 vertices = polygon.shape_to_strip(vertices),
@@ -138,7 +138,7 @@ function tp_rendering.draw_prospective_polygon(tdata, player)
         tdata.renders[#tdata.renders + 1] = rendering.draw_line({
             color = color.debian_red(0.5),
             width = 1,
-            from = tdata.centre,
+            from = tdata.center,
             to = tdata.vertex,
             surface = tdata.surface,
             players = { player.index },

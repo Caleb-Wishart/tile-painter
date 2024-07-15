@@ -22,7 +22,7 @@ local function position_to_text(self, position)
 end
 
 local function on_angle_changed(self, tdata)
-    if tdata.centre == nil or tdata.vertex == nil then
+    if tdata.center == nil or tdata.vertex == nil then
         return
     end
     local angle = nil
@@ -77,11 +77,11 @@ local function on_angle_config_change(self, tdata)
 end
 
 local function reset_polygon(self, tdata)
-    tdata.centre                   = nil
+    tdata.center                   = nil
     tdata.vertex                   = nil
     tdata.radius                   = nil
     tdata.theta                    = nil
-    self.elems.tp_centre_text.text = ""
+    self.elems.tp_center_text.text = ""
     self.elems.tp_vertex_text.text = ""
     self.elems.tp_radius_text.text = ""
     self.elems.tp_angle_text.text  = ""
@@ -91,7 +91,7 @@ local function reset_polygon(self, tdata)
 end
 
 local function on_polygon_changed(self, tdata)
-    if tdata.centre ~= nil and tdata.vertex ~= nil then
+    if tdata.center ~= nil and tdata.vertex ~= nil then
         if tdata.settings.show_tiles then
             tdata.tiles = painter.paint_polygon(self.player, tdata, true)
         else
@@ -101,13 +101,13 @@ local function on_polygon_changed(self, tdata)
     end
 end
 
-function tp_tab_shape.on_position_changed(self, position, surface, isCentre)
+function tp_tab_shape.on_position_changed(self, position, surface, isCenter)
     local tdata = self.tabs["shape"] --[[@as ShapeTabData]]
     if tdata == nil then
         return
     end
 
-    -- Reset the centre and vertex if the surface changes
+    -- Reset the center and vertex if the surface changes
     if surface ~= tdata.surface then
         reset_polygon(self, tdata)
         tdata.surface = surface
@@ -115,21 +115,21 @@ function tp_tab_shape.on_position_changed(self, position, surface, isCentre)
 
     local position_text = position_to_text(self, position)
 
-    if isCentre then
-        tdata.centre = position
-        self.elems.tp_centre_text.text = position_text
+    if isCenter then
+        tdata.center = position
+        self.elems.tp_center_text.text = position_text
     else
         tdata.vertex = position
         self.elems.tp_vertex_text.text = position_text
     end
     renderinglib.draw_polygon_points(tdata, self.player, true)
-    if tdata.centre ~= nil and tdata.vertex ~= nil then
+    if tdata.center ~= nil and tdata.vertex ~= nil then
         -- Enable the confirm button if the tile type is selected
         self.elems.tp_confirm_button.enabled = tdata.tile_type ~= nil
         -- Perform pre-calculations
-        tdata.radius = flib_position.distance(tdata.centre, tdata.vertex)
+        tdata.radius = flib_position.distance(tdata.center, tdata.vertex)
         self.elems.tp_radius_text.text = num_to_text(tdata.radius)
-        tdata.theta = polygon.angle(tdata.centre, tdata.vertex)
+        tdata.theta = polygon.angle(tdata.center, tdata.vertex)
         on_angle_changed(self, tdata)
         on_polygon_changed(self, tdata)
     else
@@ -184,7 +184,6 @@ end
 --- @param tdata ShapeTabData
 local function on_nsides_text_changed(e, self, tdata)
     local nsides = tonumber(e.element.text) or -1 -- -1 is an invalid value
-    game.print(nsides)
     if nsides > 9 then
         nsides = 9
     elseif nsides < 1 then
@@ -203,7 +202,7 @@ end
 local function on_shape_tile_select(e, self, tdata)
     local tile = e.element.elem_value --- @cast tile -SignalID
     tdata.tile_type = tile
-    self.elems.tp_confirm_button.enabled = tdata.centre ~= nil and tdata.vertex ~= nil and tile ~= nil
+    self.elems.tp_confirm_button.enabled = tdata.center ~= nil and tdata.vertex ~= nil and tile ~= nil
 end
 
 --- @param e EventData.on_gui_switch_state_changed
@@ -221,7 +220,7 @@ local function on_show_vertex_state_canged(e, self, tdata)
     tdata.settings.show_vertex = e.element.state
     if tdata.vertex ~= nil then
         renderinglib.draw_polygon_points(tdata, self.player, true)
-        if tdata.centre ~= nil then
+        if tdata.center ~= nil then
             renderinglib.draw_prospective_polygon(tdata, self.player)
         end
     end
@@ -231,8 +230,8 @@ end
 --- @param self Gui
 --- @param tdata ShapeTabData
 local function on_show_center_state_canged(e, self, tdata)
-    tdata.settings.show_centre = e.element.state
-    if tdata.centre ~= nil then
+    tdata.settings.show_center = e.element.state
+    if tdata.center ~= nil then
         renderinglib.draw_polygon_points(tdata, self.player, true)
         if tdata.vertex ~= nil then
             renderinglib.draw_prospective_polygon(tdata, self.player)
@@ -245,7 +244,7 @@ end
 --- @param tdata ShapeTabData
 local function on_show_radius_state_canged(e, self, tdata)
     tdata.settings.show_radius = e.element.state
-    if tdata.centre ~= nil and tdata.vertex ~= nil then
+    if tdata.center ~= nil and tdata.vertex ~= nil then
         renderinglib.draw_prospective_polygon(tdata, self.player)
     end
 end
@@ -255,7 +254,7 @@ end
 --- @param tdata ShapeTabData
 local function on_show_box_state_canged(e, self, tdata)
     tdata.settings.show_bounding_box = e.element.state
-    if tdata.centre ~= nil and tdata.vertex ~= nil then
+    if tdata.center ~= nil and tdata.vertex ~= nil then
         renderinglib.draw_prospective_polygon(tdata, self.player)
     end
 end
@@ -319,7 +318,7 @@ local function on_angle_text_changed(e, self, tdata)
         -- Should only be degrees mode
         tdata.theta = angle * flib_math.deg_to_rad * (invertY and -1 or 1)
     end
-    tdata.vertex = polygon.calculate_vertex(tdata.centre, tdata.radius, tdata.theta)
+    tdata.vertex = polygon.calculate_vertex(tdata.center, tdata.radius, tdata.theta)
     self.elems.tp_vertex_text.text = position_to_text(self, tdata.vertex)
     on_angle_changed(self, tdata)
     on_polygon_changed(self, tdata)
@@ -337,7 +336,7 @@ local function on_radius_text_changed(e, self, tdata)
     radius = radius ---@cast radius -string
     tdata.radius = radius
     self.elems.tp_angle_text.text = num_to_text(tdata.radius)
-    tdata.vertex = polygon.calculate_vertex(tdata.centre, tdata.radius, tdata.theta)
+    tdata.vertex = polygon.calculate_vertex(tdata.center, tdata.radius, tdata.theta)
     self.elems.tp_vertex_text.text = position_to_text(self, tdata.vertex)
     on_polygon_changed(self, tdata)
 end
@@ -506,12 +505,12 @@ local tab_def = {
                     },
                     {
                         type = "label",
-                        caption = { "gui.tp-centre" },
+                        caption = { "gui.tp-center" },
                         tooltip = { "gui.tp-tooltip-position-center" },
                     },
                     {
                         type = "textfield",
-                        name = "tp_centre_text",
+                        name = "tp_center_text",
                         text = "",
                         style = "long_number_textfield",
                         style_mods = { horizontal_align = "center" },
@@ -566,7 +565,7 @@ local tab_def = {
                         {
                             type = "checkbox",
                             style = "caption_checkbox",
-                            caption = { "gui.tp-show-guide", { "gui.tp-centre" } },
+                            caption = { "gui.tp-show-guide", { "gui.tp-center" } },
                             name = "tp_show_center",
                             state = true,
                             handler = { [defines.events.on_gui_checked_state_changed] = on_show_center_state_canged },
@@ -641,7 +640,7 @@ local tab_def = {
 tp_tab_shape.def = templates.tab_heading(tab_def)
 
 --- @class ShapeTabData
---- @field centre MapPosition|nil
+--- @field center MapPosition|nil
 --- @field vertex MapPosition|nil
 --- @field nsides integer
 --- @field radius number|nil
@@ -650,12 +649,12 @@ tp_tab_shape.def = templates.tab_heading(tab_def)
 --- @field surface uint|nil
 --- @field fill boolean
 --- @field renders uint64[]
---- @field settings table {show_vertex:boolean, show_centre:boolean, show_radius:boolean, show_bounding_box:boolean, angle_degrees:boolean, is_angle:boolean, show_tiles:boolean}
+--- @field settings table {show_vertex:boolean, show_center:boolean, show_radius:boolean, show_bounding_box:boolean, angle_degrees:boolean, is_angle:boolean, show_tiles:boolean}
 --- @field tiles Tile[]
 
 function tp_tab_shape.init(self)
     local tab = {
-        centre = nil,
+        center = nil,
         vertex = nil,
         surface = nil,
         nsides = 3,
@@ -666,7 +665,7 @@ function tp_tab_shape.init(self)
         renders = {},
         settings = {
             show_vertex = true,
-            show_centre = true,
+            show_center = true,
             show_radius = false,
             show_bounding_box = false,
             angle_degrees = true,
@@ -690,7 +689,7 @@ end
 
 function tp_tab_shape.refresh(self)
     local tdata = self.tabs["shape"] --[[@as ShapeTabData]]
-    if tdata.centre ~= nil and tdata.vertex ~= nil then
+    if tdata.center ~= nil and tdata.vertex ~= nil then
         renderinglib.draw_prospective_polygon(tdata, self.player)
     end
 end

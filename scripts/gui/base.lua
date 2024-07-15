@@ -1,14 +1,10 @@
 local flib_gui = require("__flib__.gui-lite")
 local flib_position = require("__flib__.position")
 
-local tab_entity = require("scripts.gui.tab-entity")
-local tab_shape = require("scripts.gui.tab-shape")
-local tab_fill = require("scripts.gui.tab-fill")
-
 local tabs = {
-    entity = tab_entity,
-    shape = tab_shape,
-    fill = tab_fill,
+    entity = require("scripts.gui.tab-entity"),
+    shape = require("scripts.gui.tab-shape"),
+    -- fill = require("scripts.gui.tab-fill"),
 }
 
 local templates = require("scripts.gui.templates")
@@ -17,7 +13,6 @@ local templates = require("scripts.gui.templates")
 --- @field elems table<string, LuaGuiElement>
 --- @field pinned boolean
 --- @field player LuaPlayer
---- @field inventory_selected string | nil
 --- @field mode string
 --- @field tabs { entity: EntityTabData, shape: ShapeTabData, fill: FillTabData }
 local gui = {}
@@ -34,11 +29,7 @@ function gui.on_configuration_changed()
 end
 
 --- @param e EventData.on_gui_click
-local function on_pin_button_click(e)
-    local self = global.gui[e.player_index]
-    if not self then
-        return
-    end
+local function on_pin_button_click(e, self)
     local pinned = not self.pinned
     e.element.sprite = pinned and "flib_pin_black" or "flib_pin_white"
     e.element.style = pinned and "flib_selected_frame_action_button" or "frame_action_button"
@@ -69,27 +60,21 @@ local function reset_location(self)
 end
 
 --- @param e EventData.on_gui_click
-local function on_titlebar_click(e)
-    local self = global.gui[e.player_index]
-    if not self or e.button ~= defines.mouse_button_type.middle then
+local function on_titlebar_click(e, self)
+    if e.button ~= defines.mouse_button_type.middle then
         return
     end
     reset_location(self)
 end
 
 --- @param e EventData.on_gui_click
-local function on_close_button_click(e)
-    local self = global.gui[e.player_index]
-    if not self then
-        return
-    end
+local function on_close_button_click(e, self)
     gui.hide(self)
 end
 
 --- @param e EventData.on_gui_closed
-local function on_entity_window_closed(e)
-    local self = global.gui[e.player_index]
-    if not self or self.pinned then
+local function on_main_window_closed(e, self)
+    if self.pinned then
         return
     end
     gui.hide(self)
@@ -125,7 +110,7 @@ function gui.build_gui(player)
         style = "invisible_frame",
         --- @diagnostic disable-next-line: missing-fields
         style_mods = { width = 448 },
-        handler = { [defines.events.on_gui_closed] = on_entity_window_closed },
+        handler = { [defines.events.on_gui_closed] = on_main_window_closed },
         -- Children
         -- Configuration Frame
         {
@@ -152,29 +137,6 @@ function gui.build_gui(player)
                 },
             },
         },
-        -- Player Inventory Frame
-        -- {
-        --     type = "frame",
-        --     direction = "vertical",
-        --     name = "tp_inventory_window",
-        --     style = "tp_inventory_frame",
-        --     templates.titlebar({ "gui.tp-title-inventory-window" }, "tp_main_window"),
-        --     {
-        --         type = "frame",
-        --         style = "inventory_frame",
-        --         {
-        --             type = "scroll-pane",
-        --             direction = "vertical",
-        --             style = "tp_inventory_scroll_pane",
-        --             {
-        --                 type = "table",
-        --                 name = "tp_inventory_table",
-        --                 style = "slot_table",
-        --                 column_count = 10,
-        --             },
-        --         },
-        --     },
-        -- },
     })
 
     for _, tab in pairs(tabs) do
@@ -219,79 +181,9 @@ end
 function gui.show(self)
     self.elems.tp_main_window.visible = true
     self.player.opened = self.elems.tp_main_window
-    gui.populate_inventory_table(self)
     local tab = tabs[self.mode]
     if tab.refresh then
         tab.refresh(self)
-    end
-end
-
---- @param e EventData.on_gui_click
-local function on_inventory_selection(e)
-    local player = game.get_player(e.player_index)
-    if player == nil then return end
-
-    local inventory = player.get_main_inventory()
-    if inventory == nil then return end
-
-    local item = e.element.tags.item --[[@as string]]
-    player.clear_cursor()
-    if item ~= nil then
-        local stack, _ = inventory.find_item_stack(item)
-        if stack ~= nil then
-            player.cursor_stack.transfer_stack(stack)
-        end
-    end
-end
-
---- @param self Gui
-function gui.populate_inventory_table(self)
-    local player = self.player
-    local inventory_table = self.elems.tp_inventory_table
-    if inventory_table == nil then return end
-    inventory_table.clear()
-
-    local inventory = player.get_main_inventory()
-    if inventory == nil then return end
-    -- quickly flash insert the cursor stack to get the correct inventory contents
-    inventory.insert(player.cursor_stack)
-    local contents = inventory.get_contents()
-    inventory.remove(player.cursor_stack)
-
-    for item, count in pairs(contents) do
-        local sprite = nil
-        if self.inventory_selected == item then
-            sprite = "utility/hand"
-            ---@diagnostic disable-next-line: cast-local-type
-            count = nil
-        else
-            sprite = "item/" .. item
-        end
-        local tags = {
-            item = item,
-            number = count,
-        }
-        flib_gui.add(inventory_table, {
-            type = "sprite-button",
-            sprite = sprite,
-            number = count,
-            style = "slot_button",
-            tags = tags,
-            handler = { [defines.events.on_gui_click] = on_inventory_selection }
-        })
-    end
-end
-
---- @param e EventData.on_mod_item_opened
-local function on_mod_item_opened(e)
-    if e.item.name == "tp-tool-entity" then
-        local player = game.get_player(e.player_index)
-        if player == nil then return end
-        -- local self = global.gui[player.index]
-        -- if not self then
-        local self = gui.build_gui(player)
-        -- end
-        gui.show(self)
     end
 end
 
@@ -300,19 +192,15 @@ local function on_player_removed(e)
     global.gui[e.player_index] = nil
 end
 
+--- @param e EventData.on_player_cursor_stack_changed
 local function on_player_cursor_stack_changed(e)
-    local player = game.get_player(e.player_index)
-    if player == nil then return end
-
     local self = global.gui[e.player_index]
-    if not self or self.pinned then
+    if not self then
         return
     end
-
-    self.inventory_selected = player.cursor_stack.valid_for_read and player.cursor_stack.name or nil
-
-    if self.player.opened == self.elems.tp_main_window then
-        gui.populate_inventory_table(self)
+    local cursor_stack = self.player.cursor_stack --[[@as LuaItemStack]]
+    if not cursor_stack.valid_for_read or not cursor_stack or string.sub(cursor_stack.name, 1, 8) ~= "tp-tool-" then
+        gui.hide(self)
     end
 end
 
@@ -323,7 +211,7 @@ local function on_header_tab_selected(e)
     -- try and filter out if this is not our tab
     local tabAndContent = e.element.tabs[e.element.selected_tab_index]
     local tags = tabAndContent.tab.tags
-    if tags == nil or tags.mod ~= "TilePainter" then return end
+    if tags == nil or tags.mod ~= "tile-painter" then return end
     local tab = tabs[self.mode]
     if tab.hide then
         tab.hide(self)
@@ -341,19 +229,58 @@ local function on_header_tab_selected(e)
     cursor_stack.set_stack({ name = tool, count = 1 })
 end
 
+--- @param e {player_index: uint}
+local function wrapper(e, handler)
+    local self = global.gui[e.player_index]
+    if self == nil then return end
+    handler(e, self)
+end
+
+--- @param e EventData.CustomInputEvent
+local function on_next_tool(e)
+    local self = global.gui[e.player_index]
+    if self == nil then return end
+    local tab_elems = self.elems.tp_header_tabs
+    local selected = tab_elems.selected_tab_index
+    if selected == #tab_elems.tabs then
+        selected = 1
+    else
+        selected = selected + 1
+    end
+    tab_elems.selected_tab_index = selected
+    ---@diagnostic disable-next-line: missing-fields
+    on_header_tab_selected({ player_index = e.player_index, element = tab_elems })
+end
+
+--- @param e EventData.CustomInputEvent
+local function on_previous_tool(e)
+    local self = global.gui[e.player_index]
+    if self == nil then return end
+    local tab_elems = self.elems.tp_header_tabs
+    local selected = tab_elems.selected_tab_index
+    if selected == 1 then
+        selected = #tab_elems.tabs
+    else
+        selected = selected - 1
+    end
+    tab_elems.selected_tab_index = selected
+    ---@diagnostic disable-next-line: missing-fields
+    on_header_tab_selected({ player_index = e.player_index, element = tab_elems })
+end
+
 flib_gui.add_handlers({
     on_pin_button_click = on_pin_button_click,
     on_close_button_click = on_close_button_click,
-    on_entity_window_closed = on_entity_window_closed,
-    on_inventory_selection = on_inventory_selection,
+    on_entity_window_closed = on_main_window_closed,
     on_titlebar_click = on_titlebar_click,
-})
+}, wrapper)
 
 gui.events = {
-    [defines.events.on_mod_item_opened] = on_mod_item_opened,
     [defines.events.on_player_removed] = on_player_removed,
     [defines.events.on_player_cursor_stack_changed] = on_player_cursor_stack_changed,
     [defines.events.on_gui_selected_tab_changed] = on_header_tab_selected,
+    ["tp-next-tool"] = on_next_tool,
+    ["tp-previous-tool"] = on_previous_tool,
 }
 
 return gui

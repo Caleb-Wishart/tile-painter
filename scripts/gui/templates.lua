@@ -74,7 +74,7 @@ function tp_gui_template.tab_heading(opts)
             name = "tp_tab_" .. opts.name,
             style = "tp_header_tab",
             caption = { "gui.tp-" .. opts.name },
-            tags = { mod = "TilePainter", name = opts.name },
+            tags = { mod = "tile-painter", name = opts.name },
         },
         content = {
             type = "frame",

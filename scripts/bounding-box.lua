@@ -158,10 +158,10 @@ function tp_bounding_box.convert_to_OBB(box)
     local midpoint = flib_boundingBox.center(box)
 
     -- Center the corners around the midpoint to apply orientation
-    local centre_box = flib_boundingBox.recenter_on(box, { x = 0, y = 0 })
+    local center_box = flib_boundingBox.recenter_on(box, { x = 0, y = 0 })
 
-    local cen_lt = centre_box.left_top
-    local cen_br = centre_box.right_bottom
+    local cen_lt = center_box.left_top
+    local cen_br = center_box.right_bottom
 
     -- Calculate position of the corners after rotation
     -- using calculations from applying a RotationMatrix.

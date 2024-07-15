@@ -9,7 +9,7 @@ local entity_tool = {
     icons = {
         { icon = data_util.black_image, icon_size = 1, scale = 64 },
         {
-            icon = "__TilePainter__/graphics/tool-entity-x32-white.png",
+            icon = "__tile-painter__/graphics/tool-entity-x32-white.png",
             icon_size = 32,
             mipmap_count = 2,
         },
@@ -36,7 +36,7 @@ local shape_tool = {
     icons = {
         { icon = data_util.black_image, icon_size = 1, scale = 64 },
         {
-            icon = "__TilePainter__/graphics/tool-shape-x32-white.png",
+            icon = "__tile-painter__/graphics/tool-shape-x32-white.png",
             icon_size = 32,
             mipmap_count = 2,
         },
@@ -63,7 +63,7 @@ local fill_tool = {
     icons = {
         { icon = data_util.black_image, icon_size = 1, scale = 64 },
         {
-            icon = "__TilePainter__/graphics/tool-fill-x32-white.png",
+            icon = "__tile-painter__/graphics/tool-fill-x32-white.png",
             icon_size = 32,
             mipmap_count = 2,
         },

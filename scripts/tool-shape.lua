@@ -2,7 +2,7 @@ local flib_position = require("__flib__.position")
 
 local gui = require("scripts.gui.tab-shape")
 
-local function centre_on_tile(position)
+local function center_on_tile(position)
     return flib_position.add(flib_position.to_tile(position), { 0.5, 0.5 })
 end
 
@@ -21,7 +21,7 @@ local function handle_fill_shape_click(e, isRight, isForced)
 
     local position = flib_position.ensure_explicit(e.cursor_position)
     if not isForced then
-        position = centre_on_tile(position)
+        position = center_on_tile(position)
     end
     local surface = game.get_player(e.player_index).surface.index
     gui.on_position_changed(self, position, surface, isRight)
@@ -56,5 +56,6 @@ tool.events = {
     ["tp-fill-shape-left-click-forced"] = on_left_click_forced,
     ["tp-fill-shape-right-click-forced"] = on_right_click_forced,
 }
+
 
 return tool

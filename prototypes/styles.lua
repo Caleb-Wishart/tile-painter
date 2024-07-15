@@ -108,7 +108,7 @@ styles["tp_header_tab"] = {
     parent = "tab",
     selected_graphical_set = {
         base = {
-            filename = "__TilePainter__/graphics/gui-tab.png",
+            filename = "__tile-painter__/graphics/gui-tab.png",
             position = { 0, 0 },
             corner_size = 8
         },

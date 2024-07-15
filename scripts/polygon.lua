@@ -28,22 +28,22 @@ function tp_polygon.shape_to_strip(shape)
     return strip
 end
 
--- Return the vertices of a polygon with n sides and a radius of r, centred about the given position, rotation of theta
+-- Return the vertices of a polygon with n sides and a radius of r, centerd about the given position, rotation of theta
 --- @param n integer
 --- @param r integer
---- @param centre MapPosition the centre of the polygon
+--- @param center MapPosition the center of the polygon
 --- @param theta number the rotation of the polygon
-function tp_polygon.polygon_targets(n, r, centre, theta)
-    return position_to_vertex_target(tp_polygon.polygon_vertices(n, r, centre, theta))
+function tp_polygon.polygon_targets(n, r, center, theta)
+    return position_to_vertex_target(tp_polygon.polygon_vertices(n, r, center, theta))
 end
 
--- Return the vertices of a polygon with n sides and a radius of r, centred about the given position, rotation of theta
+-- Return the vertices of a polygon with n sides and a radius of r, centerd about the given position, rotation of theta
 --- @param n integer
 --- @param r integer
---- @param centre MapPosition the centre of the polygon
+--- @param center MapPosition the center of the polygon
 --- @param theta number the rotation of the polygon
 --- @return MapPosition[]
-function tp_polygon.polygon_vertices(n, r, centre, theta)
+function tp_polygon.polygon_vertices(n, r, center, theta)
     local step = 2 * math.pi / n
 
     local rotation = 0
@@ -51,7 +51,7 @@ function tp_polygon.polygon_vertices(n, r, centre, theta)
     for i = 1, n do
         local x = r * math.cos(theta + rotation)
         local y = r * math.sin(theta + rotation)
-        vertices[i] = flib_position.add(centre, { x = x, y = y })
+        vertices[i] = flib_position.add(center, { x = x, y = y })
         rotation = rotation + step
     end
     return vertices

@@ -1,4 +1,4 @@
-local painter = require("scripts/painter")
+local painter = require("scripts.painter")
 
 --- @param e EventData.on_player_selected_area
 local function on_player_selected_area(e)
