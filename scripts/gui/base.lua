@@ -13,6 +13,7 @@ local templates = require("scripts.gui.templates")
 --- @field elems table<string, LuaGuiElement>
 --- @field pinned boolean
 --- @field player LuaPlayer
+--- @field inventory_selected string|nil
 --- @field mode string
 --- @field tabs { entity: EntityTabData, shape: ShapeTabData, fill: FillTabData }
 local gui = {}
@@ -174,7 +175,9 @@ function gui.hide(self)
     if self.player.opened == self.elems.tp_main_window then
         self.player.opened = nil
     end
-    self.player.clear_cursor()
+    if self.player.cursor_stack.valid_for_read and string.sub(self.player.cursor_stack.name, 1, 8) == "tp-tool-" then
+        self.player.clear_cursor()
+    end
 end
 
 --- @param self Gui
@@ -199,8 +202,16 @@ local function on_player_cursor_stack_changed(e)
         return
     end
     local cursor_stack = self.player.cursor_stack --[[@as LuaItemStack]]
-    if not cursor_stack.valid_for_read or not cursor_stack or string.sub(cursor_stack.name, 1, 8) ~= "tp-tool-" then
-        gui.hide(self)
+    local last_stack = self.inventory_selected
+    if last_stack == nil then last_stack = "" end
+    if cursor_stack.valid_for_read then
+        self.inventory_selected = cursor_stack.name
+        if cursor_stack.name ~= last_stack
+            and string.sub(last_stack, 1, 8) == "tp-tool-"
+            and string.sub(cursor_stack.name, 1, 8) ~= "tp-tool-"
+        then
+            gui.hide(self)
+        end
     end
 end
 
