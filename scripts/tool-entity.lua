@@ -17,14 +17,12 @@ local function on_selected_area(e, func)
     -- The first settings will have highest priority with tiles
     local tiles = { "tile_0", "tile_1", "tile_2" }
     local blacklist = {}
-    if not pdata.whitelist then
-        for _, setting in pairs(config) do
-            if setting.entity then
-                blacklist[setting.entity] = true
-            end
+    for _, setting in pairs(config) do
+        if setting.entity then
+            blacklist[setting.entity] = true
         end
     end
-    for i = 2, 0, -1 do -- 0, 1, 2
+    for i = 2, 0, -1 do -- 2, 1, 0
         local tile = tiles[i + 1]
         for j = #config, 1, -1 do
             local setting = config[j]
