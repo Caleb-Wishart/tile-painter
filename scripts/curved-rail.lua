@@ -19,7 +19,7 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 -- SOFTWARE.
 -- https://github.com/ElderAxe/LandfillEverything/blob/main/stdlib/curvedRail.lua
-local table = require("__flib__.table")
+local flib_table = require("__flib__.table")
 local direction = defines.direction
 
 local MASK_DIM = 12
@@ -40,7 +40,7 @@ local default_curve = {
 }
 
 local function flipLR(input)
-    local out = table.deep_copy(input)
+    local out = flib_table.deep_copy(input)
     local offset = MASK_DIM + 1
     for r = 1, MASK_DIM do
         for c = 1, MASK_DIM do
@@ -52,7 +52,7 @@ end
 
 
 local function flipDiag(input)
-    local out = table.deep_copy(input)
+    local out = flib_table.deep_copy(input)
     for r = 1, MASK_DIM do
         for c = 1, MASK_DIM do
             out[r][c] = input[c][r]
@@ -80,7 +80,7 @@ local function curved_rail_mask(dir, delta)
     if dir == nil then
         dir = direction.north
     end
-    local map = table.deep_copy(curveMap[dir])
+    local map = flib_table.deep_copy(curveMap[dir])
     local offset = math.floor(MASK_DIM / 2) + 1
     for r = 1, MASK_DIM do
         for c = 1, MASK_DIM do

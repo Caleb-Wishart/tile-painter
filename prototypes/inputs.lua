@@ -1,15 +1,62 @@
-local util = require("util")
-local mod_name = util.defines.mod_name
-
 data:extend {
     {
         type = "custom-input",
-        name = mod_name .. "-fill-shape-left-click",
-        key_sequence = "mouse-button-1"
+        name = "tp-fill-shape-left-click",
+        key_sequence = "mouse-button-1",
+        order = "ca",
     },
     {
         type = "custom-input",
-        name = mod_name .. "-fill-shape-right-click",
-        key_sequence = "mouse-button-2"
+        name = "tp-fill-shape-right-click",
+        key_sequence = "mouse-button-2",
+        order = "cb",
+    },
+    {
+        type = "custom-input",
+        name = "tp-fill-shape-left-click-forced",
+        key_sequence = "SHIFT + mouse-button-1",
+        order = "cc",
+    },
+    {
+        type = "custom-input",
+        name = "tp-fill-shape-right-click-forced",
+        key_sequence = "SHIFT + mouse-button-2",
+        order = "cd",
+    },
+    {
+        type = "custom-input",
+        name = "tp-get-tool",
+        key_sequence = "ALT + P",
+        action = "lua",
+        localised_name = { "tp-get-tool" },
+        order = "ab",
+    },
+    {
+        type = "custom-input",
+        name = "tp-next-tool",
+        key_sequence = "SHIFT + mouse-wheel-up",
+        controller_key_sequence = "controller-righttrigger + controller-dpup",
+        order = "aa",
+    },
+    {
+        type = "custom-input",
+        name = "tp-previous-tool",
+        key_sequence = "SHIFT + mouse-wheel-down",
+        controller_key_sequence = "controller-righttrigger + controller-dpdown",
+        order = "aa",
+    },
+    {
+        type = "custom-input",
+        name = "tp-next-tool-setting",
+        key_sequence = "CONTROL + SHIFT + mouse-wheel-up",
+        controller_key_sequence = "controller-lefttrigger + controller-righttrigger + controller-dpup",
+        order = "ba",
+    },
+    {
+        type = "custom-input",
+        name = "tp-previous-tool-setting",
+        key_sequence = "CONTROL + SHIFT + mouse-wheel-down",
+        controller_key_sequence = "controller-lefttrigger + controller-righttrigger + controller-dpdown",
+        order = "bb",
     },
 }

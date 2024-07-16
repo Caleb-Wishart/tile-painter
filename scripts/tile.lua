@@ -3,7 +3,7 @@ local flib_position = require("__flib__.position")
 --- @class tp_tile
 local tp_tile = {}
 
----@param tiles LuaTile[] tiles to get adjacent tiles for
+--- @param tiles LuaTile[] tiles to get adjacent tiles for
 function tp_tile.get_adjacent_tiles(tiles)
     local function hash(position)
         -- https://forums.factorio.com/viewtopic.php?t=41879

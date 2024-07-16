@@ -1,7 +1,7 @@
 local flib_migration = require("__flib__.migration")
 
 local by_version = {
-    ["0.1.0"] = function()
+    ["1.0.0"] = function()
         for _, player in pairs(game.players) do
             for _, child in pairs(player.gui.screen.children) do
                 if child.get_mod() == "tile-painter" then
@@ -9,7 +9,7 @@ local by_version = {
                 end
             end
         end
-        global = { gui = {}, players = {} }
+        global = { gui = {} }
     end,
 }
 

@@ -1,4 +1,4 @@
 require("prototypes.styles")
-require("prototypes.tools")
+require("prototypes.items")
 require("prototypes.shortcuts")
 require("prototypes.inputs")

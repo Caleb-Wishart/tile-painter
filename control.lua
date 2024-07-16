@@ -5,7 +5,13 @@ handler.add_libraries({
 
   require("__flib__.gui-lite"),
 
-  require("scripts.gui"),
+  require("scripts.gui.base"),
+  require("scripts.gui.templates"),
+  require("scripts.gui.tab-entity"),
+  require("scripts.gui.tab-shape"),
+
   require("scripts.tool-entity"),
   require("scripts.tool-shape"),
+
+  require("scripts.shortcut"),
 })
