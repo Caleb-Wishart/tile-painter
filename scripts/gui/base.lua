@@ -256,6 +256,10 @@ end
 local function on_next_tool(e)
     local self = global.gui[e.player_index]
     if self == nil then return end
+    local cursor_stack = self.player.cursor_stack --[[@as LuaItemStack]]
+    if not cursor_stack.valid_for_read or cursor_stack.name:sub(1, 8) ~= "tp-tool-" then
+        return
+    end
     local tab_elems = self.elems.tp_header_tabs
     local selected = tab_elems.selected_tab_index or 1
     if selected == #tab_elems.tabs then
@@ -272,6 +276,10 @@ end
 local function on_previous_tool(e)
     local self = global.gui[e.player_index]
     if self == nil then return end
+    local cursor_stack = self.player.cursor_stack --[[@as LuaItemStack]]
+    if not cursor_stack.valid_for_read or cursor_stack.name:sub(1, 8) ~= "tp-tool-" then
+        return
+    end
     local tab_elems = self.elems.tp_header_tabs
     local selected = tab_elems.selected_tab_index or 1
     if selected == 1 then
@@ -288,6 +296,10 @@ end
 local function on_next_setting(e)
     local self = global.gui[e.player_index]
     if self == nil then return end
+    local cursor_stack = self.player.cursor_stack --[[@as LuaItemStack]]
+    if not cursor_stack.valid_for_read or cursor_stack.name:sub(1, 8) ~= "tp-tool-" then
+        return
+    end
     local tab = tabs[self.mode]
     if tab.on_next_setting then
         ---@diagnostic disable-next-line: param-type-mismatch
@@ -300,6 +312,10 @@ end
 local function on_previous_setting(e)
     local self = global.gui[e.player_index]
     if self == nil then return end
+    local cursor_stack = self.player.cursor_stack --[[@as LuaItemStack]]
+    if not cursor_stack.valid_for_read or cursor_stack.name:sub(1, 8) ~= "tp-tool-" then
+        return
+    end
     local tab = tabs[self.mode]
     if tab.on_previous_setting then
         ---@diagnostic disable-next-line: param-type-mismatch
