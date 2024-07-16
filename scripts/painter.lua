@@ -148,7 +148,7 @@ function tp_painter.paint_polygon(player, tdata, whatIf)
     if whatIf then
         return tiles
     end
-    tp_painter.remove_tiles(tiles, surface, tdata.tile_type, player)
+    tp_painter.paint_tiles(tiles, surface, tdata.tile_type, player.force)
 end
 
 --- @param tiles LuaTile[]
