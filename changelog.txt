@@ -1,5 +1,18 @@
 ---------------------------------------------------------------------------------------------------
-Version: 0.1.0
+Version: 1.0.0
+Date: 2024.07.16
+  Major Features:
+    - Shape Tool
+  Features:
+    - Entity Tool now has up to 10 different presets
+    - Entity Tool now supports Export/Import
+    - Entity Tool Reverse Select to remove Tiles
+    - New icons for tools and shortcuts
+  Gui:
+    - Remove Mod Openable Item in favor of openning when holding the item.
+    - Tools split into separate tabs for better organization.
+---------------------------------------------------------------------------------------------------
+Version: 0.0.1
 Date: 2024.06.02
   Info:
     - Initial Beta Release.
