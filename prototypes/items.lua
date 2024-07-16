@@ -22,9 +22,17 @@ local entity_tool = {
     selection_cursor_box_type = "entity",
     selection_color = { r = 0.72, g = 0.45, b = 0.2, a = 1 },
 
+    reverse_selection_mode = { "nothing" },
+    reverse_selection_cursor_box_type = "entity",
+    reverse_selection_color = { 0, 0, 0, 0 },
+
     alt_selection_mode = { "buildable-type", "same-force" },
-    alt_selection_cursor_box_type = "entity",
-    alt_selection_color = { r = 0.72, g = 0.22, b = 0.1, a = 1 },
+    alt_selection_cursor_box_type = "not-allowed",
+    alt_selection_color = { r = 0.72, g = 0.2, b = 0.2, a = 1 },
+
+    alt_reverse_selection_mode = { "nothing" },
+    alt_reverse_selection_cursor_box_type = "not-allowed",
+    alt_reverse_selection_color = { 0, 0, 0, 0 },
 }
 
 local shape_tool = {
@@ -48,6 +56,10 @@ local shape_tool = {
     selection_mode = { "nothing" },
     selection_cursor_box_type = "entity",
     selection_color = { 0, 0, 0, 0 },
+
+    reverse_selection_mode = { "nothing" },
+    reverse_selection_cursor_box_type = "entity",
+    reverse_selection_color = { 0, 0, 0, 0 },
 
     alt_selection_mode = { "nothing" },
     alt_selection_cursor_box_type = "entity",

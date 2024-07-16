@@ -14,38 +14,28 @@ local get_player_settings = require("util").get_player_settings
 --- @class tp_painter
 local tp_painter = {}
 
---- @param player LuaPlayer the player to paint the tiles for
---- @param entity LuaEntity reference entity
---- @param tile_type string the tile to ghost
---- @param delta number the delta to grow the bounding box(es) by
---- @param whatIf boolean? if true, don't create tile ghosts and return the tiles
-function tp_painter.paint_entity(player, entity, tile_type, delta, whatIf)
+local function get_entity_tiles(player, entity, delta)
     local surface = entity.surface
     local box = bounding_box.ensure_explicit(entity.bounding_box)
     local search_boxes = { box }
-
-    local force = player.force ---@cast force LuaForce
-
     if get_player_settings(player.index, "entity-smooth-curved-rail") and entity.name == "curved-rail" then
         -- Use a special mapping
-        local tiles = curved_rail_mask(entity.direction, delta)
-        local pos = entity.position
-        for i = #tiles, 1, -1 do
-            local position = {
-                x = pos.x + tiles[i].x,
-                y = pos.y + tiles[i].y,
-            }
-            surfacelib.create_tile_ghost(surface, tile_type, position, force)
+        local tiles = {}
+        for _, position in pairs(curved_rail_mask(entity.direction, delta)) do
+            local pos = flib_position.add(entity.position, position)
+            local tile = surface.get_tile(pos)
+            tiles[#tiles + 1] = tile
         end
-        return
+        return tiles
     end
 
     if entity.secondary_bounding_box ~= nil then
         table.insert(search_boxes, bounding_box.ensure_explicit(entity.secondary_bounding_box))
     end
+    local tiles = {}
     for i = 1, #search_boxes do
         local sbox = search_boxes[i]
-        local tiles = nil
+        local temp_tiles = nil
         if sbox.orientation ~= flib_orientation.north
             and sbox.orientation ~= flib_orientation.east
             and sbox.orientation ~= flib_orientation.south
@@ -53,25 +43,52 @@ function tp_painter.paint_entity(player, entity, tile_type, delta, whatIf)
             -- If the bounding box has an orientation and isn't a simple rectangle,
             -- we can't safely resize it and have to get adjacent tiles
             local area = sbox
-            local search_param = { has_hidden_tile = false, area = area }
-            tiles = surfacelib.find_tiles_filtered(surface, search_param)
+            local search_param = { area = area }
+            temp_tiles = surfacelib.find_tiles_filtered(surface, search_param)
             for _ = 1, delta do
-                local adj_tiles = tilelib.get_adjacent_tiles(tiles)
+                local adj_tiles = tilelib.get_adjacent_tiles(temp_tiles)
                 for j = 1, #adj_tiles do
-                    tiles[#tiles + 1] = adj_tiles[j]
+                    temp_tiles[#temp_tiles + 1] = adj_tiles[j]
                 end
             end
         else
             -- It is more efficient to resize the bounding box and get all tiles in the area
             local area = bounding_box.resize(sbox, delta)
-            local search_param = { has_hidden_tile = false, area = area }
-            tiles = surfacelib.find_tiles_filtered(surface, search_param)
+            local search_param = { area = area }
+            temp_tiles = surfacelib.find_tiles_filtered(surface, search_param)
         end
-        if whatIf then
-            return tiles
+        for j = 1, #temp_tiles do
+            tiles[#tiles + 1] = temp_tiles[j]
         end
-        tp_painter.paint_tiles(tiles, surface, tile_type, force)
     end
+    return tiles
+end
+
+--- @param player LuaPlayer the player to paint the tiles for
+--- @param entity LuaEntity reference entity
+--- @param tile_type string the tile to ghost
+--- @param delta number the delta to grow the bounding box(es) by
+--- @param whatIf boolean? if true, don't create tile ghosts and return the tiles
+function tp_painter.paint_entity(player, entity, tile_type, delta, whatIf)
+    local tiles = get_entity_tiles(player, entity, delta)
+    if whatIf then
+        return tiles
+    end
+    local force = player.force ---@cast force LuaForce
+    tp_painter.paint_tiles(tiles, entity.surface, tile_type, force)
+end
+
+--- @param player LuaPlayer the player to remove the tiles for
+--- @param entity LuaEntity reference entity
+--- @param tile_type string the tile to remove
+--- @param delta number the delta to grow the bounding box(es) by
+--- @param whatIf boolean? if true, don't create tile ghosts and return the tiles
+function tp_painter.remove_paint_entity(player, entity, tile_type, delta, whatIf)
+    local tiles = get_entity_tiles(player, entity, delta)
+    if whatIf then
+        return tiles
+    end
+    tp_painter.remove_tiles(tiles, entity.surface, tile_type, player)
 end
 
 --- @param player LuaPlayer the player to paint the tiles for
@@ -131,7 +148,7 @@ function tp_painter.paint_polygon(player, tdata, whatIf)
     if whatIf then
         return tiles
     end
-    tp_painter.paint_tiles(tiles, surface, tdata.tile_type, player.force)
+    tp_painter.remove_tiles(tiles, surface, tdata.tile_type, player)
 end
 
 --- @param tiles LuaTile[]
@@ -161,6 +178,12 @@ end
 function tp_painter.paint_tiles(tiles, surface, tile_type, force)
     for i = 1, #tiles do
         surfacelib.create_tile_ghost(surface, tile_type, tiles[i].position, force)
+    end
+end
+
+function tp_painter.remove_tiles(tiles, surface, tile_type, player)
+    for i = 1, #tiles do
+        surfacelib.remove_tile(surface, tile_type, tiles[i].position, player)
     end
 end
 

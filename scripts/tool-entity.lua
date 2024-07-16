@@ -1,7 +1,7 @@
 local painter = require("scripts.painter")
 
---- @param e EventData.on_player_selected_area
-local function on_player_selected_area(e)
+--- @param e EventData.on_player_selected_area | EventData.on_player_reverse_selected_area
+local function on_selected_area(e, func)
     if e.item ~= "tp-tool-entity" then return end
     local p = game.get_player(e.player_index) ---@cast p -nil
     local self = global.gui[p.index]
@@ -24,7 +24,7 @@ local function on_player_selected_area(e)
             end
         end
     end
-    for i = 0, 2 do -- 0, 1, 2
+    for i = 2, 0, -1 do -- 0, 1, 2
         local tile = tiles[i + 1]
         for j = #config, 1, -1 do
             local setting = config[j]
@@ -43,7 +43,7 @@ local function on_player_selected_area(e)
                     end
                 end
                 for _, entity in pairs(entities) do
-                    painter.paint_entity(p, entity, setting[tile], i)
+                    func(p, entity, setting[tile], i)
                 end
             end
             -- Short Circuit
@@ -54,10 +54,15 @@ local function on_player_selected_area(e)
     end
 end
 
+--- @param e EventData.on_player_selected_area
+local function on_player_selected_area(e)
+    on_selected_area(e, painter.paint_entity)
+end
 
---- @param e EventData.on_player_reverse_selected_area
-local function on_player_reverse_selected_area(e)
-    return
+
+--- @param e EventData.on_player_alt_selected_area
+local function on_player_alt_selected_area(e)
+    on_selected_area(e, painter.remove_paint_entity)
 end
 
 --- @class ToolEntity
@@ -65,6 +70,7 @@ local tool = {}
 
 tool.events = {
     [defines.events.on_player_selected_area] = on_player_selected_area,
+    [defines.events.on_player_alt_selected_area] = on_player_alt_selected_area,
 }
 
 return tool
