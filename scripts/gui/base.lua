@@ -175,7 +175,8 @@ function gui.hide(self)
     if self.player.opened == self.elems.tp_main_window then
         self.player.opened = nil
     end
-    if self.player.cursor_stack.valid_for_read and self.player.cursor_stack.name:sub(1, 8) == "tp-tool-" then
+    local cursor_stack = self.player.cursor_stack
+    if cursor_stack and cursor_stack.valid_for_read and cursor_stack.name:sub(1, 8) == "tp-tool-" then
         self.player.clear_cursor()
     end
 end
@@ -204,7 +205,7 @@ local function on_player_cursor_stack_changed(e)
     local cursor_stack = self.player.cursor_stack --[[@as LuaItemStack]]
     local last_stack = self.inventory_selected
     if last_stack == nil then last_stack = "" end
-    if cursor_stack.valid and not cursor_stack.valid_for_read then
+    if cursor_stack == nil or (cursor_stack.valid and not cursor_stack.valid_for_read) then
         self.inventory_selected = nil
         gui.hide(self)
         return
@@ -238,7 +239,7 @@ local function on_header_tab_selected(e)
         tab.refresh(self)
     end
     local cursor_stack = self.player.cursor_stack
-    if not cursor_stack or not self.player.clear_cursor() then
+    if cursor_stack == nil or not self.player.clear_cursor() then
         return
     end
     local tool = "tp-tool-" .. self.mode
@@ -257,7 +258,7 @@ local function on_next_tool(e)
     local self = global.gui[e.player_index]
     if self == nil then return end
     local cursor_stack = self.player.cursor_stack --[[@as LuaItemStack]]
-    if not cursor_stack.valid_for_read or cursor_stack.name:sub(1, 8) ~= "tp-tool-" then
+    if cursor_stack == nil or not cursor_stack.valid_for_read or cursor_stack.name:sub(1, 8) ~= "tp-tool-" then
         return
     end
     local tab_elems = self.elems.tp_header_tabs
@@ -277,7 +278,7 @@ local function on_previous_tool(e)
     local self = global.gui[e.player_index]
     if self == nil then return end
     local cursor_stack = self.player.cursor_stack --[[@as LuaItemStack]]
-    if not cursor_stack.valid_for_read or cursor_stack.name:sub(1, 8) ~= "tp-tool-" then
+    if cursor_stack == nil or not cursor_stack.valid_for_read or cursor_stack.name:sub(1, 8) ~= "tp-tool-" then
         return
     end
     local tab_elems = self.elems.tp_header_tabs
@@ -297,7 +298,7 @@ local function on_next_setting(e)
     local self = global.gui[e.player_index]
     if self == nil then return end
     local cursor_stack = self.player.cursor_stack --[[@as LuaItemStack]]
-    if not cursor_stack.valid_for_read or cursor_stack.name:sub(1, 8) ~= "tp-tool-" then
+    if cursor_stack == nil or not cursor_stack.valid_for_read or cursor_stack.name:sub(1, 8) ~= "tp-tool-" then
         return
     end
     local tab = tabs[self.mode]
@@ -313,7 +314,7 @@ local function on_previous_setting(e)
     local self = global.gui[e.player_index]
     if self == nil then return end
     local cursor_stack = self.player.cursor_stack --[[@as LuaItemStack]]
-    if not cursor_stack.valid_for_read or cursor_stack.name:sub(1, 8) ~= "tp-tool-" then
+    if cursor_stack == nil or not cursor_stack.valid_for_read or cursor_stack.name:sub(1, 8) ~= "tp-tool-" then
         return
     end
     local tab = tabs[self.mode]

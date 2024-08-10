@@ -9,7 +9,11 @@ end
 --- @param e EventData.CustomInputEvent
 local function handle_fill_shape_click(e, isRight, isForced)
     local player = game.get_player(e.player_index)
-    if player == nil or (player.cursor_stack.valid_for_read and player.cursor_stack.name ~= "tp-tool-shape") then
+    if player == nil then
+        return
+    end
+    local cursor_stack = player.cursor_stack
+    if cursor_stack == nil or not cursor_stack.valid_for_read or cursor_stack.name ~= "tp-tool-shape" then
         return
     end
     local self = global.gui[e.player_index]
