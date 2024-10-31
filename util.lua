@@ -13,7 +13,7 @@ function tp_util.print(msg, obj)
     if obj == nil then
         game.print(msg)
     else
-        game.print(msg .. game.table_to_json(obj or {}))
+        game.print(msg .. helpers.table_to_json(obj or {}))
     end
 end
 

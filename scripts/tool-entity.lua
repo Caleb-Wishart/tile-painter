@@ -4,7 +4,7 @@ local painter = require("scripts.painter")
 local function on_selected_area(e, func)
     if e.item ~= "tp-tool-entity" then return end
     local p = game.get_player(e.player_index) ---@cast p -nil
-    local self = global.gui[p.index]
+    local self = storage.gui[p.index]
     if self == nil then return end
     local tdata = self.tabs["entity"]
     if tdata == nil then return end

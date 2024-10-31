@@ -1,4 +1,4 @@
-local flib_gui = require("__flib__.gui-lite")
+local flib_gui = require("__flib__.gui")
 local flib_position = require("__flib__.position")
 local flib_math = require("__flib__.math")
 
@@ -16,7 +16,7 @@ local MIN_NSIDES = 1
 local tp_tab_shape = {}
 
 local function num_to_text(num, opts)
-    return tostring(flib_math.round_to(num, opts and opts.round or 2))
+    return tostring(flib_math.round(num, opts and opts.round or 0.01))
 end
 
 local function position_to_text(self, position)
@@ -40,15 +40,15 @@ local function on_angle_changed(self, tdata)
             if angle < delta or 2 * math.pi - angle < delta then
                 angle = "0"
             elseif angle % math.pi < delta then
-                angle = num_to_text(angle / math.pi, { round = 0 }) .. "π"
+                angle = num_to_text(angle / math.pi, { round = 1 }) .. "π"
             elseif angle % (math.pi / 2) < delta then
-                angle = num_to_text(angle / (math.pi / 2), { round = 0 }) .. "π/2"
+                angle = num_to_text(angle / (math.pi / 2), { round = 1 }) .. "π/2"
             elseif angle % (math.pi / 3) < delta then
-                angle = num_to_text(angle / (math.pi / 3), { round = 0 }) .. "π/3"
+                angle = num_to_text(angle / (math.pi / 3), { round = 1 }) .. "π/3"
             elseif angle % (math.pi / 4) < delta then
-                angle = num_to_text(angle / (math.pi / 4), { round = 0 }) .. "π/4"
+                angle = num_to_text(angle / (math.pi / 4), { round = 1 }) .. "π/4"
             elseif angle % (math.pi / 6) < delta then
-                angle = num_to_text(angle / (math.pi / 6), { round = 0 }) .. "π/6"
+                angle = num_to_text(angle / (math.pi / 6), { round = 1 }) .. "π/6"
             else
                 angle = num_to_text(angle)
             end
@@ -141,7 +141,7 @@ function tp_tab_shape.on_position_changed(self, position, surface, isCenter)
 end
 
 --- @param e defines.events.on_gui_click
---- @param self Gui
+--- @param self TPGui
 --- @param tdata ShapeTabData
 local function on_confirm_click(e, self, tdata)
     if tdata.settings.show_tiles then
@@ -153,7 +153,7 @@ local function on_confirm_click(e, self, tdata)
     reset_polygon(self, tdata)
 end
 
---- @param self Gui
+--- @param self TPGui
 --- @param tdata ShapeTabData
 local function on_nsides_changed(self, tdata)
     local polygons = {
@@ -173,7 +173,7 @@ local function on_nsides_changed(self, tdata)
 end
 
 --- @param e EventData.on_gui_value_changed
---- @param self Gui
+--- @param self TPGui
 --- @param tdata ShapeTabData
 local function on_nsides_slider_changed(e, self, tdata)
     tdata.nsides = e.element.slider_value
@@ -183,7 +183,7 @@ local function on_nsides_slider_changed(e, self, tdata)
 end
 
 --- @param e EventData.on_gui_confirmed
---- @param self Gui
+--- @param self TPGui
 --- @param tdata ShapeTabData
 local function on_nsides_text_changed(e, self, tdata)
     local nsides = tonumber(e.element.text) or -1 -- -1 is an invalid value
@@ -200,16 +200,16 @@ local function on_nsides_text_changed(e, self, tdata)
 end
 
 --- @param e EventData.on_gui_elem_changed
---- @param self Gui
+--- @param self TPGui
 --- @param tdata ShapeTabData
 local function on_shape_tile_select(e, self, tdata)
-    local tile = e.element.elem_value --- @cast tile -SignalID
+    local tile = e.element.elem_value --- @cast tile -SignalID|table
     tdata.tile_type = tile
     self.elems.tp_confirm_button.enabled = tdata.center ~= nil and tdata.vertex ~= nil and tile ~= nil
 end
 
 --- @param e EventData.on_gui_switch_state_changed
---- @param self Gui
+--- @param self TPGui
 --- @param tdata ShapeTabData
 local function on_shape_mode_switch(e, self, tdata)
     tdata.fill = e.element.switch_state == "left"
@@ -217,7 +217,7 @@ local function on_shape_mode_switch(e, self, tdata)
 end
 
 --- @param e EventData.on_gui_checked_state_changed
---- @param self Gui
+--- @param self TPGui
 --- @param tdata ShapeTabData
 local function on_show_vertex_state_canged(e, self, tdata)
     tdata.settings.show_vertex = e.element.state
@@ -230,7 +230,7 @@ local function on_show_vertex_state_canged(e, self, tdata)
 end
 
 --- @param e EventData.on_gui_checked_state_changed
---- @param self Gui
+--- @param self TPGui
 --- @param tdata ShapeTabData
 local function on_show_center_state_canged(e, self, tdata)
     tdata.settings.show_center = e.element.state
@@ -243,7 +243,7 @@ local function on_show_center_state_canged(e, self, tdata)
 end
 
 --- @param e EventData.on_gui_checked_state_changed
---- @param self Gui
+--- @param self TPGui
 --- @param tdata ShapeTabData
 local function on_show_radius_state_canged(e, self, tdata)
     tdata.settings.show_radius = e.element.state
@@ -253,7 +253,7 @@ local function on_show_radius_state_canged(e, self, tdata)
 end
 
 --- @param e EventData.on_gui_checked_state_changed
---- @param self Gui
+--- @param self TPGui
 --- @param tdata ShapeTabData
 local function on_show_box_state_canged(e, self, tdata)
     tdata.settings.show_bounding_box = e.element.state
@@ -263,7 +263,7 @@ local function on_show_box_state_canged(e, self, tdata)
 end
 
 --- @param e EventData.on_gui_checked_state_changed
---- @param self Gui
+--- @param self TPGui
 --- @param tdata ShapeTabData
 local function on_show_tiles_state_canged(e, self, tdata)
     tdata.settings.show_tiles = e.element.state
@@ -271,7 +271,7 @@ local function on_show_tiles_state_canged(e, self, tdata)
 end
 
 --- @param e EventData.on_gui_switch_state_changed
---- @param self Gui
+--- @param self TPGui
 --- @param tdata ShapeTabData
 local function on_shape_angle_switch(e, self, tdata)
     local is_angle = e.element.switch_state == "left"
@@ -280,7 +280,7 @@ local function on_shape_angle_switch(e, self, tdata)
 end
 
 --- @param e EventData.on_gui_checked_state_changed
---- @param self Gui
+--- @param self TPGui
 --- @param tdata ShapeTabData
 local function on_show_angle_degrees_changed(e, self, tdata)
     tdata.settings.angle_degrees = e.element.state
@@ -289,7 +289,7 @@ local function on_show_angle_degrees_changed(e, self, tdata)
 end
 
 --- @param e EventData.on_gui_checked_state_changed
---- @param self Gui
+--- @param self TPGui
 --- @param tdata ShapeTabData
 local function on_show_angle_radians_changed(e, self, tdata)
     tdata.settings.angle_degrees = not e.element.state
@@ -298,14 +298,14 @@ local function on_show_angle_radians_changed(e, self, tdata)
 end
 
 --- @param e EventData.on_gui_click
---- @param self Gui
+--- @param self TPGui
 --- @param tdata ShapeTabData
 local function on_shape_reset_click(e, self, tdata)
     reset_polygon(self, tdata)
 end
 
 --- @param e EventData.on_gui_confirmed
---- @param self Gui
+--- @param self TPGui
 --- @param tdata ShapeTabData
 local function on_angle_text_changed(e, self, tdata)
     local angle = tonumber(e.element.text) or "NaN"
@@ -328,7 +328,7 @@ local function on_angle_text_changed(e, self, tdata)
 end
 
 --- @param e EventData.on_gui_confirmed
---- @param self Gui
+--- @param self TPGui
 --- @param tdata ShapeTabData
 local function on_radius_text_changed(e, self, tdata)
     local radius = tonumber(e.element.text) or "NaN"
@@ -384,12 +384,12 @@ local tab_def = {
         {
             type = "flow",
             direction = "vertical",
-            style_mods = { vertically_stretchable = "on", vertical_spacing = 4, },
+            style_mods = { vertically_stretchable = true, vertical_spacing = 4 },
             {
                 type = "frame",
                 direction = "vertical",
-                style = "bordered_frame_with_extra_side_margins",
-                style_mods = { horizontally_stretchable = "on" },
+                style = "bordered_frame",
+                style_mods = { horizontally_stretchable = true },
                 {
                     type = "flow",
                     direction = "horizontal",
@@ -444,8 +444,8 @@ local tab_def = {
             {
                 type = "frame",
                 direction = "vertical",
-                style = "bordered_frame_with_extra_side_margins",
-                style_mods = { horizontally_stretchable = "on" },
+                style = "bordered_frame",
+                style_mods = { horizontally_stretchable = true },
                 {
                     type = "flow",
                     direction = "horizontal",
@@ -546,8 +546,8 @@ local tab_def = {
             {
                 type = "frame",
                 direction = "vertical",
-                style = "bordered_frame_with_extra_side_margins",
-                style_mods = { horizontally_stretchable = "on" },
+                style = "bordered_frame",
+                style_mods = { horizontally_stretchable = true },
                 {
                     type = "label",
                     style = "caption_label",
@@ -657,7 +657,7 @@ tp_tab_shape.def = templates.tab_heading(tab_def)
 --- @field settings table {show_vertex:boolean, show_center:boolean, show_radius:boolean, show_bounding_box:boolean, angle_degrees:boolean, is_angle:boolean, show_tiles:boolean}
 --- @field tiles Tile[]
 
---- @param self Gui
+--- @param self TPGui
 function tp_tab_shape.init(self)
     local tab = {
         center = nil,
@@ -688,13 +688,13 @@ function tp_tab_shape.init(self)
     self.elems.tp_shape_config_table.style.column_alignments[4] = "right"
 end
 
---- @param self Gui
+--- @param self TPGui
 function tp_tab_shape.hide(self)
     local tdata = self.tabs["shape"] --[[@as ShapeTabData]]
     renderinglib.destroy_renders(tdata)
 end
 
---- @param self Gui
+--- @param self TPGui
 function tp_tab_shape.refresh(self)
     local tdata = self.tabs["shape"] --[[@as ShapeTabData]]
     if tdata.center ~= nil and tdata.vertex ~= nil then
@@ -702,7 +702,7 @@ function tp_tab_shape.refresh(self)
     end
 end
 
---- @param self Gui
+--- @param self TPGui
 --- @param tdata ShapeTabData
 function tp_tab_shape.on_next_setting(self, tdata)
     tdata.nsides = tdata.nsides + 1
@@ -714,7 +714,7 @@ function tp_tab_shape.on_next_setting(self, tdata)
     on_nsides_changed(self, tdata)
 end
 
---- @param self Gui
+--- @param self TPGui
 --- @param tdata ShapeTabData
 function tp_tab_shape.on_previous_setting(self, tdata)
     tdata.nsides = tdata.nsides - 1

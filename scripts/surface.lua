@@ -63,7 +63,7 @@ end
 ---
 --- If no `area` or `position` and `radius` is given, the entire surface is searched. If `position` and `radius` are given, only tiles within the radius of the position are included.
 --- @param surface LuaSurface the surface to find tiles on
---- @param param LuaSurface.find_tiles_filtered_param
+--- @param param TileSearchFilters
 --- @return (LuaTile)[]
 function tp_surface.find_tiles_filtered(surface, param)
     local area = param.area

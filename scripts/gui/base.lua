@@ -1,4 +1,4 @@
-local flib_gui = require("__flib__.gui-lite")
+local flib_gui = require("__flib__.gui")
 local flib_position = require("__flib__.position")
 
 local tabs = {
@@ -9,7 +9,7 @@ local tabs = {
 
 local templates = require("scripts.gui.templates")
 
---- @class Gui
+--- @class TPGui
 --- @field elems table<string, LuaGuiElement>
 --- @field pinned boolean
 --- @field player LuaPlayer
@@ -19,8 +19,8 @@ local templates = require("scripts.gui.templates")
 local gui = {}
 
 function gui.on_init()
-    --- @type table<integer, Gui>
-    global.gui = {}
+    --- @type table<integer, TPGui>
+    storage.gui = {}
 end
 
 function gui.on_configuration_changed()
@@ -32,9 +32,8 @@ end
 --- @param e EventData.on_gui_click
 local function on_pin_button_click(e, self)
     local pinned = not self.pinned
-    e.element.sprite = pinned and "flib_pin_black" or "flib_pin_white"
-    e.element.style = pinned and "flib_selected_frame_action_button" or "frame_action_button"
     self.pinned = pinned
+    e.element.toggled = pinned
     if pinned then
         self.player.opened = nil
         self.elems.close_button.tooltip = { "gui.close" }
@@ -48,7 +47,7 @@ end
 --- @type GuiLocation
 local top_left_location = { x = 15, y = 58 + 15 }
 
---- @param self Gui
+--- @param self TPGui
 local function reset_location(self)
     local value = self.player.mod_settings["tp-default-gui-location"].value
     local window = self.elems.tp_main_window
@@ -83,14 +82,14 @@ end
 
 --- @param player LuaPlayer
 function gui.destroy_gui(player)
-    if global.gui == nil then
+    if storage.gui == nil then
         return
     end
-    local self = global.gui[player.index]
+    local self = storage.gui[player.index]
     if not self then
         return
     end
-    global.gui[player.index] = nil
+    storage.gui[player.index] = nil
     local window = self.elems.tp_main_window
     if not window.valid then
         return
@@ -99,7 +98,7 @@ function gui.destroy_gui(player)
 end
 
 --- @param player LuaPlayer
---- @return Gui
+--- @return TPGui
 function gui.build_gui(player)
     gui.destroy_gui(player)
 
@@ -118,7 +117,7 @@ function gui.build_gui(player)
             type = "frame",
             direction = "vertical",
             name = "tp_config_window",
-            style = "inner_frame_in_outer_frame",
+            style = "inset_frame_container_frame",
             templates.titlebar({ "gui.tp-title-main-window" }, "tp_main_window",
                 {
                     on_close_handler = on_close_button_click,
@@ -152,7 +151,7 @@ function gui.build_gui(player)
         mode = "entity",
         tabs = {},
     }
-    global.gui[player.index] = self
+    storage.gui[player.index] = self
 
     for _, tab in pairs(tabs) do
         tab.init(self)
@@ -165,7 +164,7 @@ end
 
 -- GUI Build Utilities
 
---- @param self Gui
+--- @param self TPGui
 function gui.hide(self)
     self.elems.tp_main_window.visible = false
     local tab = tabs[self.mode]
@@ -181,7 +180,7 @@ function gui.hide(self)
     end
 end
 
---- @param self Gui
+--- @param self TPGui
 function gui.show(self)
     self.elems.tp_main_window.visible = true
     self.player.opened = self.elems.tp_main_window
@@ -193,12 +192,12 @@ end
 
 --- @param e EventData.on_player_removed
 local function on_player_removed(e)
-    global.gui[e.player_index] = nil
+    storage.gui[e.player_index] = nil
 end
 
 --- @param e EventData.on_player_cursor_stack_changed
 local function on_player_cursor_stack_changed(e)
-    local self = global.gui[e.player_index]
+    local self = storage.gui[e.player_index]
     if not self then
         return
     end
@@ -223,7 +222,7 @@ end
 
 --- @param e EventData.on_gui_selected_tab_changed
 local function on_header_tab_selected(e)
-    local self = global.gui[e.player_index]
+    local self = storage.gui[e.player_index]
     if self == nil then return end
     -- try and filter out if this is not our tab
     local tabAndContent = e.element.tabs[e.element.selected_tab_index]
@@ -248,14 +247,14 @@ end
 
 --- @param e {player_index: uint}
 local function wrapper(e, handler)
-    local self = global.gui[e.player_index]
+    local self = storage.gui[e.player_index]
     if self == nil then return end
     handler(e, self)
 end
 
 --- @param e EventData.CustomInputEvent
 local function on_next_tool(e)
-    local self = global.gui[e.player_index]
+    local self = storage.gui[e.player_index]
     if self == nil then return end
     local cursor_stack = self.player.cursor_stack --[[@as LuaItemStack]]
     if cursor_stack == nil or not cursor_stack.valid_for_read or cursor_stack.name:sub(1, 8) ~= "tp-tool-" then
@@ -275,7 +274,7 @@ end
 
 --- @param e EventData.CustomInputEvent
 local function on_previous_tool(e)
-    local self = global.gui[e.player_index]
+    local self = storage.gui[e.player_index]
     if self == nil then return end
     local cursor_stack = self.player.cursor_stack --[[@as LuaItemStack]]
     if cursor_stack == nil or not cursor_stack.valid_for_read or cursor_stack.name:sub(1, 8) ~= "tp-tool-" then
@@ -295,7 +294,7 @@ end
 
 --- @param e EventData.CustomInputEvent
 local function on_next_setting(e)
-    local self = global.gui[e.player_index]
+    local self = storage.gui[e.player_index]
     if self == nil then return end
     local cursor_stack = self.player.cursor_stack --[[@as LuaItemStack]]
     if cursor_stack == nil or not cursor_stack.valid_for_read or cursor_stack.name:sub(1, 8) ~= "tp-tool-" then
@@ -311,7 +310,7 @@ end
 
 --- @param e EventData.CustomInputEvent
 local function on_previous_setting(e)
-    local self = global.gui[e.player_index]
+    local self = storage.gui[e.player_index]
     if self == nil then return end
     local cursor_stack = self.player.cursor_stack --[[@as LuaItemStack]]
     if cursor_stack == nil or not cursor_stack.valid_for_read or cursor_stack.name:sub(1, 8) ~= "tp-tool-" then
@@ -328,7 +327,7 @@ end
 local function on_player_dropped_item(e)
     if e.entity and e.entity.name:sub(1, 8) == "tp-tool-" then
         e.entity.destroy()
-        local self = global.gui[e.player_index]
+        local self = storage.gui[e.player_index]
         if self == nil then return end
         self:hide()
     end

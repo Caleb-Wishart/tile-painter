@@ -9,9 +9,7 @@ function tp_gui_template.frame_action_button(name, sprite, tooltip, handler)
         type = "sprite-button",
         name = name,
         style = "frame_action_button",
-        sprite = sprite .. "_white",
-        hovered_sprite = sprite .. "_black",
-        clicked_sprite = sprite .. "_black",
+        sprite = sprite,
         tooltip = tooltip,
         handler = handler,
     }
@@ -32,7 +30,7 @@ function tp_gui_template.titlebar(caption, target, opts)
         drag_target = target,
         {
             type = "label",
-            style = "frame_title",
+            style = "flib_frame_title",
             caption = caption,
             ignored_by_interaction = true,
         },
@@ -46,7 +44,7 @@ function tp_gui_template.titlebar(caption, target, opts)
         end
         if opts.on_pin_handler then
             table.insert(elems, #elems + 1,
-                tp_gui_template.frame_action_button("pin_button", "flib_pin", { "gui.flib-keep-open" },
+                tp_gui_template.frame_action_button("pin_button", "flib_pin_white", { "gui.flib-keep-open" },
                     opts.on_pin_handler))
         end
         if opts.on_titlebar_click_handler then
@@ -85,8 +83,8 @@ function tp_gui_template.tab_heading(opts)
                 direction = "horizontal",
                 style = "subheader_frame",
                 style_mods = {
-                    horizontally_stretchable = "on",
-                    horizontally_squashable = "on",
+                    horizontally_stretchable = true,
+                    horizontally_squashable = true,
                 },
                 table.unpack(opts.subheading),
             },
@@ -103,7 +101,7 @@ end
 function tp_gui_template.tab_wrapper(name)
     --- @param e {player_index: uint}
     local function wrapper(e, handler)
-        local self = global.gui[e.player_index]
+        local self = storage.gui[e.player_index]
         if self == nil then return end
         local tdata = self.tabs[name]
         if tdata == nil then return end

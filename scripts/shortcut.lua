@@ -12,7 +12,7 @@ local function on_shortcut(e)
         return
     end
 
-    local self = global.gui[e.player_index]
+    local self = storage.gui[e.player_index]
     if self == nil then
         self = gui.build_gui(player)
     end

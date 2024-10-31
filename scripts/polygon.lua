@@ -4,7 +4,7 @@ local flib_position = require("__flib__.position")
 local tp_polygon = {}
 
 --- @param vertices MapPosition[]
---- @return ScriptRenderVertexTarget[]
+--- @return ScriptRenderTarget[]
 local function position_to_vertex_target(vertices)
     local targets = {}
     for i = 1, #vertices do

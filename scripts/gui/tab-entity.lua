@@ -1,5 +1,4 @@
-local flib_gui = require("__flib__.gui-lite")
-
+local flib_gui = require("__flib__.gui")
 local templates = require("scripts.gui.templates")
 
 local base64 = require("lib.base64")
@@ -24,7 +23,7 @@ local tp_tab_entity = {}
 
 
 --- @param e EventData.on_gui_switch_state_changed
---- @param self Gui
+--- @param self TPGui
 --- @param tdata EntityTabData
 --- @param pdata EntityPresetData
 local function on_mode_switch(e, self, tdata, pdata)
@@ -33,7 +32,7 @@ local function on_mode_switch(e, self, tdata, pdata)
 end
 
 --- @param e EventData.on_gui_elem_changed
---- @param self Gui
+--- @param self TPGui
 --- @param tdata EntityTabData
 --- @param pdata EntityPresetData
 local function on_config_select(e, self, tdata, pdata)
@@ -42,7 +41,7 @@ local function on_config_select(e, self, tdata, pdata)
     config[e.element.tags.type] = e.element.elem_value
 end
 
---- @param self Gui
+--- @param self TPGui
 --- @param tdata EntityTabData
 --- @param pdata EntityPresetData
 --- @param isEdit boolean
@@ -81,7 +80,7 @@ local function destroy_import_export_dialog(self)
 end
 
 --- @param e EventData.on_gui_closed
---- @param self Gui
+--- @param self TPGui
 --- @param tdata EntityTabData
 --- @param pdata EntityPresetData
 local function on_import_export_dialog_closed(e, self, tdata, pdata)
@@ -93,7 +92,7 @@ local function create_import_export_dialog(self, caption, button_def)
         type = "frame",
         name = "tp_export_window",
         direction = "vertical",
-        style_mods = { maximal_height = 930, },
+        -- style_mods = { maximal_height = 930 },
         elem_mods = { auto_center = true },
         handler = { [defines.events.on_gui_closed] = on_import_export_dialog_closed },
         -- Children
@@ -106,7 +105,7 @@ local function create_import_export_dialog(self, caption, button_def)
             type = "text-box",
             name = "tp_export_text",
             elem_mods = { word_wrap = true },
-            style_mods = { width = 400, height = 250 },
+            -- style_mods = { width = 400, height = 250 },
             text = "",
         },
         {
@@ -122,7 +121,7 @@ local function create_import_export_dialog(self, caption, button_def)
 end
 
 --- @param e EventData.on_gui_click
---- @param self Gui
+--- @param self TPGui
 --- @param tdata EntityTabData
 --- @param pdata EntityPresetData
 local function on_export_click(e, self, tdata, pdata)
@@ -132,12 +131,12 @@ local function on_export_click(e, self, tdata, pdata)
         caption = { "gui.ok" },
         handler = { [defines.events.on_gui_click] = on_import_export_dialog_closed }
     })
-    local text = base64.encode(game.table_to_json(pdata)) --[[@as string]]
+    local text = base64.encode(helpers.table_to_json(pdata)) --[[@as string]]
     self.elems.tp_export_text.text = text
 end
 
 --- @param e EventData.on_gui_click
---- @param self Gui
+--- @param self TPGui
 --- @param tdata EntityTabData
 --- @param pdata EntityPresetData
 local function on_import_confirm_click(e, self, tdata, pdata)
@@ -150,7 +149,7 @@ local function on_import_confirm_click(e, self, tdata, pdata)
         destroy_import_export_dialog(self)
     end
     local text = self.elems.tp_export_text.text
-    local success, import = pcall(game.json_to_table, base64.decode(text))
+    local success, import = pcall(helpers.json_to_table, base64.decode(text))
     import = import --[[@as EntityPresetData]]
     local config = {}
 
@@ -173,7 +172,7 @@ local function on_import_confirm_click(e, self, tdata, pdata)
             return
         end
         if setting.entity ~= nil and setting.entity ~= "signal-anything" then
-            local entity = game.entity_prototypes[setting.entity]
+            local entity = prototypes.entity[setting.entity]
             if entity == nil then
                 create_error_text({ "failed-to-import-string", "Invalid Entity in Config" })
                 return
@@ -181,7 +180,7 @@ local function on_import_confirm_click(e, self, tdata, pdata)
         end
         for i = 0, 2 do
             if setting["tile_" .. i] ~= nil then
-                local tile = game.tile_prototypes[setting["tile_" .. i]]
+                local tile = prototypes.tile[setting["tile_" .. i]]
                 if tile == nil then
                     create_error_text({ "failed-to-import-string", "Invalid Tile in Config" })
                     return
@@ -208,7 +207,7 @@ local function on_import_confirm_click(e, self, tdata, pdata)
 end
 
 --- @param e EventData.on_gui_click
---- @param self Gui
+--- @param self TPGui
 --- @param tdata EntityTabData
 --- @param pdata EntityPresetData
 local function on_import_click(e, self, tdata, pdata)
@@ -221,7 +220,7 @@ local function on_import_click(e, self, tdata, pdata)
 end
 
 --- @param e EventData.on_gui_click
---- @param self Gui
+--- @param self TPGui
 --- @param tdata EntityTabData
 --- @param pdata EntityPresetData
 local function on_entity_reset_click(e, self, tdata, pdata)
@@ -235,7 +234,7 @@ local function on_entity_reset_click(e, self, tdata, pdata)
 end
 
 --- @param e EventData.on_gui_confirmed
---- @param self Gui
+--- @param self TPGui
 --- @param tdata EntityTabData
 --- @param pdata EntityPresetData
 local function on_preset_name_text_changed(e, self, tdata, pdata)
@@ -244,7 +243,7 @@ local function on_preset_name_text_changed(e, self, tdata, pdata)
 end
 
 --- @param e EventData.on_gui_click
---- @param self Gui
+--- @param self TPGui
 --- @param tdata EntityTabData
 --- @param pdata EntityPresetData
 local function on_rename_click(e, self, tdata, pdata)
@@ -253,7 +252,7 @@ local function on_rename_click(e, self, tdata, pdata)
 end
 
 --- @param e EventData.on_gui_selection_state_changed
---- @param self Gui
+--- @param self TPGui
 --- @param tdata EntityTabData
 --- @param pdata EntityPresetData
 local function on_preset_select(e, self, tdata, pdata)
@@ -269,7 +268,7 @@ local tab_def = {
             type = "label",
             name = "tp_entity_preset_name_label",
             caption = default_name(1),
-            style_mods = { maximal_width = 230 },
+            -- style_mods = { maximal_width = 230 },
             style = "subheader_caption_label",
         },
         {
@@ -285,7 +284,7 @@ local tab_def = {
             type = "sprite-button",
             name = "tp_entity_rename_button",
             style = "mini_button_aligned_to_text_vertically_when_centered",
-            sprite = "utility/rename_icon_small_black",
+            sprite = "utility/rename_icon",
             tooltip = { "gui-edit-label.edit-label" },
             handler = { [defines.events.on_gui_click] = on_rename_click },
         },
@@ -296,7 +295,7 @@ local tab_def = {
         {
             type = "drop-down",
             style = "dropdown",
-            style_mods = { maximal_width = 60 },
+            -- style_mods = { maximal_width = 60 },
             name = "tp_entity_preset_dropdown",
             items = preset_list,
             selected_index = 1,
@@ -328,7 +327,7 @@ local tab_def = {
         {
             type = "flow",
             direction = "horizontal",
-            style_mods = { top_padding = 4, bottom_padding = 4, },
+            -- style_mods = { top_padding = 4, bottom_padding = 4 },
             {
                 type = "label",
                 caption = "Filters",
@@ -365,13 +364,13 @@ local tab_def = {
 
 tp_tab_entity.def = templates.tab_heading(tab_def)
 
---- @param self Gui
+--- @param self TPGui
 function tp_tab_entity.populate_config_table(self)
     local function build_heading(tbl)
         local col = math.floor(TABLE_COLS / CONFIG_ATTRS)
         flib_gui.add(tbl, {
             type = "empty-widget",
-            style_mods = { horizontally_stretchable = "on" }
+            style_mods = { horizontally_stretchable = true }
         })
         for _ = 1, col do
             flib_gui.add(tbl, {
@@ -390,12 +389,12 @@ function tp_tab_entity.populate_config_table(self)
             end
             flib_gui.add(tbl, {
                 type = "empty-widget",
-                style_mods = { horizontally_stretchable = "on" }
+                style_mods = { horizontally_stretchable = true }
             })
         end
     end
 
-    --- @param self Gui
+    --- @param self TPGui
     local function build_row(self, tbl, row)
         local tdata = self.tabs["entity"]
         local pdata = tdata.presets[tdata.preset]
@@ -487,13 +486,13 @@ function tp_tab_entity.populate_config_table(self)
         if row % 2 == 1 then
             flib_gui.add(config_table, {
                 type = "empty-widget",
-                style_mods = { horizontally_stretchable = "on" }
+                style_mods = { horizontally_stretchable = true }
             })
         end
         build_row(self, config_table, row)
         flib_gui.add(config_table, {
             type = "empty-widget",
-            style_mods = { horizontally_stretchable = "on" }
+            style_mods = { horizontally_stretchable = true }
         })
     end
 end
@@ -530,7 +529,7 @@ function tp_tab_entity.hide(self)
     destroy_import_export_dialog(self)
 end
 
---- @param self Gui
+--- @param self TPGui
 --- @param tdata EntityTabData
 function tp_tab_entity.on_next_setting(self, tdata)
     tdata.preset = tdata.preset + 1
@@ -542,7 +541,7 @@ function tp_tab_entity.on_next_setting(self, tdata)
     load_preset(self, tdata, pdata)
 end
 
---- @param self Gui
+--- @param self TPGui
 --- @param tdata EntityTabData
 function tp_tab_entity.on_previous_setting(self, tdata)
     tdata.preset = tdata.preset - 1
@@ -556,7 +555,7 @@ end
 
 --- @param e {player_index: uint}
 local function wrapper(e, handler)
-    local self = global.gui[e.player_index]
+    local self = storage.gui[e.player_index]
     if self == nil then return end
     local tdata = self.tabs["entity"]
     if tdata == nil then return end

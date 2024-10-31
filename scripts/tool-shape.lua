@@ -16,7 +16,7 @@ local function handle_fill_shape_click(e, isRight, isForced)
     if cursor_stack == nil or not cursor_stack.valid_for_read or cursor_stack.name ~= "tp-tool-shape" then
         return
     end
-    local self = global.gui[e.player_index]
+    local self = storage.gui[e.player_index]
     if self == nil then return end
     if self.mode ~= "shape" or not self.elems.tp_main_window.visible then return end
 
