@@ -92,7 +92,7 @@ local function create_import_export_dialog(self, caption, button_def)
         type = "frame",
         name = "tp_export_window",
         direction = "vertical",
-        -- style_mods = { maximal_height = 930 },
+        style_mods = { maximal_height = 930 },
         elem_mods = { auto_center = true },
         handler = { [defines.events.on_gui_closed] = on_import_export_dialog_closed },
         -- Children
@@ -105,7 +105,7 @@ local function create_import_export_dialog(self, caption, button_def)
             type = "text-box",
             name = "tp_export_text",
             elem_mods = { word_wrap = true },
-            -- style_mods = { width = 400, height = 250 },
+            style_mods = { width = 400, height = 250 },
             text = "",
         },
         {
@@ -268,7 +268,7 @@ local tab_def = {
             type = "label",
             name = "tp_entity_preset_name_label",
             caption = default_name(1),
-            -- style_mods = { maximal_width = 230 },
+            style_mods = { maximal_width = 230 },
             style = "subheader_caption_label",
         },
         {
@@ -295,7 +295,7 @@ local tab_def = {
         {
             type = "drop-down",
             style = "dropdown",
-            -- style_mods = { maximal_width = 60 },
+            style_mods = { maximal_width = 60 },
             name = "tp_entity_preset_dropdown",
             items = preset_list,
             selected_index = 1,
@@ -327,7 +327,7 @@ local tab_def = {
         {
             type = "flow",
             direction = "horizontal",
-            -- style_mods = { top_padding = 4, bottom_padding = 4 },
+            style_mods = { top_padding = 4, bottom_padding = 4 },
             {
                 type = "label",
                 caption = "Filters",

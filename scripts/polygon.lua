@@ -3,16 +3,6 @@ local flib_position = require("__flib__.position")
 --- @class tp_polygon
 local tp_polygon = {}
 
---- @param vertices MapPosition[]
---- @return ScriptRenderTarget[]
-local function position_to_vertex_target(vertices)
-    local targets = {}
-    for i = 1, #vertices do
-        targets[i] = { target = vertices[i] }
-    end
-    return targets
-end
-
 -- reorders the given array to result in: last, first, second last, second, etc...
 -- more visually: 1, 2, 3, 4, 5, 6, 7, 8 -> 8, 1, 7, 2, 6, 3, 5, 4
 -- translates a shape into a strip used for draw_polygon
@@ -26,15 +16,6 @@ function tp_polygon.shape_to_strip(shape)
         next_index = (shape_length - next_index) + (i % 2)
     end
     return strip
-end
-
--- Return the vertices of a polygon with n sides and a radius of r, centerd about the given position, rotation of theta
---- @param n integer
---- @param r integer
---- @param center MapPosition the center of the polygon
---- @param theta number the rotation of the polygon
-function tp_polygon.polygon_targets(n, r, center, theta)
-    return position_to_vertex_target(tp_polygon.polygon_vertices(n, r, center, theta))
 end
 
 -- Return the vertices of a polygon with n sides and a radius of r, centerd about the given position, rotation of theta

@@ -11,28 +11,36 @@ local entity_tool = {
         {
             icon = "__tile-painter__/graphics/tool-entity-x32-white.png",
             icon_size = 32,
-            mipmap_count = 2,
         },
     },
 
-    flags = { "hidden", "not-stackable", "spawnable", "only-in-cursor" },
+    flags = { "not-stackable", "spawnable", "only-in-cursor" },
+    hidden = true,
     stack_size = 1,
 
-    selection_mode = { "buildable-type", "same-force" },
-    selection_cursor_box_type = "entity",
-    selection_color = { r = 0.72, g = 0.45, b = 0.2, a = 1 },
+    select = {
+        border_color = { r = 0.72, g = 0.45, b = 0.2, a = 1 },
+        mode = { "buildable-type", "same-force" },
+        cursor_box_type = "entity"
+    },
 
-    reverse_selection_mode = { "nothing" },
-    reverse_selection_cursor_box_type = "entity",
-    reverse_selection_color = { 0, 0, 0, 0 },
+    reverse_select = {
+        border_color = { 0, 0, 0, 0 },
+        mode = { "nothing" },
+        cursor_box_type = "entity"
+    },
 
-    alt_selection_mode = { "buildable-type", "same-force" },
-    alt_selection_cursor_box_type = "not-allowed",
-    alt_selection_color = { r = 0.72, g = 0.2, b = 0.2, a = 1 },
+    alt_select = {
+        border_color = { r = 0.72, g = 0.2, b = 0.2, a = 1 },
+        mode = { "buildable-type", "same-force" },
+        cursor_box_type = "not-allowed"
+    },
 
-    alt_reverse_selection_mode = { "nothing" },
-    alt_reverse_selection_cursor_box_type = "not-allowed",
-    alt_reverse_selection_color = { 0, 0, 0, 0 },
+    alt_reverse_select = {
+        border_color = { 0, 0, 0, 0 },
+        mode = { "nothing" },
+        cursor_box_type = "not-allowed"
+    },
 }
 
 local shape_tool = {
@@ -46,24 +54,30 @@ local shape_tool = {
         {
             icon = "__tile-painter__/graphics/tool-shape-x32-white.png",
             icon_size = 32,
-            mipmap_count = 2,
         },
     },
 
-    flags = { "hidden", "not-stackable", "spawnable", "only-in-cursor" },
+    flags = { "not-stackable", "spawnable", "only-in-cursor" },
+    hidden = true,
     stack_size = 1,
 
-    selection_mode = { "nothing" },
-    selection_cursor_box_type = "entity",
-    selection_color = { 0, 0, 0, 0 },
+    select = {
+        border_color = { 0, 0, 0, 0 },
+        mode = { "nothing" },
+        cursor_box_type = "entity"
+    },
 
-    reverse_selection_mode = { "nothing" },
-    reverse_selection_cursor_box_type = "entity",
-    reverse_selection_color = { 0, 0, 0, 0 },
+    reverse_select = {
+        border_color = { 0, 0, 0, 0 },
+        mode = { "nothing" },
+        cursor_box_type = "entity"
+    },
 
-    alt_selection_mode = { "nothing" },
-    alt_selection_cursor_box_type = "entity",
-    alt_selection_color = { 0, 0, 0, 0 },
+    alt_select = {
+        border_color = { 0, 0, 0, 0 },
+        mode = { "nothing" },
+        cursor_box_type = "entity"
+    }
 }
 
 local fill_tool = {
@@ -77,20 +91,30 @@ local fill_tool = {
         {
             icon = "__tile-painter__/graphics/tool-fill-x32-white.png",
             icon_size = 32,
-            mipmap_count = 2,
         },
     },
 
-    flags = { "hidden", "not-stackable", "spawnable", "only-in-cursor" },
+    flags = { "not-stackable", "spawnable", "only-in-cursor" },
+    hidden = true,
     stack_size = 1,
 
-    selection_mode = { "nothing" },
-    selection_cursor_box_type = "entity",
-    selection_color = { 0, 0, 0, 0 },
+    select = {
+        border_color = { 0, 0, 0, 0 },
+        mode = { "nothing" },
+        cursor_box_type = "entity"
+    },
 
-    alt_selection_mode = { "nothing" },
-    alt_selection_cursor_box_type = "entity",
-    alt_selection_color = { 0, 0, 0, 0 },
+    reverse_select = {
+        border_color = { 0, 0, 0, 0 },
+        mode = { "nothing" },
+        cursor_box_type = "entity"
+    },
+
+    alt_select = {
+        border_color = { 0, 0, 0, 0 },
+        mode = { "nothing" },
+        cursor_box_type = "entity"
+    }
 }
 
 data:extend { entity_tool, shape_tool, fill_tool }

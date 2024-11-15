@@ -44,7 +44,7 @@ local function get_entity_tiles(player, entity, delta)
             -- we can't safely resize it and have to get adjacent tiles
             local area = sbox
             local search_param = { area = area }
-            temp_tiles = surfacelib.find_tiles_filtered(surface, search_param)
+            temp_tiles = surface.find_tiles_filtered(search_param)
             for _ = 1, delta do
                 local adj_tiles = tilelib.get_adjacent_tiles(temp_tiles)
                 for j = 1, #adj_tiles do
@@ -55,7 +55,7 @@ local function get_entity_tiles(player, entity, delta)
             -- It is more efficient to resize the bounding box and get all tiles in the area
             local area = bounding_box.resize(sbox, delta)
             local search_param = { area = area }
-            temp_tiles = surfacelib.find_tiles_filtered(surface, search_param)
+            temp_tiles = surface.find_tiles_filtered(search_param)
         end
         for j = 1, #temp_tiles do
             tiles[#tiles + 1] = temp_tiles[j]
@@ -103,7 +103,7 @@ function tp_painter.paint_polygon(player, tdata, whatIf)
         right_bottom = flib_position.add(tdata.center, { x = r, y = r }),
     }
     local surface = game.surfaces[tdata.surface]
-    local area = surfacelib.find_tiles_filtered(surface, { area = bb })
+    local area = surface.find_tiles_filtered({ area = bb })
     local tiles = {}
     if n == 1 then
         local c = tdata.center ---@cast c -nil
@@ -171,7 +171,7 @@ function tp_painter.paint_fill_tool(player, surface, position, tile_type, border
     --  Use a setting here to restrict to only admins to prevent griefing
     local max_radius = get_player_settings(player.index, "fill-max-distance")
     local search_param = { has_hidden_tile = false, position = position, radius = max_radius }
-    local tiles = surfacelib.find_tiles_filtered(surface, search_param)
+    local tiles = surface.find_tiles_filtered(search_param)
     -- Templating
 end
 

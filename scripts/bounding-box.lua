@@ -143,41 +143,4 @@ function tp_bounding_box.line_intersect_AABB(pos1, pos2, box)
     return true
 end
 
---- Take a BoundingBox and return the corresponding OrientedBoundingBox.
---- @param box BoundingBox The bounding box or rectangle
---- @return OrientedBoundingBox The corresponding CoordinateBox of the param
-function tp_bounding_box.convert_to_OBB(box)
-    -- Convert [0,1] orientation to radians
-    local angle = box.orientation * tp_bounding_box.orientation_to_rad
-    -- Calculate trig values
-    local sin = math.sin(angle)
-    local cos = math.cos(angle)
-
-    -- Find box midpoint so we can translate the rotated area back to the original position.
-    -- Midpoint is always constant across rotation.
-    local midpoint = flib_boundingBox.center(box)
-
-    -- Center the corners around the midpoint to apply orientation
-    local center_box = flib_boundingBox.recenter_on(box, { x = 0, y = 0 })
-
-    local cen_lt = center_box.left_top
-    local cen_br = center_box.right_bottom
-
-    -- Calculate position of the corners after rotation
-    -- using calculations from applying a RotationMatrix.
-    -- left_top in this context refers to left_top in initial box and may may not be the left_top in the rotated box
-    local rotated_area = {
-        left_top = flib_position.add({ x = cen_lt.x * cos - cen_lt.y * sin, y = cen_lt.x * sin + cen_lt.y * cos },
-            midpoint),
-        right_top = flib_position.add({ x = cen_br.x * cos - cen_lt.y * sin, y = cen_br.x * sin + cen_lt.y * cos },
-            midpoint),
-        left_bottom = flib_position.add({ x = cen_lt.x * cos - cen_br.y * sin, y = cen_lt.x * sin + cen_br.y * cos },
-            midpoint),
-        right_bottom = flib_position.add(
-            { x = cen_br.x * cos - cen_br.y * sin, y = cen_br.x * sin + cen_br.y * cos },
-            midpoint),
-    }
-    return rotated_area
-end
-
 return tp_bounding_box

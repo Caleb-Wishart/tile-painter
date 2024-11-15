@@ -112,7 +112,7 @@ function tp_rendering.draw_prospective_polygon(tdata, player)
             draw_on_ground = true,
         })
     elseif n > 2 then
-        local vertices = polygon.polygon_targets(n, r, tdata.center, theta)
+        local vertices = polygon.polygon_vertices(n, r, tdata.center, theta)
         if tdata.fill and not tdata.settings.show_tiles then
             tdata.renders[#tdata.renders + 1] = rendering.draw_polygon {
                 vertices = polygon.shape_to_strip(vertices),
@@ -126,8 +126,8 @@ function tp_rendering.draw_prospective_polygon(tdata, player)
             tdata.renders[#tdata.renders + 1] = rendering.draw_line({
                 color = color.coral(),
                 width = 2,
-                from = vertices[i].target,
-                to = vertices[i % #vertices + 1].target,
+                from = vertices[i],
+                to = vertices[i % #vertices + 1],
                 surface = tdata.surface,
                 players = { player.index },
                 draw_on_ground = true,
@@ -151,7 +151,7 @@ end
 --- @param tdata ShapeTabData
 function tp_rendering.destroy_renders(tdata)
     for _, render in pairs(tdata.renders) do
-        rendering.destroy(render)
+        render.destroy()
     end
 end
 

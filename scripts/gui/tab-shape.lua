@@ -653,7 +653,7 @@ tp_tab_shape.def = templates.tab_heading(tab_def)
 --- @field tile_type string|nil
 --- @field surface uint|nil
 --- @field fill boolean
---- @field renders uint64[]
+--- @field renders LuaRenderObject[]
 --- @field settings table {show_vertex:boolean, show_center:boolean, show_radius:boolean, show_bounding_box:boolean, angle_degrees:boolean, is_angle:boolean, show_tiles:boolean}
 --- @field tiles Tile[]
 
