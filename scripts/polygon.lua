@@ -43,7 +43,10 @@ function tp_polygon.point_in_polygon(p, n, poly)
     local j = n
     local inside = false
     for i = 1, n do
-        if ((poly[i].y > p.y) ~= (poly[j].y > p.y) and p.x < (poly[j].x - poly[i].x) * (p.y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x) then
+        if
+            (poly[i].y > p.y) ~= (poly[j].y > p.y)
+            and p.x < (poly[j].x - poly[i].x) * (p.y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x
+        then
             inside = not inside
         end
         j = i

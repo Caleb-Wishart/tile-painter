@@ -23,12 +23,6 @@ function gui.on_init()
     storage.gui = {}
 end
 
-function gui.on_configuration_changed()
-    for _, player in pairs(game.players) do
-        gui.destroy_gui(player)
-    end
-end
-
 --- @param e EventData.on_gui_click
 local function on_pin_button_click(e, self)
     local pinned = not self.pinned
@@ -118,13 +112,11 @@ function gui.build_gui(player)
             direction = "vertical",
             name = "tp_config_window",
             style = "inset_frame_container_frame",
-            templates.titlebar({ "gui.tp-title-main-window" }, "tp_main_window",
-                {
-                    on_close_handler = on_close_button_click,
-                    on_pin_handler = on_pin_button_click,
-                    on_titlebar_click_handler =
-                        on_titlebar_click
-                }),
+            templates.titlebar({ "gui.tp-title-main-window" }, "tp_main_window", {
+                on_close_handler = on_close_button_click,
+                on_pin_handler = on_pin_button_click,
+                on_titlebar_click_handler = on_titlebar_click,
+            }),
             {
                 type = "frame",
                 style = "tp_inside_frame",
@@ -203,7 +195,9 @@ local function on_player_cursor_stack_changed(e)
     end
     local cursor_stack = self.player.cursor_stack --[[@as LuaItemStack]]
     local last_stack = self.inventory_selected
-    if last_stack == nil then last_stack = "" end
+    if last_stack == nil then
+        last_stack = ""
+    end
     if cursor_stack == nil or (cursor_stack.valid and not cursor_stack.valid_for_read) then
         self.inventory_selected = nil
         gui.hide(self)
@@ -211,7 +205,8 @@ local function on_player_cursor_stack_changed(e)
     end
     if cursor_stack.valid_for_read then
         self.inventory_selected = cursor_stack.name
-        if cursor_stack.name ~= last_stack
+        if
+            cursor_stack.name ~= last_stack
             and last_stack:sub(1, 8) == "tp-tool-"
             and cursor_stack.name:sub(1, 8) ~= "tp-tool-"
         then
@@ -223,11 +218,15 @@ end
 --- @param e EventData.on_gui_selected_tab_changed
 local function on_header_tab_selected(e)
     local self = storage.gui[e.player_index]
-    if self == nil then return end
+    if self == nil then
+        return
+    end
     -- try and filter out if this is not our tab
     local tabAndContent = e.element.tabs[e.element.selected_tab_index]
     local tags = tabAndContent.tab.tags
-    if tags == nil or tags.mod ~= "tile-painter" then return end
+    if tags == nil or tags.mod ~= "tile-painter" then
+        return
+    end
     local tab = tabs[self.mode]
     if tab.hide then
         tab.hide(self)
@@ -248,14 +247,18 @@ end
 --- @param e {player_index: uint}
 local function wrapper(e, handler)
     local self = storage.gui[e.player_index]
-    if self == nil then return end
+    if self == nil then
+        return
+    end
     handler(e, self)
 end
 
 --- @param e EventData.CustomInputEvent
 local function on_next_tool(e)
     local self = storage.gui[e.player_index]
-    if self == nil then return end
+    if self == nil then
+        return
+    end
     local cursor_stack = self.player.cursor_stack --[[@as LuaItemStack]]
     if cursor_stack == nil or not cursor_stack.valid_for_read or cursor_stack.name:sub(1, 8) ~= "tp-tool-" then
         return
@@ -275,7 +278,9 @@ end
 --- @param e EventData.CustomInputEvent
 local function on_previous_tool(e)
     local self = storage.gui[e.player_index]
-    if self == nil then return end
+    if self == nil then
+        return
+    end
     local cursor_stack = self.player.cursor_stack --[[@as LuaItemStack]]
     if cursor_stack == nil or not cursor_stack.valid_for_read or cursor_stack.name:sub(1, 8) ~= "tp-tool-" then
         return
@@ -295,7 +300,9 @@ end
 --- @param e EventData.CustomInputEvent
 local function on_next_setting(e)
     local self = storage.gui[e.player_index]
-    if self == nil then return end
+    if self == nil then
+        return
+    end
     local cursor_stack = self.player.cursor_stack --[[@as LuaItemStack]]
     if cursor_stack == nil or not cursor_stack.valid_for_read or cursor_stack.name:sub(1, 8) ~= "tp-tool-" then
         return
@@ -311,7 +318,9 @@ end
 --- @param e EventData.CustomInputEvent
 local function on_previous_setting(e)
     local self = storage.gui[e.player_index]
-    if self == nil then return end
+    if self == nil then
+        return
+    end
     local cursor_stack = self.player.cursor_stack --[[@as LuaItemStack]]
     if cursor_stack == nil or not cursor_stack.valid_for_read or cursor_stack.name:sub(1, 8) ~= "tp-tool-" then
         return
@@ -328,7 +337,9 @@ local function on_player_dropped_item(e)
     if e.entity and e.entity.name:sub(1, 8) == "tp-tool-" then
         e.entity.destroy()
         local self = storage.gui[e.player_index]
-        if self == nil then return end
+        if self == nil then
+            return
+        end
         self:hide()
     end
 end

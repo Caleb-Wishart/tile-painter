@@ -15,8 +15,7 @@ do
     ---@field right_top MapPosition
     ---@field left_bottom MapPosition
     ---@field right_bottom MapPosition
-    local OrientedBoundingBox = {
-    }
+    local OrientedBoundingBox = {}
 end
 
 ---A subclass of BoundingBox that specifies all four positions top-left, top-right, bottom-left, bottom-right as well as orientation.
@@ -30,22 +29,17 @@ do
     ---@field left_bottom MapPosition
     ---@field right_bottom MapPosition
     ---@field orientation RealOrientation
-    local BoundingBox4 = {
-    }
+    local BoundingBox4 = {}
 end
-
-
 
 --- @class tp_bounding_box
 local tp_bounding_box = {}
-
 
 --- Multiply by orientation to covert to radians.
 --- ```lua
 --- local angle = area.orientation * orientation_to_rad
 --- ```
 tp_bounding_box.orientation_to_rad = 2 * math.pi --- @type number
-
 
 --- Return the box in explicit form.
 --- Function is identical to flib_boundingBox.ensure_explicit except
@@ -56,7 +50,7 @@ function tp_bounding_box.ensure_explicit(box)
     return {
         left_top = flib_position.ensure_explicit(box.left_top or box[1]),
         right_bottom = flib_position.ensure_explicit(box.right_bottom or box[2]),
-        orientation = box.orientation or box[3] or 0
+        orientation = box.orientation or box[3] or 0,
     }
 end
 
@@ -69,7 +63,7 @@ function tp_bounding_box.convert_to_BB4(box)
         right_bottom = flib_position.ensure_explicit(box.right_bottom or box[2]),
         right_top = { x = box.right_bottom.x or box[2][1], y = box.left_top.y or box[1][2] },
         left_bottom = { x = box.left_top.x or box[1][1], y = box.right_bottom.y or box[2][2] },
-        orientation = box.orientation or box[3] or 0
+        orientation = box.orientation or box[3] or 0,
     }
 end
 
@@ -84,7 +78,7 @@ function tp_bounding_box.resize(box, delta)
     return {
         left_top = { x = ebox.left_top.x - delta, y = ebox.left_top.y - delta },
         right_bottom = { x = ebox.right_bottom.x + delta, y = ebox.right_bottom.y + delta },
-        orientation = ebox.orientation or 0
+        orientation = ebox.orientation or 0,
     }
 end
 

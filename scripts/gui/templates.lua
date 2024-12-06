@@ -38,18 +38,32 @@ function tp_gui_template.titlebar(caption, target, opts)
     }
     if opts then
         if opts.on_close_handler then
-            table.insert(elems, #elems + 1,
-                tp_gui_template.frame_action_button("close_button", "utility/close", { "gui.close-instruction" },
-                    opts.on_close_handler))
+            table.insert(
+                elems,
+                #elems + 1,
+                tp_gui_template.frame_action_button(
+                    "close_button",
+                    "utility/close",
+                    { "gui.close-instruction" },
+                    opts.on_close_handler
+                )
+            )
         end
         if opts.on_pin_handler then
-            table.insert(elems, #elems + 1,
-                tp_gui_template.frame_action_button("pin_button", "flib_pin_white", { "gui.flib-keep-open" },
-                    opts.on_pin_handler))
+            table.insert(
+                elems,
+                #elems + 1,
+                tp_gui_template.frame_action_button(
+                    "pin_button",
+                    "flib_pin_white",
+                    { "gui.flib-keep-open" },
+                    opts.on_pin_handler
+                )
+            )
         end
         if opts.on_titlebar_click_handler then
             elems.handler = {
-                [defines.events.on_gui_click] = opts.on_titlebar_click_handler
+                [defines.events.on_gui_click] = opts.on_titlebar_click_handler,
             }
         end
     end
@@ -63,9 +77,15 @@ end
 
 --- @param opts TabHeadingOpts
 function tp_gui_template.tab_heading(opts)
-    if type(opts.name) ~= "string" then error("Name must be a string") end
-    if type(opts.subheading) ~= "table" then error("Subheading must be a table") end
-    if type(opts.contents) ~= "table" then error("Contents must be a table") end
+    if type(opts.name) ~= "string" then
+        error("Name must be a string")
+    end
+    if type(opts.subheading) ~= "table" then
+        error("Subheading must be a table")
+    end
+    if type(opts.contents) ~= "table" then
+        error("Contents must be a table")
+    end
     return {
         tab = {
             type = "tab",
@@ -94,7 +114,7 @@ function tp_gui_template.tab_heading(opts)
                 style = "tp_tab_inside_shallow_frame",
                 table.unpack(opts.contents),
             },
-        }
+        },
     }
 end
 
@@ -102,9 +122,13 @@ function tp_gui_template.tab_wrapper(name)
     --- @param e {player_index: uint}
     local function wrapper(e, handler)
         local self = storage.gui[e.player_index]
-        if self == nil then return end
+        if self == nil then
+            return
+        end
         local tdata = self.tabs[name]
-        if tdata == nil then return end
+        if tdata == nil then
+            return
+        end
         handler(e, self, tdata)
     end
     return wrapper

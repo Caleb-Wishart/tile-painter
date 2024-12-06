@@ -22,8 +22,14 @@ function tp_surface.create_tile_ghost(surface, tile_type, position, force)
             end
         end
     end
-    if surface.can_place_entity { name = "tile-ghost", position = pos, inner_name = tile_type, force = force } then
-        surface.create_entity { name = "tile-ghost", position = pos, inner_name = tile_type, force = force, expires = false }
+    if surface.can_place_entity({ name = "tile-ghost", position = pos, inner_name = tile_type, force = force }) then
+        surface.create_entity({
+            name = "tile-ghost",
+            position = pos,
+            inner_name = tile_type,
+            force = force,
+            expires = false,
+        })
     end
 end
 

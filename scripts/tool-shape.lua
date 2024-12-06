@@ -17,11 +17,17 @@ local function handle_fill_shape_click(e, isRight, isForced)
         return
     end
     local self = storage.gui[e.player_index]
-    if self == nil then return end
-    if self.mode ~= "shape" or not self.elems.tp_main_window.visible then return end
+    if self == nil then
+        return
+    end
+    if self.mode ~= "shape" or not self.elems.tp_main_window.visible then
+        return
+    end
 
     local tdata = self.tabs["shape"]
-    if tdata == nil then return end
+    if tdata == nil then
+        return
+    end
 
     local position = flib_position.ensure_explicit(e.cursor_position)
     if not isForced then
@@ -60,6 +66,5 @@ tool.events = {
     ["tp-fill-shape-left-click-forced"] = on_left_click_forced,
     ["tp-fill-shape-right-click-forced"] = on_right_click_forced,
 }
-
 
 return tool

@@ -21,7 +21,7 @@ local by_version = {
             end
         end
         storage = { gui = {} }
-    end
+    end,
 }
 
 --- @param e ConfigurationChangedData

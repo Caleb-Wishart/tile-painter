@@ -15,12 +15,13 @@ for i = 1, MAX_PRESETS do
 end
 
 local function default_name(i)
-    if i == nil then return "<Unnamed Preset>" end
+    if i == nil then
+        return "<Unnamed Preset>"
+    end
     return "<Unnamed Preset " .. i .. ">"
 end
 
 local tp_tab_entity = {}
-
 
 --- @param e EventData.on_gui_switch_state_changed
 --- @param self TPGui
@@ -37,7 +38,9 @@ end
 --- @param pdata EntityPresetData
 local function on_config_select(e, self, tdata, pdata)
     local config = pdata.config[e.element.tags.index]
-    if config == nil then return end
+    if config == nil then
+        return
+    end
     config[e.element.tags.type] = e.element.elem_value
 end
 
@@ -73,7 +76,9 @@ local function load_preset(self, tdata, pdata)
 end
 
 local function destroy_import_export_dialog(self)
-    if self.elems.tp_export_window == nil then return end
+    if self.elems.tp_export_window == nil then
+        return
+    end
     self.elems.tp_export_window.destroy()
     self.elems.tp_export_window = nil
     self.elems.tp_export_text = nil
@@ -96,11 +101,7 @@ local function create_import_export_dialog(self, caption, button_def)
         elem_mods = { auto_center = true },
         handler = { [defines.events.on_gui_closed] = on_import_export_dialog_closed },
         -- Children
-        templates.titlebar(
-            caption,
-            "tp_export_window",
-            { on_close_handler = on_import_export_dialog_closed }
-        ),
+        templates.titlebar(caption, "tp_export_window", { on_close_handler = on_import_export_dialog_closed }),
         {
             type = "text-box",
             name = "tp_export_text",
@@ -115,7 +116,7 @@ local function create_import_export_dialog(self, caption, button_def)
                 type = "empty-widget",
                 style = "flib_horizontal_pusher",
             },
-            button_def
+            button_def,
         },
     }, self.elems)
 end
@@ -129,7 +130,7 @@ local function on_export_click(e, self, tdata, pdata)
         type = "button",
         style = "dialog_button",
         caption = { "gui.ok" },
-        handler = { [defines.events.on_gui_click] = on_import_export_dialog_closed }
+        handler = { [defines.events.on_gui_click] = on_import_export_dialog_closed },
     })
     local text = base64.encode(helpers.table_to_json(pdata)) --[[@as string]]
     self.elems.tp_export_text.text = text
@@ -215,7 +216,7 @@ local function on_import_click(e, self, tdata, pdata)
         type = "button",
         style = "dialog_button",
         caption = { "gui-blueprint-library.import" },
-        handler = { [defines.events.on_gui_click] = on_import_confirm_click }
+        handler = { [defines.events.on_gui_click] = on_import_confirm_click },
     })
 end
 
@@ -278,7 +279,7 @@ local tab_def = {
             looe_focus_on_confirm = true,
             clear_and_focus_on_right_click = true,
             visible = false,
-            handler = { [defines.events.on_gui_confirmed] = on_preset_name_text_changed }
+            handler = { [defines.events.on_gui_confirmed] = on_preset_name_text_changed },
         },
         {
             type = "sprite-button",
@@ -321,7 +322,7 @@ local tab_def = {
             sprite = "utility/reset",
             tooltip = { "gui.tp-tooltip-reset" },
             handler = { [defines.events.on_gui_click] = on_entity_reset_click },
-        }
+        },
     },
     contents = {
         {
@@ -370,7 +371,7 @@ function tp_tab_entity.populate_config_table(self)
         local col = math.floor(TABLE_COLS / CONFIG_ATTRS)
         flib_gui.add(tbl, {
             type = "empty-widget",
-            style_mods = { horizontally_stretchable = true }
+            style_mods = { horizontally_stretchable = true },
         })
         for _ = 1, col do
             flib_gui.add(tbl, {
@@ -389,7 +390,7 @@ function tp_tab_entity.populate_config_table(self)
             end
             flib_gui.add(tbl, {
                 type = "empty-widget",
-                style_mods = { horizontally_stretchable = true }
+                style_mods = { horizontally_stretchable = true },
             })
         end
     end
@@ -430,23 +431,23 @@ function tp_tab_entity.populate_config_table(self)
                 elem_filters = {
                     { filter = "blueprintable", mode = "and" },
                     { filter = "rolling-stock", mode = "and", invert = true },
-                    { filter = "hidden",        mode = "and", invert = true },
-                    { filter = "flag",          mode = "and", invert = true, flag = "placeable-off-grid" },
+                    { filter = "hidden", mode = "and", invert = true },
+                    { filter = "flag", mode = "and", invert = true, flag = "placeable-off-grid" },
                     -- Other / Hidden / Cheat Entities
-                    { filter = "name",          mode = "and", invert = true, name = "infinity-chest" },
-                    { filter = "name",          mode = "and", invert = true, name = "infinity-pipe" },
-                    { filter = "name",          mode = "and", invert = true, name = "simple-entity-with-force" },
-                    { filter = "name",          mode = "and", invert = true, name = "simple-entity-with-owner" },
-                    { filter = "name",          mode = "and", invert = true, name = "linked-chest" },
-                    { filter = "name",          mode = "and", invert = true, name = "linked-belt" },
-                    { filter = "name",          mode = "and", invert = true, name = "burner-generator" },
-                    { filter = "name",          mode = "and", invert = true, name = "electric-energy-interface" },
-                    { filter = "name",          mode = "and", invert = true, name = "heat-interface" },
+                    { filter = "name", mode = "and", invert = true, name = "infinity-chest" },
+                    { filter = "name", mode = "and", invert = true, name = "infinity-pipe" },
+                    { filter = "name", mode = "and", invert = true, name = "simple-entity-with-force" },
+                    { filter = "name", mode = "and", invert = true, name = "simple-entity-with-owner" },
+                    { filter = "name", mode = "and", invert = true, name = "linked-chest" },
+                    { filter = "name", mode = "and", invert = true, name = "linked-belt" },
+                    { filter = "name", mode = "and", invert = true, name = "burner-generator" },
+                    { filter = "name", mode = "and", invert = true, name = "electric-energy-interface" },
+                    { filter = "name", mode = "and", invert = true, name = "heat-interface" },
                 },
                 -- elem_filters = { { filter = "hidden", invert = true, mode = "and" } }
                 -- TODO fun hidden setting to enable placing on enemy spawners
                 tags = { type = "entity", index = row },
-                handler = { [defines.events.on_gui_elem_changed] = on_config_select }
+                handler = { [defines.events.on_gui_elem_changed] = on_config_select },
             })
         end
 
@@ -466,13 +467,15 @@ function tp_tab_entity.populate_config_table(self)
                 tile = enabled and config[tiles[i]] or nil,
                 elem_filters = filter,
                 tags = { type = tiles[i], index = row },
-                handler = { [defines.events.on_gui_elem_changed] = on_config_select }
+                handler = { [defines.events.on_gui_elem_changed] = on_config_select },
             })
         end
     end
 
     local config_table = self.elems.tp_config_table
-    if config_table == nil then return end
+    if config_table == nil then
+        return
+    end
     -- Kind of redundant to set this every time, but it's not a big deal
     for i = 1, TABLE_COLS do
         config_table.style.column_alignments[i] = "center"
@@ -486,13 +489,13 @@ function tp_tab_entity.populate_config_table(self)
         if row % 2 == 1 then
             flib_gui.add(config_table, {
                 type = "empty-widget",
-                style_mods = { horizontally_stretchable = true }
+                style_mods = { horizontally_stretchable = true },
             })
         end
         build_row(self, config_table, row)
         flib_gui.add(config_table, {
             type = "empty-widget",
-            style_mods = { horizontally_stretchable = true }
+            style_mods = { horizontally_stretchable = true },
         })
     end
 end
@@ -537,7 +540,9 @@ function tp_tab_entity.on_next_setting(self, tdata)
         tdata.preset = 1
     end
     local pdata = tdata.presets[tdata.preset]
-    if pdata == nil then return end
+    if pdata == nil then
+        return
+    end
     load_preset(self, tdata, pdata)
 end
 
@@ -549,18 +554,26 @@ function tp_tab_entity.on_previous_setting(self, tdata)
         tdata.preset = MAX_PRESETS
     end
     local pdata = tdata.presets[tdata.preset]
-    if pdata == nil then return end
+    if pdata == nil then
+        return
+    end
     load_preset(self, tdata, pdata)
 end
 
 --- @param e {player_index: uint}
 local function wrapper(e, handler)
     local self = storage.gui[e.player_index]
-    if self == nil then return end
+    if self == nil then
+        return
+    end
     local tdata = self.tabs["entity"]
-    if tdata == nil then return end
+    if tdata == nil then
+        return
+    end
     local pdata = tdata.presets[tdata.preset]
-    if pdata == nil then return end
+    if pdata == nil then
+        return
+    end
     handler(e, self, tdata, pdata)
 end
 

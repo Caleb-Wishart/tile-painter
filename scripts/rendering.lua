@@ -114,13 +114,13 @@ function tp_rendering.draw_prospective_polygon(tdata, player)
     elseif n > 2 then
         local vertices = polygon.polygon_vertices(n, r, tdata.center, theta)
         if tdata.fill and not tdata.settings.show_tiles then
-            tdata.renders[#tdata.renders + 1] = rendering.draw_polygon {
+            tdata.renders[#tdata.renders + 1] = rendering.draw_polygon({
                 vertices = polygon.shape_to_strip(vertices),
                 color = color.gray(0.1),
                 surface = tdata.surface,
                 players = { player.index },
                 draw_on_ground = true,
-            }
+            })
         end
         for i = 1, #vertices do
             tdata.renders[#tdata.renders + 1] = rendering.draw_line({

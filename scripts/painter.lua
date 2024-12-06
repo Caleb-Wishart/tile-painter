@@ -10,7 +10,6 @@ local polygon = require("scripts.polygon")
 local curved_rail_mask = require("scripts.curved-rail")
 local get_player_settings = require("util").get_player_settings
 
-
 --- @class tp_painter
 local tp_painter = {}
 
@@ -36,10 +35,12 @@ local function get_entity_tiles(player, entity, delta)
     for i = 1, #search_boxes do
         local sbox = search_boxes[i]
         local temp_tiles = nil
-        if sbox.orientation ~= flib_orientation.north
+        if
+            sbox.orientation ~= flib_orientation.north
             and sbox.orientation ~= flib_orientation.east
             and sbox.orientation ~= flib_orientation.south
-            and sbox.orientation ~= flib_orientation.west then
+            and sbox.orientation ~= flib_orientation.west
+        then
             -- If the bounding box has an orientation and isn't a simple rectangle,
             -- we can't safely resize it and have to get adjacent tiles
             local area = sbox
@@ -155,7 +156,6 @@ end
 local function flood_fill(tiles)
     -- Templating
 end
-
 
 --- @param tiles LuaTile[]
 --- @param boundary string

@@ -26,23 +26,19 @@ local tab_def = {
                 caption = "Options",
                 style = "heading_2_label",
             },
-
         },
     },
-
 }
 
 tp_tab_fill.def = templates.tab_heading(tab_def)
 
 --- @class FillTabData
 
-
 function tp_tab_fill.init(self)
     local tab = {}
     self.tabs["fill"] = tab
 end
 
-function tp_tab_fill.refresh(self)
-end
+function tp_tab_fill.refresh(self) end
 
 return tp_tab_fill

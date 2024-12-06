@@ -50,7 +50,6 @@ local function flipLR(input)
     return out
 end
 
-
 local function flipDiag(input)
     local out = flib_table.deep_copy(input)
     for r = 1, MASK_DIM do

@@ -7,6 +7,6 @@
   "description": "A set of tools to help paint tiles.",
   "dependencies": ["base >= 2.0.18", "flib"],
   "package": {
-    "ignore": ["resources/*"]
+    "ignore": ["resources/*", "stylua.toml"]
   }
 }

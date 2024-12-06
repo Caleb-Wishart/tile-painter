@@ -80,14 +80,14 @@ local function on_angle_config_change(self, tdata)
 end
 
 local function reset_polygon(self, tdata)
-    tdata.center                   = nil
-    tdata.vertex                   = nil
-    tdata.radius                   = nil
-    tdata.theta                    = nil
+    tdata.center = nil
+    tdata.vertex = nil
+    tdata.radius = nil
+    tdata.theta = nil
     self.elems.tp_center_text.text = ""
     self.elems.tp_vertex_text.text = ""
     self.elems.tp_radius_text.text = ""
-    self.elems.tp_angle_text.text  = ""
+    self.elems.tp_angle_text.text = ""
     renderinglib.destroy_renders(tdata)
     self.elems.tp_confirm_button.enabled = false
     tdata.tiles = {}
@@ -314,7 +314,9 @@ local function on_angle_text_changed(e, self, tdata)
         return
     end
     if not tdata.settings.is_angle then
-        if angle < 0 or angle > 360 then angle = 0 end
+        if angle < 0 or angle > 360 then
+            angle = 0
+        end
         tdata.theta = (angle - 90) * flib_math.deg_to_rad
     else
         local invertY = get_player_settings(self.player.index, "shape-invert-y-axis")
@@ -364,7 +366,7 @@ local tab_def = {
             maximum_value = MAX_NSIDES,
             value = 3,
             style = "notched_slider",
-            handler = { [defines.events.on_gui_value_changed] = on_nsides_slider_changed }
+            handler = { [defines.events.on_gui_value_changed] = on_nsides_slider_changed },
         },
         {
             type = "textfield",
@@ -376,9 +378,8 @@ local tab_def = {
             allow_negative = false,
             looe_focus_on_confirm = true,
             clear_and_focus_on_right_click = true,
-            handler = { [defines.events.on_gui_confirmed] = on_nsides_text_changed }
+            handler = { [defines.events.on_gui_confirmed] = on_nsides_text_changed },
         },
-
     },
     contents = {
         {
@@ -425,7 +426,7 @@ local tab_def = {
                             elem_type = "tile",
                             tile = nil,
                             elem_filters = { { filter = "blueprintable", mode = "and" } },
-                            handler = { [defines.events.on_gui_elem_changed] = on_shape_tile_select }
+                            handler = { [defines.events.on_gui_elem_changed] = on_shape_tile_select },
                         },
                     },
                     {
@@ -504,8 +505,7 @@ local tab_def = {
                         allow_negative = true,
                         looe_focus_on_confirm = true,
                         clear_and_focus_on_right_click = true,
-                        handler = { [defines.events.on_gui_confirmed] = on_angle_text_changed }
-
+                        handler = { [defines.events.on_gui_confirmed] = on_angle_text_changed },
                     },
                     {
                         type = "label",
@@ -539,7 +539,7 @@ local tab_def = {
                         allow_negative = false,
                         looe_focus_on_confirm = true,
                         clear_and_focus_on_right_click = true,
-                        handler = { [defines.events.on_gui_confirmed] = on_radius_text_changed }
+                        handler = { [defines.events.on_gui_confirmed] = on_radius_text_changed },
                     },
                 },
             },
@@ -636,7 +636,7 @@ local tab_def = {
                             handler = { [defines.events.on_gui_checked_state_changed] = on_show_tiles_state_canged },
                         },
                     },
-                }
+                },
             },
         },
     },
