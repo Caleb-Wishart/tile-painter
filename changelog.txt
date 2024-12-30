@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.2
+Date: 2024.12.30
+  Bugfixes:
+    - Correctly handle entities / tiles being removed if they are set in the tools configuration.
+---------------------------------------------------------------------------------------------------
 Version: 2.0.1
 Date: 2024.12.07
   Bugfixes:
