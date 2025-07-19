@@ -142,10 +142,9 @@ end
 --- @param pdata EntityPresetData
 local function on_import_confirm_click(e, self, tdata, pdata)
     local function create_error_text(message)
-        self.player.surface.create_entity({
-            name = "flying-text",
-            position = self.player.position,
+        self.player.create_local_flying_text({
             text = message,
+            create_at_cursor = true,
         })
         destroy_import_export_dialog(self)
     end
@@ -331,7 +330,7 @@ local tab_def = {
             style_mods = { top_padding = 4, bottom_padding = 4 },
             {
                 type = "label",
-                caption = "Filters",
+                caption = { "gui-blueprint.filters" },
                 style = "heading_2_label",
             },
             {
@@ -431,18 +430,18 @@ function tp_tab_entity.populate_config_table(self)
                 elem_filters = {
                     { filter = "blueprintable", mode = "and" },
                     { filter = "rolling-stock", mode = "and", invert = true },
-                    { filter = "hidden", mode = "and", invert = true },
-                    { filter = "flag", mode = "and", invert = true, flag = "placeable-off-grid" },
+                    { filter = "hidden",        mode = "and", invert = true },
+                    { filter = "flag",          mode = "and", invert = true, flag = "placeable-off-grid" },
                     -- Other / Hidden / Cheat Entities
-                    { filter = "name", mode = "and", invert = true, name = "infinity-chest" },
-                    { filter = "name", mode = "and", invert = true, name = "infinity-pipe" },
-                    { filter = "name", mode = "and", invert = true, name = "simple-entity-with-force" },
-                    { filter = "name", mode = "and", invert = true, name = "simple-entity-with-owner" },
-                    { filter = "name", mode = "and", invert = true, name = "linked-chest" },
-                    { filter = "name", mode = "and", invert = true, name = "linked-belt" },
-                    { filter = "name", mode = "and", invert = true, name = "burner-generator" },
-                    { filter = "name", mode = "and", invert = true, name = "electric-energy-interface" },
-                    { filter = "name", mode = "and", invert = true, name = "heat-interface" },
+                    { filter = "name",          mode = "and", invert = true, name = "infinity-chest" },
+                    { filter = "name",          mode = "and", invert = true, name = "infinity-pipe" },
+                    { filter = "name",          mode = "and", invert = true, name = "simple-entity-with-force" },
+                    { filter = "name",          mode = "and", invert = true, name = "simple-entity-with-owner" },
+                    { filter = "name",          mode = "and", invert = true, name = "linked-chest" },
+                    { filter = "name",          mode = "and", invert = true, name = "linked-belt" },
+                    { filter = "name",          mode = "and", invert = true, name = "burner-generator" },
+                    { filter = "name",          mode = "and", invert = true, name = "electric-energy-interface" },
+                    { filter = "name",          mode = "and", invert = true, name = "heat-interface" },
                 },
                 -- elem_filters = { { filter = "hidden", invert = true, mode = "and" } }
                 -- TODO fun hidden setting to enable placing on enemy spawners
