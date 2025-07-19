@@ -1,11 +1,11 @@
 {
   "name": "tile-painter",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "title": "Tile Painter",
   "author": "AckEmma",
   "factorio_version": "2.0",
   "description": "A set of tools to help paint tiles.",
-  "dependencies": ["base >= 2.0.18", "flib"],
+  "dependencies": ["base >= 2.0.31", "flib"],
   "package": {
     "ignore": ["resources/*", "stylua.toml"]
   }
