@@ -1,30 +1,26 @@
 local styles = data.raw["gui-style"].default
 
-styles["tp_config_flow"] = {
-    type                     = "vertical_flow_style",
-    parent                   = "vertical_flow",
-    horizontally_stretchable = "on",
-}
+styles["tp_config_flow"] = { type = "vertical_flow_style", parent = "vertical_flow", horizontally_stretchable = "on" }
 
 styles["tp_config_table"] = {
     type                     = "table_style",
     parent                   = "slot_table",
     horizontally_stretchable = "on",
     right_cell_padding       = 1,
-    horizontal_spacing       = 4,
+    horizontal_spacing       = 4
 }
 
 styles["tp_flow_titlebar"] = {
     type = "horizontal_flow_style",
     parent = "flib_titlebar_flow",
-    vertically_stretchable = "off",
+    vertically_stretchable = "off"
 }
 
 styles["tp_titlebar_label"] = {
     type = "label_style",
     parent = "flib_frame_title",
     vertically_stretchable = "on",
-    horizontally_squashable = "on",
+    horizontally_squashable = "on"
 }
 
 styles["tp_titlebar_handle"] = {
@@ -33,35 +29,29 @@ styles["tp_titlebar_handle"] = {
     left_margin              = 4,
     right_margin             = 4,
     height                   = 24,
-    horizontally_stretchable = "on",
+    horizontally_stretchable = "on"
 }
 
-styles["tp_textfield_number"] = {
-    type = "textbox_style",
-    width = 36,
-}
+styles["tp_textfield_number"] = { type = "textbox_style", width = 36 }
 
 styles["tp_inside_frame"] = {
     type                     = "frame_style",
     parent                   = "frame",
     padding                  = 0,
     horizontally_stretchable = "on",
-    graphical_set            =
-    {
-        base =
-        {
+    graphical_set            = {
+        base = {
             position = { 17, 0 },
             corner_size = 8,
             draw_type = "outer",
-            center = { position = { 256, 25 }, size = { 1, 1 } },
+            center = { position = { 256, 25 }, size = { 1, 1 } }
         },
-        shadow = default_inner_shadow,
+        shadow = default_inner_shadow
     },
-    vertical_flow_style      =
-    {
+    vertical_flow_style      = {
         type = "vertical_flow_style",
         vertical_spacing = 0
-    },
+    }
 }
 
 styles["tp_tabbed_pane_frame"] = {
@@ -71,13 +61,12 @@ styles["tp_tabbed_pane_frame"] = {
     left_padding = 0,
     bottom_padding = 0,
     graphical_set = {
-        base =
-        {
+        base = {
             top = { position = { 256, 18 }, size = { 1, 1 } },
-            center = { position = { 256, 25 }, size = { 1, 1 } },
+            center = { position = { 256, 25 }, size = { 1, 1 } }
         },
         shadow = top_glow({ 255, 255, 255, 0.35 }, 0.5)
-    },
+    }
 }
 
 styles["tp_tabbed_pane"] = {
@@ -86,7 +75,7 @@ styles["tp_tabbed_pane"] = {
     top_margin = 6,
     tab_content_frame = {
         type = "frame_style",
-        parent = "tp_tabbed_pane_frame",
+        parent = "tp_tabbed_pane_frame"
     }
 }
 
@@ -100,10 +89,8 @@ styles["tp_header_tab"] = {
             corner_size = 8
         },
         shadow = tab_glow(default_shadow_color, 0.5)
-    },
-
+    }
 }
-
 
 styles["tp_tab_inside_shallow_frame"] = {
     type = "frame_style",
@@ -114,8 +101,7 @@ styles["tp_tab_inside_shallow_frame"] = {
     bottom_padding = 12,
     vertically_stretchable = "on",
     graphical_set = {
-        base =
-        {
+        base = {
             position = { 17, 0 },
             corner_size = 8,
             center = { position = { 76, 8 }, size = { 1, 1 } },
@@ -123,5 +109,5 @@ styles["tp_tab_inside_shallow_frame"] = {
             draw_type = "outer"
         },
         shadow = tab_glow(default_shadow_color, 0.5)
-    },
+    }
 }

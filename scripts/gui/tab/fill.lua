@@ -9,12 +9,12 @@ local tab_def = {
         {
             type = "label",
             caption = "Fill Area",
-            style = "heading_2_label",
+            style = "heading_2_label"
         },
         {
             type = "empty-widget",
-            style = "flib_horizontal_pusher",
-        },
+            style = "flib_horizontal_pusher"
+        }
     },
     contents = {
         {
@@ -24,15 +24,16 @@ local tab_def = {
             {
                 type = "label",
                 caption = "Options",
-                style = "heading_2_label",
-            },
-        },
-    },
+                style = "heading_2_label"
+            }
+        }
+    }
 }
 
+---@diagnostic disable-next-line: param-type-mismatch
 tp_tab_fill.def = templates.tab_heading(tab_def)
 
---- @class FillTabData
+---@class FillTabData
 
 function tp_tab_fill.init(self)
     local tab = {}

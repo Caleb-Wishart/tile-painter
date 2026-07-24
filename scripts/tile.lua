@@ -1,13 +1,15 @@
 local flib_position = require("__flib__.position")
 
---- @class tp_tile
+---@class tp_tile
 local tp_tile = {}
 
---- @param tiles LuaTile[] tiles to get adjacent tiles for
+---@param tiles LuaTile[] tiles to get adjacent tiles for
 function tp_tile.get_adjacent_tiles(tiles)
     local function hash(position)
         -- https://forums.factorio.com/viewtopic.php?t=41879
         -- cantor pairing function v7
+
+        ---@return number, number
         local function NtoZ(x, y)
             return (x >= 0 and x or (-0.5 - x)), (y >= 0 and y or (-0.5 - y))
         end
@@ -18,7 +20,7 @@ function tp_tile.get_adjacent_tiles(tiles)
         local h = s * (s + 0.5) + x
         return h + h
     end
-    local surface = nil
+    local surface = nil ---@cast surface LuaSurface
     local positions = {}
     for i = 1, #tiles do
         if surface == nil then

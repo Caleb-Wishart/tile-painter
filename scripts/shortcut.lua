@@ -1,6 +1,6 @@
 local gui = require("scripts.gui.base")
 
---- @param e EventData.CustomInputEvent|EventData.on_lua_shortcut
+---@param e EventData.CustomInputEvent | EventData.on_lua_shortcut
 local function on_shortcut(e)
     local name = e.input_name or e.prototype_name
     if name ~= "tp-get-tool" then
@@ -24,14 +24,12 @@ local function on_shortcut(e)
         return
     end
     local tool = "tp-tool-" .. self.mode
-    cursor_stack.set_stack({ name = tool, count = 1 })
+    local stack = { name = tool, count = 1 } --[[@as ItemStackDefinition]]
+    cursor_stack.set_stack(stack)
 end
 
 local shortcut = {}
 
-shortcut.events = {
-    [defines.events.on_lua_shortcut] = on_shortcut,
-    ["tp-get-tool"] = on_shortcut,
-}
+shortcut.events = { [defines.events.on_lua_shortcut] = on_shortcut, ["tp-get-tool"] = on_shortcut }
 
 return shortcut

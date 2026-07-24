@@ -1,12 +1,16 @@
 local flib_position = require("__flib__.position")
 
-local gui = require("scripts.gui.tab-shape")
+local gui = require("scripts.gui.tab.shape")
 
+---@param position MapPosition
+---@return MapPosition
 local function center_on_tile(position)
-    return flib_position.add(flib_position.to_tile(position), { 0.5, 0.5 })
+    local offset = { 0.5, 0.5 } --[[@as MapPosition]]
+    local position_as_tile = flib_position.to_tile(position) --[[@as MapPosition]]
+    return flib_position.add(position_as_tile, offset)
 end
 
---- @param e EventData.CustomInputEvent
+---@param e EventData.CustomInputEvent
 local function handle_fill_shape_click(e, isRight, isForced)
     local player = game.get_player(e.player_index)
     if player == nil then
@@ -16,7 +20,7 @@ local function handle_fill_shape_click(e, isRight, isForced)
     if cursor_stack == nil or not cursor_stack.valid_for_read or cursor_stack.name ~= "tp-tool-shape" then
         return
     end
-    local self = storage.gui[e.player_index]
+    local self = storage.gui[e.player_index] ---@cast self TPGui
     if self == nil then
         return
     end
@@ -33,38 +37,42 @@ local function handle_fill_shape_click(e, isRight, isForced)
     if not isForced then
         position = center_on_tile(position)
     end
-    local surface = game.get_player(e.player_index).surface.index
+    local player = game.get_player(e.player_index)
+    if player == nil then
+        return
+    end
+    local surface = player.surface.index --[[@as SurfaceIdentification]]
     gui.on_position_changed(self, position, surface, isRight)
 end
 
---- @param e EventData.CustomInputEvent
+---@param e EventData.CustomInputEvent
 local function on_left_click(e)
     handle_fill_shape_click(e, false, false)
 end
 
---- @param e EventData.CustomInputEvent
+---@param e EventData.CustomInputEvent
 local function on_right_click(e)
     handle_fill_shape_click(e, true, false)
 end
 
---- @param e EventData.CustomInputEvent
+---@param e EventData.CustomInputEvent
 local function on_left_click_forced(e)
     handle_fill_shape_click(e, false, true)
 end
 
---- @param e EventData.CustomInputEvent
+---@param e EventData.CustomInputEvent
 local function on_right_click_forced(e)
     handle_fill_shape_click(e, true, true)
 end
 
---- @class ToolShape
+---@class ToolShape
 local tool = {}
 
 tool.events = {
     ["tp-fill-shape-left-click"] = on_left_click,
     ["tp-fill-shape-right-click"] = on_right_click,
     ["tp-fill-shape-left-click-forced"] = on_left_click_forced,
-    ["tp-fill-shape-right-click-forced"] = on_right_click_forced,
+    ["tp-fill-shape-right-click-forced"] = on_right_click_forced
 }
 
 return tool

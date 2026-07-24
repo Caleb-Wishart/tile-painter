@@ -10,8 +10,8 @@ local entity_tool = {
         { icon = data_util.black_image, icon_size = 1, scale = 64 },
         {
             icon = "__tile-painter__/graphics/tool-entity-x32-white.png",
-            icon_size = 32,
-        },
+            icon_size = 32
+        }
     },
 
     flags = { "not-stackable", "spawnable", "only-in-cursor" },
@@ -40,7 +40,7 @@ local entity_tool = {
         border_color = { 0, 0, 0, 0 },
         mode = { "nothing" },
         cursor_box_type = "not-allowed"
-    },
+    }
 }
 
 local shape_tool = {
@@ -53,8 +53,8 @@ local shape_tool = {
         { icon = data_util.black_image, icon_size = 1, scale = 64 },
         {
             icon = "__tile-painter__/graphics/tool-shape-x32-white.png",
-            icon_size = 32,
-        },
+            icon_size = 32
+        }
     },
 
     flags = { "not-stackable", "spawnable", "only-in-cursor" },
@@ -90,8 +90,8 @@ local fill_tool = {
         { icon = data_util.black_image, icon_size = 1, scale = 64 },
         {
             icon = "__tile-painter__/graphics/tool-fill-x32-white.png",
-            icon_size = 32,
-        },
+            icon_size = 32
+        }
     },
 
     flags = { "not-stackable", "spawnable", "only-in-cursor" },

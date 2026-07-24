@@ -8,7 +8,7 @@ local renderinglib = require("scripts.rendering")
 local polygon = require("scripts.polygon")
 local painter = require("scripts.painter")
 
-local get_player_settings = require("util").get_player_settings
+local get_player_settings = require("scripts.util.settings").get_player_settings
 
 local MAX_NSIDES = 9
 local MIN_NSIDES = 1
@@ -140,9 +140,9 @@ function tp_tab_shape.on_position_changed(self, position, surface, isCenter)
     end
 end
 
---- @param e defines.events.on_gui_click
---- @param self TPGui
---- @param tdata ShapeTabData
+---@param e     defines.events.on_gui_click
+---@param self  TPGui
+---@param tdata ShapeTabData
 local function on_confirm_click(e, self, tdata)
     if tdata.settings.show_tiles then
         painter.paint_tiles(tdata.tiles, game.surfaces[tdata.surface], tdata.tile_type, self.player.force)
@@ -153,8 +153,8 @@ local function on_confirm_click(e, self, tdata)
     reset_polygon(self, tdata)
 end
 
---- @param self TPGui
---- @param tdata ShapeTabData
+---@param self  TPGui
+---@param tdata ShapeTabData
 local function on_nsides_changed(self, tdata)
     local polygons = {
         [1] = "Circle",
@@ -165,26 +165,26 @@ local function on_nsides_changed(self, tdata)
         [6] = "Hexagon",
         [7] = "Heptagon",
         [8] = "Octagon",
-        [9] = "Nonagon",
+        [9] = "Nonagon"
     }
     local name = polygons[tdata.nsides]
     self.elems.tp_heading_shape.caption = name
     on_polygon_changed(self, tdata)
 end
 
---- @param e EventData.on_gui_value_changed
---- @param self TPGui
---- @param tdata ShapeTabData
+---@param e     EventData.on_gui_value_changed
+---@param self  TPGui
+---@param tdata ShapeTabData
 local function on_nsides_slider_changed(e, self, tdata)
-    tdata.nsides = e.element.slider_value
+    tdata.nsides = e.element.slider_value --[[@as integer]]
     self.elems.tp_nsides_text.text = tostring(tdata.nsides)
 
     on_nsides_changed(self, tdata)
 end
 
---- @param e EventData.on_gui_confirmed
---- @param self TPGui
---- @param tdata ShapeTabData
+---@param e     EventData.on_gui_confirmed
+---@param self  TPGui
+---@param tdata ShapeTabData
 local function on_nsides_text_changed(e, self, tdata)
     local nsides = tonumber(e.element.text) or -1 -- -1 is an invalid value
     if nsides > MAX_NSIDES then
@@ -199,26 +199,26 @@ local function on_nsides_text_changed(e, self, tdata)
     on_nsides_changed(self, tdata)
 end
 
---- @param e EventData.on_gui_elem_changed
---- @param self TPGui
---- @param tdata ShapeTabData
+---@param e     EventData.on_gui_elem_changed
+---@param self  TPGui
+---@param tdata ShapeTabData
 local function on_shape_tile_select(e, self, tdata)
-    local tile = e.element.elem_value --- @cast tile -SignalID|table
+    local tile = e.element.elem_value ---@cast tile - SignalID | table
     tdata.tile_type = tile
     self.elems.tp_confirm_button.enabled = tdata.center ~= nil and tdata.vertex ~= nil and tile ~= nil
 end
 
---- @param e EventData.on_gui_switch_state_changed
---- @param self TPGui
---- @param tdata ShapeTabData
+---@param e     EventData.on_gui_switch_state_changed
+---@param self  TPGui
+---@param tdata ShapeTabData
 local function on_shape_mode_switch(e, self, tdata)
     tdata.fill = e.element.switch_state == "left"
     on_polygon_changed(self, tdata)
 end
 
---- @param e EventData.on_gui_checked_state_changed
---- @param self TPGui
---- @param tdata ShapeTabData
+---@param e     EventData.on_gui_checked_state_changed
+---@param self  TPGui
+---@param tdata ShapeTabData
 local function on_show_vertex_state_canged(e, self, tdata)
     tdata.settings.show_vertex = e.element.state
     if tdata.vertex ~= nil then
@@ -229,9 +229,9 @@ local function on_show_vertex_state_canged(e, self, tdata)
     end
 end
 
---- @param e EventData.on_gui_checked_state_changed
---- @param self TPGui
---- @param tdata ShapeTabData
+---@param e     EventData.on_gui_checked_state_changed
+---@param self  TPGui
+---@param tdata ShapeTabData
 local function on_show_center_state_canged(e, self, tdata)
     tdata.settings.show_center = e.element.state
     if tdata.center ~= nil then
@@ -242,9 +242,9 @@ local function on_show_center_state_canged(e, self, tdata)
     end
 end
 
---- @param e EventData.on_gui_checked_state_changed
---- @param self TPGui
---- @param tdata ShapeTabData
+---@param e     EventData.on_gui_checked_state_changed
+---@param self  TPGui
+---@param tdata ShapeTabData
 local function on_show_radius_state_canged(e, self, tdata)
     tdata.settings.show_radius = e.element.state
     if tdata.center ~= nil and tdata.vertex ~= nil then
@@ -252,9 +252,9 @@ local function on_show_radius_state_canged(e, self, tdata)
     end
 end
 
---- @param e EventData.on_gui_checked_state_changed
---- @param self TPGui
---- @param tdata ShapeTabData
+---@param e     EventData.on_gui_checked_state_changed
+---@param self  TPGui
+---@param tdata ShapeTabData
 local function on_show_box_state_canged(e, self, tdata)
     tdata.settings.show_bounding_box = e.element.state
     if tdata.center ~= nil and tdata.vertex ~= nil then
@@ -262,51 +262,51 @@ local function on_show_box_state_canged(e, self, tdata)
     end
 end
 
---- @param e EventData.on_gui_checked_state_changed
---- @param self TPGui
---- @param tdata ShapeTabData
+---@param e     EventData.on_gui_checked_state_changed
+---@param self  TPGui
+---@param tdata ShapeTabData
 local function on_show_tiles_state_canged(e, self, tdata)
     tdata.settings.show_tiles = e.element.state
     on_polygon_changed(self, tdata)
 end
 
---- @param e EventData.on_gui_switch_state_changed
---- @param self TPGui
---- @param tdata ShapeTabData
+---@param e     EventData.on_gui_switch_state_changed
+---@param self  TPGui
+---@param tdata ShapeTabData
 local function on_shape_angle_switch(e, self, tdata)
     local is_angle = e.element.switch_state == "left"
     tdata.settings.is_angle = is_angle
     on_angle_config_change(self, tdata)
 end
 
---- @param e EventData.on_gui_checked_state_changed
---- @param self TPGui
---- @param tdata ShapeTabData
+---@param e     EventData.on_gui_checked_state_changed
+---@param self  TPGui
+---@param tdata ShapeTabData
 local function on_show_angle_degrees_changed(e, self, tdata)
     tdata.settings.angle_degrees = e.element.state
     self.elems.tp_show_angle_radians.state = not e.element.state
     on_angle_config_change(self, tdata)
 end
 
---- @param e EventData.on_gui_checked_state_changed
---- @param self TPGui
---- @param tdata ShapeTabData
+---@param e     EventData.on_gui_checked_state_changed
+---@param self  TPGui
+---@param tdata ShapeTabData
 local function on_show_angle_radians_changed(e, self, tdata)
     tdata.settings.angle_degrees = not e.element.state
     self.elems.tp_show_angle_degrees.state = not e.element.state
     on_angle_config_change(self, tdata)
 end
 
---- @param e EventData.on_gui_click
---- @param self TPGui
---- @param tdata ShapeTabData
+---@param e     EventData.on_gui_click
+---@param self  TPGui
+---@param tdata ShapeTabData
 local function on_shape_reset_click(e, self, tdata)
     reset_polygon(self, tdata)
 end
 
---- @param e EventData.on_gui_confirmed
---- @param self TPGui
---- @param tdata ShapeTabData
+---@param e     EventData.on_gui_confirmed
+---@param self  TPGui
+---@param tdata ShapeTabData
 local function on_angle_text_changed(e, self, tdata)
     local angle = tonumber(e.element.text) or "NaN"
     if angle == "NaN" then
@@ -329,16 +329,16 @@ local function on_angle_text_changed(e, self, tdata)
     on_polygon_changed(self, tdata)
 end
 
---- @param e EventData.on_gui_confirmed
---- @param self TPGui
---- @param tdata ShapeTabData
+---@param e     EventData.on_gui_confirmed
+---@param self  TPGui
+---@param tdata ShapeTabData
 local function on_radius_text_changed(e, self, tdata)
     local radius = tonumber(e.element.text) or "NaN"
     if radius == "NaN" then
         self.elems.tp_angle_text.text = num_to_text(tdata.radius)
         return
     end
-    radius = radius ---@cast radius -string
+    radius = radius ---@cast radius - string
     tdata.radius = radius
     self.elems.tp_angle_text.text = num_to_text(tdata.radius)
     tdata.vertex = polygon.calculate_vertex(tdata.center, tdata.radius, tdata.theta)
@@ -353,11 +353,11 @@ local tab_def = {
             type = "label",
             caption = "Triangle",
             name = "tp_heading_shape",
-            style = "heading_2_label",
+            style = "heading_2_label"
         },
         {
             type = "empty-widget",
-            style = "flib_horizontal_pusher",
+            style = "flib_horizontal_pusher"
         },
         {
             type = "slider",
@@ -366,7 +366,7 @@ local tab_def = {
             maximum_value = MAX_NSIDES,
             value = 3,
             style = "notched_slider",
-            handler = { [defines.events.on_gui_value_changed] = on_nsides_slider_changed },
+            handler = { [defines.events.on_gui_value_changed] = on_nsides_slider_changed }
         },
         {
             type = "textfield",
@@ -378,8 +378,8 @@ local tab_def = {
             allow_negative = false,
             looe_focus_on_confirm = true,
             clear_and_focus_on_right_click = true,
-            handler = { [defines.events.on_gui_confirmed] = on_nsides_text_changed },
-        },
+            handler = { [defines.events.on_gui_confirmed] = on_nsides_text_changed }
+        }
     },
     contents = {
         {
@@ -397,11 +397,11 @@ local tab_def = {
                     {
                         type = "label",
                         style = "caption_label",
-                        caption = { "gui.tp-label-tiles", 0 },
+                        caption = { "gui.tp-label-tiles", 0 }
                     },
                     {
                         type = "empty-widget",
-                        style = "flib_horizontal_pusher",
+                        style = "flib_horizontal_pusher"
                     },
                     {
                         type = "switch",
@@ -409,8 +409,8 @@ local tab_def = {
                         switch_state = "left",
                         left_label_caption = { "gui.tp-fill" },
                         right_label_caption = { "gui.tp-outline" },
-                        handler = { [defines.events.on_gui_switch_state_changed] = on_shape_mode_switch },
-                    },
+                        handler = { [defines.events.on_gui_switch_state_changed] = on_shape_mode_switch }
+                    }
                 },
                 {
                     type = "flow",
@@ -426,21 +426,21 @@ local tab_def = {
                             elem_type = "tile",
                             tile = nil,
                             elem_filters = { { filter = "blueprintable", mode = "and" } },
-                            handler = { [defines.events.on_gui_elem_changed] = on_shape_tile_select },
-                        },
+                            handler = { [defines.events.on_gui_elem_changed] = on_shape_tile_select }
+                        }
                     },
                     {
                         type = "empty-widget",
-                        style = "flib_horizontal_pusher",
+                        style = "flib_horizontal_pusher"
                     },
                     {
                         type = "button",
                         name = "tp_confirm_button",
                         caption = { "gui.tp-confirm" },
                         handler = { [defines.events.on_gui_click] = on_confirm_click },
-                        enabled = false,
-                    },
-                },
+                        enabled = false
+                    }
+                }
             },
             {
                 type = "frame",
@@ -453,19 +453,19 @@ local tab_def = {
                     {
                         type = "label",
                         style = "caption_label",
-                        caption = { "gui.tp-label-polygon-info" },
+                        caption = { "gui.tp-label-polygon-info" }
                     },
                     {
                         type = "empty-widget",
-                        style = "flib_horizontal_pusher",
+                        style = "flib_horizontal_pusher"
                     },
                     {
                         type = "sprite-button",
                         style = "mini_tool_button_red",
                         sprite = "utility/reset",
                         tooltip = { "gui.tp-tooltip-reset" },
-                        handler = { [defines.events.on_gui_click] = on_shape_reset_click },
-                    },
+                        handler = { [defines.events.on_gui_click] = on_shape_reset_click }
+                    }
                 },
                 {
                     type = "table",
@@ -474,7 +474,7 @@ local tab_def = {
                     {
                         type = "label",
                         caption = { "gui.tp-vertex" },
-                        tooltip = { "gui.tp-tooltip-position-vertex" },
+                        tooltip = { "gui.tp-tooltip-position-vertex" }
                     },
                     {
                         type = "textfield",
@@ -483,16 +483,16 @@ local tab_def = {
                         style = "long_number_textfield",
                         style_mods = { horizontal_align = "center" },
                         tooltip = { "gui.tp-tooltip-position-vertex-text" },
-                        enabled = false,
+                        enabled = false
                     },
                     {
                         type = "empty-widget",
-                        style = "flib_horizontal_pusher",
+                        style = "flib_horizontal_pusher"
                     },
                     {
                         type = "label",
                         name = "tp_angle_label",
-                        caption = { "gui.tp-angle" },
+                        caption = { "gui.tp-angle" }
                     },
                     {
                         type = "textfield",
@@ -505,12 +505,12 @@ local tab_def = {
                         allow_negative = true,
                         looe_focus_on_confirm = true,
                         clear_and_focus_on_right_click = true,
-                        handler = { [defines.events.on_gui_confirmed] = on_angle_text_changed },
+                        handler = { [defines.events.on_gui_confirmed] = on_angle_text_changed }
                     },
                     {
                         type = "label",
                         caption = { "gui.tp-center" },
-                        tooltip = { "gui.tp-tooltip-position-center" },
+                        tooltip = { "gui.tp-tooltip-position-center" }
                     },
                     {
                         type = "textfield",
@@ -519,15 +519,15 @@ local tab_def = {
                         style = "long_number_textfield",
                         tooltip = { "gui.tp-tooltip-position-center-text" },
                         style_mods = { horizontal_align = "center" },
-                        enabled = false,
+                        enabled = false
                     },
                     {
                         type = "empty-widget",
-                        style = "flib_horizontal_pusher",
+                        style = "flib_horizontal_pusher"
                     },
                     {
                         type = "label",
-                        caption = { "gui.tp-radius" },
+                        caption = { "gui.tp-radius" }
                     },
                     {
                         type = "textfield",
@@ -539,9 +539,9 @@ local tab_def = {
                         allow_negative = false,
                         looe_focus_on_confirm = true,
                         clear_and_focus_on_right_click = true,
-                        handler = { [defines.events.on_gui_confirmed] = on_radius_text_changed },
-                    },
-                },
+                        handler = { [defines.events.on_gui_confirmed] = on_radius_text_changed }
+                    }
+                }
             },
             {
                 type = "frame",
@@ -551,7 +551,7 @@ local tab_def = {
                 {
                     type = "label",
                     style = "caption_label",
-                    caption = { "gui-blueprint.settings" },
+                    caption = { "gui-blueprint.settings" }
                 },
                 {
                     type = "flow",
@@ -565,7 +565,7 @@ local tab_def = {
                             caption = { "gui.tp-show-guide", { "gui.tp-vertex" } },
                             name = "tp_show_vertex",
                             state = true,
-                            handler = { [defines.events.on_gui_checked_state_changed] = on_show_vertex_state_canged },
+                            handler = { [defines.events.on_gui_checked_state_changed] = on_show_vertex_state_canged }
                         },
                         {
                             type = "checkbox",
@@ -573,7 +573,7 @@ local tab_def = {
                             caption = { "gui.tp-show-guide", { "gui.tp-center" } },
                             name = "tp_show_center",
                             state = true,
-                            handler = { [defines.events.on_gui_checked_state_changed] = on_show_center_state_canged },
+                            handler = { [defines.events.on_gui_checked_state_changed] = on_show_center_state_canged }
                         },
                         {
                             type = "checkbox",
@@ -581,7 +581,7 @@ local tab_def = {
                             caption = { "gui.tp-show-guide", { "gui.tp-radius" } },
                             name = "tp_show_radius",
                             state = false,
-                            handler = { [defines.events.on_gui_checked_state_changed] = on_show_radius_state_canged },
+                            handler = { [defines.events.on_gui_checked_state_changed] = on_show_radius_state_canged }
                         },
                         {
                             type = "checkbox",
@@ -589,12 +589,12 @@ local tab_def = {
                             caption = { "gui.tp-show-guide", { "gui.tp-box" } },
                             name = "tp_show_box",
                             state = false,
-                            handler = { [defines.events.on_gui_checked_state_changed] = on_show_box_state_canged },
-                        },
+                            handler = { [defines.events.on_gui_checked_state_changed] = on_show_box_state_canged }
+                        }
                     },
                     {
                         type = "empty-widget",
-                        style = "flib_horizontal_pusher",
+                        style = "flib_horizontal_pusher"
                     },
                     {
                         type = "flow",
@@ -606,7 +606,7 @@ local tab_def = {
                             left_label_caption = { "gui.tp-angle" },
                             right_label_caption = { "gui.tp-bearing" },
                             tooltip = { "gui.tp-tooltip-angle-bearing-switch" },
-                            handler = { [defines.events.on_gui_switch_state_changed] = on_shape_angle_switch },
+                            handler = { [defines.events.on_gui_switch_state_changed] = on_shape_angle_switch }
                         },
                         {
                             type = "radiobutton",
@@ -615,7 +615,7 @@ local tab_def = {
                             tooltip = { "gui.tp-tooltip-angle", { "gui.tp-degrees" } },
                             handler = { [defines.events.on_gui_click] = on_show_angle_degrees_changed },
                             state = true,
-                            enabled = true,
+                            enabled = true
                         },
                         {
                             type = "radiobutton",
@@ -624,7 +624,7 @@ local tab_def = {
                             tooltip = { "gui.tp-tooltip-angle", { "gui.tp-radians" } },
                             handler = { [defines.events.on_gui_click] = on_show_angle_radians_changed },
                             state = false,
-                            enabled = true,
+                            enabled = true
                         },
                         {
                             type = "checkbox",
@@ -633,31 +633,32 @@ local tab_def = {
                             tooltip = { "gui.tp-tooltip-shape-show-tiles" },
                             name = "tp_show_tiles",
                             state = false,
-                            handler = { [defines.events.on_gui_checked_state_changed] = on_show_tiles_state_canged },
-                        },
-                    },
-                },
-            },
-        },
-    },
+                            handler = { [defines.events.on_gui_checked_state_changed] = on_show_tiles_state_canged }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
+---@diagnostic disable-next-line: param-type-mismatch
 tp_tab_shape.def = templates.tab_heading(tab_def)
 
---- @class ShapeTabData
---- @field center MapPosition|nil
---- @field vertex MapPosition|nil
---- @field nsides integer
---- @field radius number|nil
---- @field theta number|nil
---- @field tile_type string|nil
---- @field surface uint|nil
---- @field fill boolean
---- @field renders LuaRenderObject[]
---- @field settings table {show_vertex:boolean, show_center:boolean, show_radius:boolean, show_bounding_box:boolean, angle_degrees:boolean, is_angle:boolean, show_tiles:boolean}
---- @field tiles Tile[]
+---@class ShapeTabData
+---@field center    MapPosition | nil
+---@field vertex    MapPosition | nil
+---@field nsides    integer
+---@field radius    number | nil
+---@field theta     number | nil
+---@field tile_type string | nil
+---@field surface   SurfaceIdentification | nil
+---@field fill      boolean
+---@field renders   LuaRenderObject[]
+---@field settings  table                       {show_vertex:boolean, show_center:boolean, show_radius:boolean, show_bounding_box:boolean, angle_degrees:boolean, is_angle:boolean, show_tiles:boolean}
+---@field tiles     Tile[]
 
---- @param self TPGui
+---@param self TPGui
 function tp_tab_shape.init(self)
     local tab = {
         center = nil,
@@ -676,9 +677,9 @@ function tp_tab_shape.init(self)
             show_bounding_box = false,
             angle_degrees = true,
             is_angle = true,
-            show_tiles = false,
+            show_tiles = false
         },
-        tiles = {},
+        tiles = {}
     } --[[@as ShapeTabData]]
     self.tabs["shape"] = tab
 
@@ -688,13 +689,13 @@ function tp_tab_shape.init(self)
     self.elems.tp_shape_config_table.style.column_alignments[4] = "right"
 end
 
---- @param self TPGui
+---@param self TPGui
 function tp_tab_shape.hide(self)
     local tdata = self.tabs["shape"] --[[@as ShapeTabData]]
     renderinglib.destroy_renders(tdata)
 end
 
---- @param self TPGui
+---@param self TPGui
 function tp_tab_shape.refresh(self)
     local tdata = self.tabs["shape"] --[[@as ShapeTabData]]
     if tdata.center ~= nil and tdata.vertex ~= nil then
@@ -702,8 +703,8 @@ function tp_tab_shape.refresh(self)
     end
 end
 
---- @param self TPGui
---- @param tdata ShapeTabData
+---@param self  TPGui
+---@param tdata ShapeTabData
 function tp_tab_shape.on_next_setting(self, tdata)
     tdata.nsides = tdata.nsides + 1
     if tdata.nsides > MAX_NSIDES then
@@ -714,8 +715,8 @@ function tp_tab_shape.on_next_setting(self, tdata)
     on_nsides_changed(self, tdata)
 end
 
---- @param self TPGui
---- @param tdata ShapeTabData
+---@param self  TPGui
+---@param tdata ShapeTabData
 function tp_tab_shape.on_previous_setting(self, tdata)
     tdata.nsides = tdata.nsides - 1
     if tdata.nsides < MIN_NSIDES then
@@ -742,7 +743,7 @@ flib_gui.add_handlers({
     on_shape_reset_click = on_shape_reset_click,
     on_show_tiles_state_canged = on_show_tiles_state_canged,
     on_angle_text_changed = on_angle_text_changed,
-    on_radius_text_changed = on_radius_text_changed,
+    on_radius_text_changed = on_radius_text_changed
 }, templates.tab_wrapper("shape"))
 
 return tp_tab_shape

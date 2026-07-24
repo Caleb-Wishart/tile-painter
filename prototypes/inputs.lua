@@ -3,25 +3,25 @@ data:extend {
         type = "custom-input",
         name = "tp-fill-shape-left-click",
         key_sequence = "mouse-button-1",
-        order = "ca",
+        order = "ca"
     },
     {
         type = "custom-input",
         name = "tp-fill-shape-right-click",
         key_sequence = "mouse-button-2",
-        order = "cb",
+        order = "cb"
     },
     {
         type = "custom-input",
         name = "tp-fill-shape-left-click-forced",
         key_sequence = "SHIFT + mouse-button-1",
-        order = "cc",
+        order = "cc"
     },
     {
         type = "custom-input",
         name = "tp-fill-shape-right-click-forced",
         key_sequence = "SHIFT + mouse-button-2",
-        order = "cd",
+        order = "cd"
     },
     {
         type = "custom-input",
@@ -29,34 +29,34 @@ data:extend {
         key_sequence = "ALT + P",
         action = "lua",
         localised_name = { "tp-get-tool" },
-        order = "ab",
+        order = "ab"
     },
     {
         type = "custom-input",
         name = "tp-next-tool",
         key_sequence = "SHIFT + mouse-wheel-up",
         controller_key_sequence = "controller-righttrigger + controller-dpup",
-        order = "aa",
+        order = "aa"
     },
     {
         type = "custom-input",
         name = "tp-previous-tool",
         key_sequence = "SHIFT + mouse-wheel-down",
         controller_key_sequence = "controller-righttrigger + controller-dpdown",
-        order = "aa",
+        order = "aa"
     },
     {
         type = "custom-input",
         name = "tp-next-tool-setting",
         key_sequence = "CONTROL + SHIFT + mouse-wheel-up",
         controller_key_sequence = "controller-lefttrigger + controller-righttrigger + controller-dpup",
-        order = "ba",
+        order = "ba"
     },
     {
         type = "custom-input",
         name = "tp-previous-tool-setting",
         key_sequence = "CONTROL + SHIFT + mouse-wheel-down",
         controller_key_sequence = "controller-lefttrigger + controller-righttrigger + controller-dpdown",
-        order = "bb",
-    },
+        order = "bb"
+    }
 }

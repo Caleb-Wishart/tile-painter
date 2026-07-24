@@ -20,25 +20,19 @@
 -- SOFTWARE.
 -- https://github.com/ElderAxe/LandfillEverything/blob/main/stdlib/curvedRail.lua
 local flib_table = require("__flib__.table")
-local direction = defines.direction
+local direction = defines.direction --[[@as defines.direction]]
 
 local MASK_DIM = 12
-
+---@format disable
 local default_curve = {
-    { 9, 9, 9, 9, 9, 2, 2, 2, 2, 2, 9, 9 },
-    { 9, 9, 9, 9, 2, 2, 1, 1, 1, 2, 2, 9 },
-    { 9, 9, 9, 2, 2, 1, 1, 0, 1, 1, 2, 9 },
-    { 9, 9, 2, 2, 1, 1, 0, 0, 0, 1, 2, 9 },
-    { 9, 9, 2, 1, 1, 0, 0, 0, 1, 1, 2, 9 },
-    { 9, 9, 2, 1, 0, 0, 0, 1, 1, 2, 2, 9 },
-    { 9, 9, 2, 1, 0, 0, 1, 1, 2, 2, 9, 9 },
-    { 9, 9, 2, 1, 0, 0, 1, 2, 2, 9, 9, 9 },
-    { 9, 9, 2, 1, 0, 0, 1, 2, 9, 9, 9, 9 },
-    { 9, 9, 2, 1, 0, 0, 1, 2, 9, 9, 9, 9 },
-    { 9, 9, 2, 1, 1, 1, 1, 2, 9, 9, 9, 9 },
-    { 9, 9, 2, 2, 2, 2, 2, 2, 9, 9, 9, 9 },
+    { 9, 9, 9, 9, 9, 2, 2, 2, 2, 2, 9, 9 }, { 9, 9, 9, 9, 2, 2, 1, 1, 1, 2, 2, 9 },
+    { 9, 9, 9, 2, 2, 1, 1, 0, 1, 1, 2, 9 }, { 9, 9, 2, 2, 1, 1, 0, 0, 0, 1, 2, 9 },
+    { 9, 9, 2, 1, 1, 0, 0, 0, 1, 1, 2, 9 }, { 9, 9, 2, 1, 0, 0, 0, 1, 1, 2, 2, 9 },
+    { 9, 9, 2, 1, 0, 0, 1, 1, 2, 2, 9, 9 }, { 9, 9, 2, 1, 0, 0, 1, 2, 2, 9, 9, 9 },
+    { 9, 9, 2, 1, 0, 0, 1, 2, 9, 9, 9, 9 }, { 9, 9, 2, 1, 0, 0, 1, 2, 9, 9, 9, 9 },
+    { 9, 9, 2, 1, 1, 1, 1, 2, 9, 9, 9, 9 }, { 9, 9, 2, 2, 2, 2, 2, 2, 9, 9, 9, 9 }
 }
-
+---@format enable
 local function flipLR(input)
     local out = flib_table.deep_copy(input)
     local offset = MASK_DIM + 1
@@ -71,15 +65,15 @@ curveMap[direction.northwest] = flipLR(curveMap[direction.east])
 curveMap[direction.north] = flipDiag(curveMap[direction.northwest])
 
 --- Get the mask for a curved rail given the direction and the delta (offset)
---- @param dir defines.direction The direction of the rail
---- @param delta number The offset of the rail
---- @return table A list of {x, y} pairs
+---@param dir   defines.direction The direction of the rail
+---@param delta number            The offset of the rail
+---@return table A list of {x, y} pairs
 local function curved_rail_mask(dir, delta)
     local out = {}
     if dir == nil then
         dir = direction.north
     end
-    local map = flib_table.deep_copy(curveMap[dir])
+    local map = flib_table.deep_copy(curveMap[dir]) ---@cast map - nil
     local offset = math.floor(MASK_DIM / 2) + 1
     for r = 1, MASK_DIM do
         for c = 1, MASK_DIM do

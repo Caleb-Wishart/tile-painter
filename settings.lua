@@ -27,7 +27,7 @@ data:extend({
         setting_type = "runtime-per-user",
         default_value = true,
         order = "bb"
-    },
+    }
     -- {
     --     type = "int-setting",
     --     name = "tp-fill-max-distance",

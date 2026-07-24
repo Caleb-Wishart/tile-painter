@@ -8,7 +8,7 @@ local shortcut = {
     icon_size = 32,
     small_icon_size = 24,
     action = "lua",
-    associated_control_input = "tp-get-tool",
+    associated_control_input = "tp-get-tool"
 }
 
 data:extend { shortcut }

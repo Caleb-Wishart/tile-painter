@@ -1,12 +1,12 @@
 local painter = require("scripts.painter")
 
---- @param e EventData.on_player_selected_area | EventData.on_player_reverse_selected_area
+---@param e EventData.on_player_selected_area | EventData.on_player_reverse_selected_area | EventData.on_player_alt_selected_area
 local function on_selected_area(e, func)
     if e.item ~= "tp-tool-entity" then
         return
     end
-    local p = game.get_player(e.player_index) ---@cast p -nil
-    local self = storage.gui[p.index]
+    local p = game.get_player(e.player_index) ---@cast p - nil
+    local self = storage.gui[p.index] ---@cast self TPGui
     if self == nil then
         return
     end
@@ -42,10 +42,7 @@ local function on_selected_area(e, func)
                 else
                     entities = {}
                     for _, entity in pairs(e.entities) do
-                        if
-                            (pdata.whitelist and entity.name == setting.entity)
-                            or (isAny and not blacklist[entity.name])
-                        then
+                        if (pdata.whitelist and entity.name == setting.entity) or (isAny and not blacklist[entity.name]) then
                             entities[#entities + 1] = entity
                         end
                     end
@@ -62,22 +59,22 @@ local function on_selected_area(e, func)
     end
 end
 
---- @param e EventData.on_player_selected_area
+---@param e EventData.on_player_selected_area
 local function on_player_selected_area(e)
     on_selected_area(e, painter.paint_entity)
 end
 
---- @param e EventData.on_player_alt_selected_area
+---@param e EventData.on_player_alt_selected_area
 local function on_player_alt_selected_area(e)
     on_selected_area(e, painter.remove_paint_entity)
 end
 
---- @class ToolEntity
+---@class ToolEntity
 local tool = {}
 
 tool.events = {
     [defines.events.on_player_selected_area] = on_player_selected_area,
-    [defines.events.on_player_alt_selected_area] = on_player_alt_selected_area,
+    [defines.events.on_player_alt_selected_area] = on_player_alt_selected_area
 }
 
 return tool
