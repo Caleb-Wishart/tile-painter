@@ -93,6 +93,7 @@ local function on_import_export_dialog_closed(e, self, tdata, pdata)
 end
 
 local function create_import_export_dialog(self, caption, button_def)
+    destroy_import_export_dialog(self)
     flib_gui.add(self.player.gui.screen, {
         type = "frame",
         name = "tp_export_window",
