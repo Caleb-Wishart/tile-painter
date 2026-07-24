@@ -1,5 +1,3 @@
-local flib_migration = require("__flib__.migration")
-
 local by_version = {
     ["1.0.0"] = function ()
         for _, player in pairs(game.players) do
@@ -23,23 +21,43 @@ local by_version = {
         storage = { gui = {} }
     end
 }
+local migrations = {}
 
 ---@param e ConfigurationChangedData
-local function on_configuration_changed(e)
-    flib_migration.on_config_changed(e, by_version)
+function migrations.on_configuration_changed(e)
+    -- By Version migrations
+    local _mod_changes = e.mod_changes and e.mod_changes[script.mod_name]
+    if not _mod_changes then
+        return
+    end
+    local old_version = _mod_changes.old_version
+    if not old_version then
+        return
+    end
+
+    for version, migration in pairs(by_version) do
+        if helpers.compare_versions(old_version, version) <= 0 then
+            migration()
+        end
+    end
+
+    if not storage then
+        return
+    end
+    -- if a mod with an entity or tile was removed, ensure it is removed from gui selections
     for _, player in pairs(game.players) do
-        local self = storage.gui[player.index]
+        local self = storage.gui[player.index] --[[@as TPGui]]
         if self == nil then
-            return
+            goto continue
         end
         local tdata = self.tabs["entity"]
         if tdata == nil then
-            return
+            goto continue
         end
         for _, preset in pairs(tdata.presets) do
             local config = preset.config
             if config == nil then
-                return
+                goto continue
             end
             for _, c in pairs(config) do
                 if prototypes.entity[c["entity"]] == nil then
@@ -56,11 +74,8 @@ local function on_configuration_changed(e)
                 end
             end
         end
+        ::continue::
     end
 end
-
-local migrations = {}
-
-migrations.on_configuration_changed = on_configuration_changed
 
 return migrations
