@@ -12,6 +12,9 @@ end
 
 ---@param e EventData.CustomInputEvent
 local function handle_fill_shape_click(e, isRight, isForced)
+    if e.in_gui then
+        return
+    end
     local player = game.get_player(e.player_index)
     if player == nil then
         return
